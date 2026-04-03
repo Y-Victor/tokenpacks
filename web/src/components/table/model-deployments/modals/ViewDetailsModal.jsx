@@ -30,7 +30,7 @@ import {
   Button,
   Badge,
   Tooltip,
-} from '@douyinfe/semi-ui';
+} from '../../../../components/ui/semi-compat';
 import {
   FaInfoCircle,
   FaServer,
@@ -42,7 +42,7 @@ import {
   FaCopy,
   FaLink,
 } from 'react-icons/fa';
-import { IconRefresh } from '@douyinfe/semi-icons';
+import { IconRefresh } from '../../../../components/ui/semi-icons-compat';
 import {
   API,
   showError,

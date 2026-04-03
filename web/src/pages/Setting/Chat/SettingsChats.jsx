@@ -18,28 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useEffect, useState, useRef } from 'react';
-import {
-  Banner,
-  Button,
-  Dropdown,
-  Form,
-  Space,
-  Spin,
-  RadioGroup,
-  Radio,
-  Table,
-  Modal,
-  Input,
-  Divider,
-} from '@douyinfe/semi-ui';
-import {
-  IconPlus,
-  IconEdit,
-  IconDelete,
-  IconSearch,
-  IconSaveStroked,
-  IconBolt,
-} from '@douyinfe/semi-icons';
+import { Plus, Edit, Trash2, Search, Save, Zap } from 'lucide-react';
 import {
   compareObjects,
   API,
@@ -49,6 +28,18 @@ import {
   verifyJSON,
 } from '../../../helpers';
 import { useTranslation } from 'react-i18next';
+import { Form, Spin } from '../../../components/ui/form-compat';
+import {
+  Banner,
+  Button,
+  Divider,
+  Dropdown,
+  Input,
+  Modal as Dialog,
+  Radio,
+  RadioGroup,
+  Table,
+} from '../../../components/ui/semi-compat';
 
 export default function SettingsChats(props) {
   const { t } = useTranslation();
@@ -353,10 +344,10 @@ export default function SettingsChats(props) {
       title: t('操作'),
       key: 'action',
       render: (_, record) => (
-        <Space>
+        <div className="flex items-center gap-2">
           <Button
             type='primary'
-            icon={<IconEdit />}
+            icon={<Edit size={14} />}
             size='small'
             onClick={() => handleEditConfig(record)}
           >
@@ -364,20 +355,20 @@ export default function SettingsChats(props) {
           </Button>
           <Button
             type='danger'
-            icon={<IconDelete />}
+            icon={<Trash2 size={14} />}
             size='small'
             onClick={() => handleDeleteConfig(record.id)}
           >
             {t('删除')}
           </Button>
-        </Space>
+        </div>
       ),
     },
   ];
 
   return (
     <Spin spinning={loading}>
-      <Space vertical style={{ width: '100%' }}>
+      <div className="flex items-center gap-2">
         <Form.Section text={t('聊天设置')}>
           <Banner
             type='info'
@@ -414,10 +405,10 @@ export default function SettingsChats(props) {
 
           {editMode === 'visual' ? (
             <div>
-              <Space style={{ marginBottom: 16 }}>
+              <div className="flex items-center gap-2">
                 <Button
                   type='primary'
-                  icon={<IconPlus />}
+                  icon={<Plus size={14} />}
                   onClick={handleAddConfig}
                 >
                   {t('添加聊天配置')}
@@ -441,27 +432,27 @@ export default function SettingsChats(props) {
                     },
                   ]}
                 >
-                  <Button icon={<IconBolt />}>
+                  <Button icon={<Zap size={14} />}>
                     {t('填入模板')}
                   </Button>
                 </Dropdown>
                 <Button
                   type='primary'
                   theme='solid'
-                  icon={<IconSaveStroked />}
+                  icon={<Save size={14} />}
                   onClick={onSubmit}
                 >
                   {t('保存聊天设置')}
                 </Button>
                 <Input
-                  prefix={<IconSearch />}
+                  prefix={<Search size={14} />}
                   placeholder={t('搜索聊天应用名称')}
                   value={searchText}
                   onChange={(value) => setSearchText(value)}
                   style={{ width: 250 }}
                   showClear
                 />
-              </Space>
+              </div>
 
               <Table
                 columns={columns}
@@ -513,21 +504,21 @@ export default function SettingsChats(props) {
         </Form.Section>
 
         {editMode === 'json' && (
-          <Space>
+          <div className="flex items-center gap-2">
             <Button
               type='primary'
-              icon={<IconSaveStroked />}
+              icon={<Save size={14} />}
               onClick={onSubmit}
             >
               {t('保存聊天设置')}
             </Button>
-          </Space>
+          </div>
         )}
-      </Space>
+      </div>
 
-      <Modal
+      <Dialog
         title={isEdit ? t('编辑聊天配置') : t('添加聊天配置')}
-        visible={modalVisible}
+        open={modalVisible}
         onOk={handleModalOk}
         onCancel={handleModalCancel}
         width={600}
@@ -556,7 +547,7 @@ export default function SettingsChats(props) {
             style={{ marginTop: 16 }}
           />
         </Form>
-      </Modal>
+      </Dialog>
     </Spin>
   );
 }

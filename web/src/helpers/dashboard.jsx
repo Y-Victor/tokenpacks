@@ -18,11 +18,9 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Progress, Divider, Empty } from '@douyinfe/semi-ui';
-import {
-  IllustrationConstruction,
-  IllustrationConstructionDark,
-} from '@douyinfe/semi-illustrations';
+import { Progress } from '../components/ui/progress';
+import { Separator } from '../components/ui/separator';
+import { EmptyState } from '../components/ui/empty-state';
 import {
   timestamp2string,
   timestamp2string1,
@@ -34,7 +32,6 @@ import {
   STORAGE_KEYS,
   DEFAULT_TIME_INTERVALS,
   DEFAULTS,
-  ILLUSTRATION_SIZE,
 } from '../constants/dashboard.constants';
 
 // ========== 时间相关工具函数 ==========
@@ -177,11 +174,8 @@ export const renderMonitorList = (
   if (!monitors || monitors.length === 0) {
     return (
       <div className='flex justify-center items-center py-4'>
-        <Empty
-          image={<IllustrationConstruction style={ILLUSTRATION_SIZE} />}
-          darkModeImage={
-            <IllustrationConstructionDark style={ILLUSTRATION_SIZE} />
-          }
+        <EmptyState
+          type='construction'
           title={t('暂无监控数据')}
         />
       </div>
@@ -217,10 +211,10 @@ export const renderMonitorList = (
         </span>
         <div className='flex-1'>
           <Progress
-            percent={(monitor.uptime || 0) * 100}
-            showInfo={false}
+            value={(monitor.uptime || 0) * 100}
+            className='h-2'
             aria-label={`${monitor.name} uptime`}
-            stroke={getUptimeStatusColor(monitor.status)}
+            style={{ '--progress-color': getUptimeStatusColor(monitor.status) }}
           />
         </div>
       </div>
@@ -234,7 +228,7 @@ export const renderMonitorList = (
           <div className='text-md font-semibold text-gray-500 px-2 py-1'>
             {gname}
           </div>
-          <Divider />
+          <Separator />
         </>
       )}
       {list.map(renderItem)}

@@ -18,33 +18,27 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-  Modal,
-  Table,
-  Badge,
-  Typography,
-  Toast,
-  Empty,
-  Button,
-  Input,
-  Tag,
-} from '@douyinfe/semi-ui';
-import {
-  IllustrationNoResult,
-  IllustrationNoResultDark,
-} from '@douyinfe/semi-illustrations';
-import { Coins } from 'lucide-react';
-import { IconSearch } from '@douyinfe/semi-icons';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '../../ui/dialog';
+import { Badge } from '../../ui/badge';
+import { Button } from '../../ui/button';
+import { Input } from '../../ui/input';
+import { toast } from 'sonner';
+import { Coins, Search } from 'lucide-react';
 import { API, timestamp2string } from '../../../helpers';
 import { isAdmin } from '../../../helpers/utils';
 import { useIsMobile } from '../../../hooks/common/useIsMobile';
-const { Text } = Typography;
+import { confirm } from '../../../lib/confirm';
 
 // 状态映射配置
 const STATUS_CONFIG = {
-  success: { type: 'success', key: '成功' },
-  pending: { type: 'warning', key: '待支付' },
-  failed: { type: 'danger', key: '失败' },
-  expired: { type: 'danger', key: '已过期' },
+  success: { variant: 'success', key: '成功' },
+  pending: { variant: 'warning', key: '待支付' },
+  failed: { variant: 'destructive', key: '失败' },
+  expired: { variant: 'destructive', key: '已过期' },
 };
 
 // 支付方式映射
@@ -79,10 +73,10 @@ const TopupHistoryModal = ({ visible, onCancel, t }) => {
         setTopups(data.items || []);
         setTotal(data.total || 0);
       } else {
-        Toast.error({ content: message || t('加载失败') });
+        toast.error(message || t('加载失败'));
       }
     } catch (error) {
-      Toast.error({ content: t('加载账单失败') });
+      toast.error(t('加载账单失败'));
     } finally {
       setLoading(false);
     }
@@ -98,13 +92,8 @@ const TopupHistoryModal = ({ visible, onCancel, t }) => {
     setPage(currentPage);
   };
 
-  const handlePageSizeChange = (currentPageSize) => {
-    setPageSize(currentPageSize);
-    setPage(1);
-  };
-
-  const handleKeywordChange = (value) => {
-    setKeyword(value);
+  const handleKeywordChange = (e) => {
+    setKeyword(e.target.value);
     setPage(1);
   };
 
@@ -116,39 +105,38 @@ const TopupHistoryModal = ({ visible, onCancel, t }) => {
       });
       const { success, message } = res.data;
       if (success) {
-        Toast.success({ content: t('补单成功') });
+        toast.success(t('补单成功'));
         await loadTopups(page, pageSize);
       } else {
-        Toast.error({ content: message || t('补单失败') });
+        toast.error(message || t('补单失败'));
       }
     } catch (e) {
-      Toast.error({ content: t('补单失败') });
+      toast.error(t('补单失败'));
     }
   };
 
   const confirmAdminComplete = (tradeNo) => {
-    Modal.confirm({
+    confirm({
       title: t('确认补单'),
       content: t('是否将该订单标记为成功并为用户入账？'),
-      onOk: () => handleAdminComplete(tradeNo),
+      onConfirm: () => handleAdminComplete(tradeNo),
     });
   };
 
   // 渲染状态徽章
   const renderStatusBadge = (status) => {
-    const config = STATUS_CONFIG[status] || { type: 'primary', key: status };
+    const config = STATUS_CONFIG[status] || { variant: 'default', key: status };
     return (
-      <span className='flex items-center gap-2'>
-        <Badge dot type={config.type} />
-        <span>{t(config.key)}</span>
-      </span>
+      <Badge variant={config.variant}>
+        {t(config.key)}
+      </Badge>
     );
   };
 
   // 渲染支付方式
   const renderPaymentMethod = (pm) => {
     const displayName = PAYMENT_METHOD_MAP[pm];
-    return <Text>{displayName ? t(displayName) : pm || '-'}</Text>;
+    return <span>{displayName ? t(displayName) : pm || '-'}</span>;
   };
 
   const isSubscriptionTopup = (record) => {
@@ -159,133 +147,125 @@ const TopupHistoryModal = ({ visible, onCancel, t }) => {
   // 检查是否为管理员
   const userIsAdmin = useMemo(() => isAdmin(), []);
 
-  const columns = useMemo(() => {
-    const baseColumns = [
-      {
-        title: t('订单号'),
-        dataIndex: 'trade_no',
-        key: 'trade_no',
-        render: (text) => <Text copyable>{text}</Text>,
-      },
-      {
-        title: t('支付方式'),
-        dataIndex: 'payment_method',
-        key: 'payment_method',
-        render: renderPaymentMethod,
-      },
-      {
-        title: t('充值额度'),
-        dataIndex: 'amount',
-        key: 'amount',
-        render: (amount, record) => {
-          if (isSubscriptionTopup(record)) {
-            return (
-              <Tag color='purple' shape='circle' size='small'>
-                {t('订阅套餐')}
-              </Tag>
-            );
-          }
-          return (
-            <span className='flex items-center gap-1'>
-              <Coins size={16} />
-              <Text>{amount}</Text>
-            </span>
-          );
-        },
-      },
-      {
-        title: t('支付金额'),
-        dataIndex: 'money',
-        key: 'money',
-        render: (money) => <Text type='danger'>¥{money.toFixed(2)}</Text>,
-      },
-      {
-        title: t('状态'),
-        dataIndex: 'status',
-        key: 'status',
-        render: renderStatusBadge,
-      },
-    ];
-
-    // 管理员才显示操作列
-    if (userIsAdmin) {
-      baseColumns.push({
-        title: t('操作'),
-        key: 'action',
-        render: (_, record) => {
-          const actions = [];
-          if (record.status === 'pending') {
-            actions.push(
-              <Button
-                key="complete"
-                size='small'
-                type='primary'
-                theme='outline'
-                onClick={() => confirmAdminComplete(record.trade_no)}
-              >
-                {t('补单')}
-              </Button>
-            );
-          }
-          return actions.length > 0 ? <>{actions}</> : null;
-        },
-      });
-    }
-
-    baseColumns.push({
-      title: t('创建时间'),
-      dataIndex: 'create_time',
-      key: 'create_time',
-      render: (time) => timestamp2string(time),
-    });
-
-    return baseColumns;
-  }, [t, userIsAdmin]);
+  const totalPages = Math.ceil(total / pageSize);
 
   return (
-    <Modal
-      title={t('充值账单')}
-      visible={visible}
-      onCancel={onCancel}
-      footer={null}
-      size={isMobile ? 'full-width' : 'large'}
-    >
-      <div className='mb-3'>
-        <Input
-          prefix={<IconSearch />}
-          placeholder={t('订单号')}
-          value={keyword}
-          onChange={handleKeywordChange}
-          showClear
-        />
-      </div>
-      <Table
-        columns={columns}
-        dataSource={topups}
-        loading={loading}
-        rowKey='id'
-        pagination={{
-          currentPage: page,
-          pageSize: pageSize,
-          total: total,
-          showSizeChanger: true,
-          pageSizeOpts: [10, 20, 50, 100],
-          onPageChange: handlePageChange,
-          onPageSizeChange: handlePageSizeChange,
-        }}
-        size='small'
-        empty={
-          <Empty
-            image={<IllustrationNoResult style={{ width: 150, height: 150 }} />}
-            darkModeImage={
-              <IllustrationNoResultDark style={{ width: 150, height: 150 }} />
-            }
-            description={t('暂无充值记录')}
-            style={{ padding: 30 }}
-          />
-        }
-      />
-    </Modal>
+    <Dialog open={visible} onOpenChange={(open) => !open && onCancel()}>
+      <DialogContent className={isMobile ? 'max-w-full h-full' : 'max-w-4xl'}>
+        <DialogHeader>
+          <DialogTitle>{t('充值账单')}</DialogTitle>
+        </DialogHeader>
+        <div className='mb-3'>
+          <div className='relative'>
+            <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
+            <Input
+              placeholder={t('订单号')}
+              value={keyword}
+              onChange={handleKeywordChange}
+              className='pl-9'
+            />
+          </div>
+        </div>
+        <div className='overflow-auto'>
+          <table className='w-full text-sm'>
+            <thead>
+              <tr className='border-b'>
+                <th className='text-left p-2 font-medium'>{t('订单号')}</th>
+                <th className='text-left p-2 font-medium'>{t('支付方式')}</th>
+                <th className='text-left p-2 font-medium'>{t('充值额度')}</th>
+                <th className='text-left p-2 font-medium'>{t('支付金额')}</th>
+                <th className='text-left p-2 font-medium'>{t('状态')}</th>
+                {userIsAdmin && <th className='text-left p-2 font-medium'>{t('操作')}</th>}
+                <th className='text-left p-2 font-medium'>{t('创建时间')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={userIsAdmin ? 7 : 6} className='text-center p-8 text-muted-foreground'>
+                    {t('加载中...')}
+                  </td>
+                </tr>
+              ) : topups.length === 0 ? (
+                <tr>
+                  <td colSpan={userIsAdmin ? 7 : 6} className='text-center p-8 text-muted-foreground'>
+                    {t('暂无充值记录')}
+                  </td>
+                </tr>
+              ) : (
+                topups.map((record) => (
+                  <tr key={record.id} className='border-b hover:bg-muted/50'>
+                    <td className='p-2'>
+                      <span className='font-mono text-xs'>{record.trade_no}</span>
+                    </td>
+                    <td className='p-2'>{renderPaymentMethod(record.payment_method)}</td>
+                    <td className='p-2'>
+                      {isSubscriptionTopup(record) ? (
+                        <Badge variant='secondary'>{t('订阅套餐')}</Badge>
+                      ) : (
+                        <span className='flex items-center gap-1'>
+                          <Coins size={16} />
+                          {record.amount}
+                        </span>
+                      )}
+                    </td>
+                    <td className='p-2'>
+                      <span className='text-red-500'>¥{record.money?.toFixed(2)}</span>
+                    </td>
+                    <td className='p-2'>{renderStatusBadge(record.status)}</td>
+                    {userIsAdmin && (
+                      <td className='p-2'>
+                        {record.status === 'pending' && (
+                          <Button
+                            size='sm'
+                            variant='outline'
+                            onClick={() => confirmAdminComplete(record.trade_no)}
+                          >
+                            {t('补单')}
+                          </Button>
+                        )}
+                      </td>
+                    )}
+                    <td className='p-2 text-muted-foreground text-xs'>
+                      {timestamp2string(record.create_time)}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+        {/* Simple pagination */}
+        {totalPages > 1 && (
+          <div className='flex items-center justify-between pt-4'>
+            <span className='text-sm text-muted-foreground'>
+              {t('共')} {total} {t('条')}
+            </span>
+            <div className='flex items-center gap-2'>
+              <Button
+                size='sm'
+                variant='outline'
+                disabled={page <= 1}
+                onClick={() => handlePageChange(page - 1)}
+              >
+                {t('上一页')}
+              </Button>
+              <span className='text-sm'>
+                {page} / {totalPages}
+              </span>
+              <Button
+                size='sm'
+                variant='outline'
+                disabled={page >= totalPages}
+                onClick={() => handlePageChange(page + 1)}
+              >
+                {t('下一页')}
+              </Button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 };
 

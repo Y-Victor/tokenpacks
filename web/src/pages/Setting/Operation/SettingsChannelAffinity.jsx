@@ -34,7 +34,7 @@ import {
   Table,
   Tag,
   Typography,
-} from '@douyinfe/semi-ui';
+} from '../../../components/ui/semi-compat';
 import {
   IconClose,
   IconCode,
@@ -43,7 +43,7 @@ import {
   IconPlus,
   IconRefresh,
   IconSearch,
-} from '@douyinfe/semi-icons';
+} from '../../../components/ui/semi-icons-compat';
 import {
   API,
   compareObjects,
@@ -894,7 +894,6 @@ export default function SettingsChannelAffinity(props) {
         <Form
           values={inputs}
           getFormApi={(formAPI) => (refForm.current = formAPI)}
-          style={{ marginBottom: 15 }}
         >
           <Form.Section text={t('渠道亲和性')}>
             {banner}
@@ -1138,7 +1137,7 @@ export default function SettingsChannelAffinity(props) {
                         )}
                         <br />
                         {t(
-                          'NewAPI 默认不会将入口请求的 User-Agent 透传到上游渠道；该条件仅用于识别访问本站点的客户端。',
+                          'TokenPacks 默认不会将入口请求的 User-Agent 透传到上游渠道；该条件仅用于识别访问本站点的客户端。',
                         )}
                         <br />
                         {t(

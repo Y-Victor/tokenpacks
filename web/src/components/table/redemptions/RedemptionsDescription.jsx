@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Typography } from '@douyinfe/semi-ui';
+import { Typography } from '../../../components/ui/semi-compat';
 import { Ticket } from 'lucide-react';
 import CompactModeToggle from '../../common/ui/CompactModeToggle';
 

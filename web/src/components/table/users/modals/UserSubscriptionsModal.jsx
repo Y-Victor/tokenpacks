@@ -18,27 +18,28 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { Button } from '../../../ui/button';
+import { Badge } from '../../../ui/badge';
+import { EmptyState } from '../../../ui/empty-state';
 import {
-  Button,
-  Empty,
-  Modal,
   Select,
-  SideSheet,
-  Space,
-  Tag,
-  Typography,
-} from '@douyinfe/semi-ui';
-import { IconPlusCircle } from '@douyinfe/semi-icons';
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../../ui/select';
 import {
-  IllustrationNoResult,
-  IllustrationNoResultDark,
-} from '@douyinfe/semi-illustrations';
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '../../../ui/sheet';
+import { PlusCircle } from 'lucide-react';
 import { API, showError, showSuccess } from '../../../../helpers';
 import { convertUSDToCurrency } from '../../../../helpers/render';
 import { useIsMobile } from '../../../../hooks/common/useIsMobile';
 import CardTable from '../../../common/ui/CardTable';
-
-const { Text } = Typography;
+import { confirm } from '../../../../lib/confirm';
 
 function formatTs(ts) {
   if (!ts) return '-';
@@ -54,22 +55,22 @@ function renderStatusTag(sub, t) {
   const isActive = status === 'active' && !isExpiredByTime;
   if (isActive) {
     return (
-      <Tag color='green' shape='circle' size='small'>
+      <Badge variant='outline' className='text-green-600 border-green-300'>
         {t('生效')}
-      </Tag>
+      </Badge>
     );
   }
   if (status === 'cancelled') {
     return (
-      <Tag color='grey' shape='circle' size='small'>
+      <Badge variant='outline' className='text-gray-500 border-gray-300'>
         {t('已作废')}
-      </Tag>
+      </Badge>
     );
   }
   return (
-    <Tag color='grey' shape='circle' size='small'>
+    <Badge variant='outline' className='text-gray-500 border-gray-300'>
       {t('已过期')}
-    </Tag>
+    </Badge>
   );
 }
 
@@ -108,7 +109,7 @@ const UserSubscriptionsModal = ({ visible, onCancel, user, t, onSuccess }) => {
         Number(p?.plan?.price_amount || 0),
         2,
       )})`,
-      value: p?.plan?.id,
+      value: String(p?.plan?.id),
     }));
   }, [plans]);
 
@@ -175,7 +176,7 @@ const UserSubscriptionsModal = ({ visible, onCancel, user, t, onSuccess }) => {
       const res = await API.post(
         `/api/subscription/admin/users/${user.id}/subscriptions`,
         {
-          plan_id: selectedPlanId,
+          plan_id: Number(selectedPlanId),
         },
       );
       if (res.data?.success) {
@@ -195,11 +196,10 @@ const UserSubscriptionsModal = ({ visible, onCancel, user, t, onSuccess }) => {
   };
 
   const invalidateSubscription = (subId) => {
-    Modal.confirm({
+    confirm({
       title: t('确认作废'),
       content: t('作废后该订阅将立即失效，历史记录不受影响。是否继续？'),
-      centered: true,
-      onOk: async () => {
+      onConfirm: async () => {
         try {
           const res = await API.post(
             `/api/subscription/admin/user_subscriptions/${subId}/invalidate`,
@@ -220,12 +220,10 @@ const UserSubscriptionsModal = ({ visible, onCancel, user, t, onSuccess }) => {
   };
 
   const deleteSubscription = (subId) => {
-    Modal.confirm({
+    confirm({
       title: t('确认删除'),
       content: t('删除会彻底移除该订阅记录（含权益明细）。是否继续？'),
-      centered: true,
-      okType: 'danger',
-      onOk: async () => {
+      onConfirm: async () => {
         try {
           const res = await API.delete(
             `/api/subscription/admin/user_subscriptions/${subId}`,
@@ -305,9 +303,9 @@ const UserSubscriptionsModal = ({ visible, onCancel, user, t, onSuccess }) => {
           const total = Number(sub?.amount_total || 0);
           const used = Number(sub?.amount_used || 0);
           return (
-            <Text type={total > 0 ? 'secondary' : 'tertiary'}>
+            <span className={total > 0 ? 'text-muted-foreground' : 'text-muted-foreground/60'}>
               {total > 0 ? `${used}/${total}` : t('不限')}
-            </Text>
+            </span>
           );
         },
       },
@@ -324,25 +322,23 @@ const UserSubscriptionsModal = ({ visible, onCancel, user, t, onSuccess }) => {
           const isActive = sub?.status === 'active' && !isExpired;
           const isCancelled = sub?.status === 'cancelled';
           return (
-            <Space>
+            <div className='flex items-center gap-1'>
               <Button
-                size='small'
-                type='warning'
-                theme='light'
+                size='sm'
+                variant='outline'
                 disabled={!isActive || isCancelled}
                 onClick={() => invalidateSubscription(sub?.id)}
               >
                 {t('作废')}
               </Button>
               <Button
-                size='small'
-                type='danger'
-                theme='light'
+                size='sm'
+                variant='destructive'
                 onClick={() => deleteSubscription(sub?.id)}
               >
                 {t('删除')}
               </Button>
-            </Space>
+            </div>
           );
         },
       },
@@ -350,83 +346,77 @@ const UserSubscriptionsModal = ({ visible, onCancel, user, t, onSuccess }) => {
   }, [t, planTitleMap]);
 
   return (
-    <SideSheet
-      visible={visible}
-      placement='right'
-      width={isMobile ? '100%' : 920}
-      bodyStyle={{ padding: 0 }}
-      onCancel={onCancel}
-      title={
-        <Space>
-          <Tag color='blue' shape='circle'>
-            {t('管理')}
-          </Tag>
-          <Typography.Title heading={4} className='m-0'>
-            {t('用户订阅管理')}
-          </Typography.Title>
-          <Text type='tertiary' className='ml-2'>
-            {user?.username || '-'} (ID: {user?.id || '-'})
-          </Text>
-        </Space>
-      }
-    >
-      <div className='p-4'>
-        {/* 顶部操作栏：新增订阅 */}
-        <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4'>
-          <div className='flex gap-2 flex-1'>
-            <Select
-              placeholder={t('选择订阅套餐')}
-              optionList={planOptions}
-              value={selectedPlanId}
-              onChange={setSelectedPlanId}
-              loading={plansLoading}
-              filter
-              style={{ minWidth: isMobile ? undefined : 300, flex: 1 }}
-            />
-            <Button
-              type='primary'
-              theme='solid'
-              icon={<IconPlusCircle />}
-              loading={creating}
-              onClick={createSubscription}
-            >
-              {t('新增订阅')}
-            </Button>
-          </div>
-        </div>
+    <Sheet open={visible} onOpenChange={(open) => !open && onCancel()}>
+      <SheetContent side='right' className={isMobile ? 'w-full' : 'w-[920px] sm:max-w-[920px]'}>
+        <SheetHeader>
+          <SheetTitle>
+            <div className='flex items-center gap-2'>
+              <Badge variant='outline' className='text-blue-600 border-blue-300'>
+                {t('管理')}
+              </Badge>
+              <span>{t('用户订阅管理')}</span>
+              <span className='text-sm text-muted-foreground ml-2'>
+                {user?.username || '-'} (ID: {user?.id || '-'})
+              </span>
+            </div>
+          </SheetTitle>
+        </SheetHeader>
 
-        {/* 订阅列表 */}
-        <CardTable
-          columns={columns}
-          dataSource={pagedSubs}
-          rowKey={(row) => row?.subscription?.id}
-          loading={loading}
-          scroll={{ x: 'max-content' }}
-          hidePagination={false}
-          pagination={{
-            currentPage,
-            pageSize,
-            total: subs.length,
-            pageSizeOpts: [10, 20, 50],
-            showSizeChanger: false,
-            onPageChange: handlePageChange,
-          }}
-          empty={
-            <Empty
-              image={
-                <IllustrationNoResult style={{ width: 150, height: 150 }} />
-              }
-              darkModeImage={
-                <IllustrationNoResultDark style={{ width: 150, height: 150 }} />
-              }
-              description={t('暂无订阅记录')}
-              style={{ padding: 30 }}
-            />
-          }
-          size='middle'
-        />
-      </div>
-    </SideSheet>
+        <div className='flex-1 overflow-y-auto p-4'>
+          {/* Top Action Bar */}
+          <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4'>
+            <div className='flex gap-2 flex-1'>
+              <Select
+                value={selectedPlanId || undefined}
+                onValueChange={setSelectedPlanId}
+              >
+                <SelectTrigger className={isMobile ? 'flex-1' : 'min-w-[300px] flex-1'}>
+                  <SelectValue placeholder={t('选择订阅套餐')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {planOptions.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                onClick={createSubscription}
+                disabled={creating}
+              >
+                <PlusCircle className='h-4 w-4 mr-1' />
+                {t('新增订阅')}
+              </Button>
+            </div>
+          </div>
+
+          {/* Subscriptions List */}
+          <CardTable
+            columns={columns}
+            dataSource={pagedSubs}
+            rowKey={(row) => row?.subscription?.id}
+            loading={loading}
+            scroll={{ x: 'max-content' }}
+            hidePagination={false}
+            pagination={{
+              currentPage,
+              pageSize,
+              total: subs.length,
+              pageSizeOpts: [10, 20, 50],
+              showSizeChanger: false,
+              onPageChange: handlePageChange,
+            }}
+            empty={
+              <EmptyState
+                title={t('暂无订阅记录')}
+              />
+            }
+            size='middle'
+          />
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 };
 

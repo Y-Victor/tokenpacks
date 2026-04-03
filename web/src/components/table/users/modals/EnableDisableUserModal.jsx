@@ -18,7 +18,14 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Modal } from '@douyinfe/semi-ui';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../../../ui/dialog';
+import { Button } from '../../../ui/button';
 
 const EnableDisableUserModal = ({
   visible,
@@ -31,15 +38,26 @@ const EnableDisableUserModal = ({
   const isDisable = action === 'disable';
 
   return (
-    <Modal
-      title={isDisable ? t('确定要禁用此用户吗？') : t('确定要启用此用户吗？')}
-      visible={visible}
-      onCancel={onCancel}
-      onOk={onConfirm}
-      type='warning'
-    >
-      {isDisable ? t('此操作将禁用用户账户') : t('此操作将启用用户账户')}
-    </Modal>
+    <Dialog open={visible} onOpenChange={(open) => !open && onCancel()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            {isDisable ? t('确定要禁用此用户吗？') : t('确定要启用此用户吗？')}
+          </DialogTitle>
+        </DialogHeader>
+        <div>
+          {isDisable ? t('此操作将禁用用户账户') : t('此操作将启用用户账户')}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onCancel}>
+            {t('取消')}
+          </Button>
+          <Button onClick={onConfirm}>
+            {t('确定')}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

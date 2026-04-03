@@ -17,9 +17,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import React from 'react';
-import { Button, Form } from '@douyinfe/semi-ui';
-import { IconSearch } from '@douyinfe/semi-icons';
+import React, { useState } from 'react';
+import { Button } from '../../ui/button';
+import { Input } from '../../ui/input';
+import { Search } from 'lucide-react';
 
 const ChannelsFilters = ({
   setEditingChannel,
@@ -36,13 +37,41 @@ const ChannelsFilters = ({
   searching,
   t,
 }) => {
+  // Local state to replicate Semi Form behavior
+  const [searchKeyword, setSearchKeyword] = useState(formInitValues?.searchKeyword || '');
+  const [searchModel, setSearchModel] = useState(formInitValues?.searchModel || '');
+  const [searchGroup, setSearchGroup] = useState(formInitValues?.searchGroup || '');
+
+  // Expose a formApi-like object to the parent
+  React.useEffect(() => {
+    const api = {
+      getValues: () => ({ searchKeyword, searchModel, searchGroup }),
+      getValue: (field) => {
+        if (field === 'searchKeyword') return searchKeyword;
+        if (field === 'searchModel') return searchModel;
+        if (field === 'searchGroup') return searchGroup;
+        return '';
+      },
+      reset: () => {
+        setSearchKeyword('');
+        setSearchModel('');
+        setSearchGroup('');
+      },
+    };
+    setFormApi(api);
+  }, [searchKeyword, searchModel, searchGroup, setFormApi]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    searchChannels(enableTagMode);
+  };
+
   return (
     <div className='flex flex-col md:flex-row justify-between items-center gap-2 w-full'>
       <div className='flex gap-2 w-full md:w-auto order-2 md:order-1'>
         <Button
-          size='small'
-          theme='light'
-          type='primary'
+          size='sm'
+          variant='default'
           className='w-full md:w-auto'
           onClick={() => {
             setEditingChannel({
@@ -55,8 +84,8 @@ const ChannelsFilters = ({
         </Button>
 
         <Button
-          size='small'
-          type='tertiary'
+          size='sm'
+          variant='outline'
           className='w-full md:w-auto'
           onClick={refresh}
         >
@@ -64,8 +93,8 @@ const ChannelsFilters = ({
         </Button>
 
         <Button
-          size='small'
-          type='tertiary'
+          size='sm'
+          variant='outline'
           onClick={() => setShowColumnSelector(true)}
           className='w-full md:w-auto'
         >
@@ -74,83 +103,76 @@ const ChannelsFilters = ({
       </div>
 
       <div className='flex flex-col md:flex-row items-center gap-2 w-full md:w-auto order-1 md:order-2'>
-        <Form
-          initValues={formInitValues}
-          getFormApi={(api) => setFormApi(api)}
-          onSubmit={() => searchChannels(enableTagMode)}
-          allowEmpty={true}
+        <form
+          onSubmit={handleSubmit}
           autoComplete='off'
-          layout='horizontal'
-          trigger='change'
-          stopValidateWithError={false}
           className='flex flex-col md:flex-row items-center gap-2 w-full'
         >
           <div className='relative w-full md:w-64'>
-            <Form.Input
-              size='small'
-              field='searchKeyword'
-              prefix={<IconSearch />}
+            <Search className='absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
+            <Input
+              className='pl-8 h-8'
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
               placeholder={t('渠道ID，名称，密钥，API地址')}
-              showClear
-              pure
             />
           </div>
           <div className='w-full md:w-48'>
-            <Form.Input
-              size='small'
-              field='searchModel'
-              prefix={<IconSearch />}
-              placeholder={t('模型关键字')}
-              showClear
-              pure
-            />
+            <div className='relative'>
+              <Search className='absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
+              <Input
+                className='pl-8 h-8'
+                value={searchModel}
+                onChange={(e) => setSearchModel(e.target.value)}
+                placeholder={t('模型关键字')}
+              />
+            </div>
           </div>
           <div className='w-full md:w-32'>
-            <Form.Select
-              size='small'
-              field='searchGroup'
-              placeholder={t('选择分组')}
-              optionList={[
-                { label: t('选择分组'), value: null },
-                ...groupOptions,
-              ]}
-              className='w-full'
-              showClear
-              pure
-              onChange={() => {
-                // 延迟执行搜索，让表单值先更新
+            <select
+              className='flex h-8 w-full rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+              value={searchGroup}
+              onChange={(e) => {
+                setSearchGroup(e.target.value);
                 setTimeout(() => {
                   searchChannels(enableTagMode);
                 }, 0);
               }}
-            />
+            >
+              <option value=''>{t('选择分组')}</option>
+              {groupOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           </div>
           <Button
-            size='small'
-            type='tertiary'
-            htmlType='submit'
-            loading={loading || searching}
+            size='sm'
+            variant='outline'
+            type='submit'
+            disabled={loading || searching}
             className='w-full md:w-auto'
           >
             {t('查询')}
           </Button>
           <Button
-            size='small'
-            type='tertiary'
+            size='sm'
+            variant='outline'
+            type='button'
             onClick={() => {
-              if (formApi) {
-                formApi.reset();
-                // 重置后立即查询，使用setTimeout确保表单重置完成
-                setTimeout(() => {
-                  refresh();
-                }, 100);
-              }
+              setSearchKeyword('');
+              setSearchModel('');
+              setSearchGroup('');
+              setTimeout(() => {
+                refresh();
+              }, 100);
             }}
             className='w-full md:w-auto'
           >
             {t('重置')}
           </Button>
-        </Form>
+        </form>
       </div>
     </div>
   );

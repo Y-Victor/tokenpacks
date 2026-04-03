@@ -25,7 +25,7 @@ import {
   Input,
   Toast,
   Typography,
-} from '@douyinfe/semi-ui';
+} from '../../../../components/ui/semi-compat';
 import { useTranslation } from 'react-i18next';
 import { selectFilter } from '../../../../helpers';
 

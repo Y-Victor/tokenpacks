@@ -29,7 +29,7 @@ import {
   Tag,
   Tooltip,
   Typography,
-} from '@douyinfe/semi-ui';
+} from '../ui/semi-compat';
 import { API, showError, showSuccess, renderQuota } from '../../helpers';
 import { getCurrencyConfig } from '../../helpers/render';
 import { RefreshCw, Sparkles } from 'lucide-react';
@@ -519,7 +519,7 @@ const SubscriptionPlansCard = ({
 
                 return (
                   <Card
-                    key={plan?.id}
+                    key={`${plan?.id ?? 'plan'}-${index}`}
                     className={`!rounded-xl transition-all hover:shadow-lg w-full h-full ${
                       isPopular ? 'ring-2 ring-purple-500' : ''
                     }`}

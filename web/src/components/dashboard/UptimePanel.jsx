@@ -18,20 +18,12 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import {
-  Card,
-  Button,
-  Spin,
-  Tabs,
-  TabPane,
-  Tag,
-  Empty,
-} from '@douyinfe/semi-ui';
-import { Gauge, RefreshCw } from 'lucide-react';
-import {
-  IllustrationConstruction,
-  IllustrationConstructionDark,
-} from '@douyinfe/semi-illustrations';
+import { Card, CardHeader, CardTitle, CardContent } from '../ui/card';
+import { Button } from '../ui/button';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
+import { Badge } from '../ui/badge';
+import { Gauge, RefreshCw, Loader2 } from 'lucide-react';
+import { EmptyState } from '../ui/empty-state';
 import ScrollableContainer from '../common/ui/ScrollableContainer';
 
 const UptimePanel = ({
@@ -47,104 +39,96 @@ const UptimePanel = ({
   t,
 }) => {
   return (
-    <Card
-      {...CARD_PROPS}
-      className='shadow-sm !rounded-2xl lg:col-span-1'
-      title={
-        <div className='flex items-center justify-between w-full gap-2'>
-          <div className='flex items-center gap-2'>
-            <Gauge size={16} />
-            {t('服务可用性')}
+    <Card className='shadow-sm rounded-2xl lg:col-span-1'>
+      <CardHeader className='pb-3'>
+        <CardTitle className='text-base'>
+          <div className='flex items-center justify-between w-full gap-2'>
+            <div className='flex items-center gap-2'>
+              <Gauge size={16} />
+              {t('服务可用性')}
+            </div>
+            <Button
+              variant='ghost'
+              size='icon'
+              onClick={loadUptimeData}
+              disabled={uptimeLoading}
+              className='h-8 w-8 text-gray-500 hover:text-blue-500 hover:bg-blue-50 rounded-full'
+            >
+              {uptimeLoading ? <Loader2 size={14} className='animate-spin' /> : <RefreshCw size={14} />}
+            </Button>
           </div>
-          <Button
-            icon={<RefreshCw size={14} />}
-            onClick={loadUptimeData}
-            loading={uptimeLoading}
-            size='small'
-            theme='borderless'
-            type='tertiary'
-            className='text-gray-500 hover:text-blue-500 hover:bg-blue-50 !rounded-full'
-          />
-        </div>
-      }
-      bodyStyle={{ padding: 0 }}
-    >
-      {/* 内容区域 */}
-      <div className='relative'>
-        <Spin spinning={uptimeLoading}>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className='p-0'>
+        {/* Content area */}
+        <div className='relative'>
+          {uptimeLoading && (
+            <div className='absolute inset-0 bg-background/50 z-10 flex items-center justify-center'>
+              <Loader2 className='h-6 w-6 animate-spin text-muted-foreground' />
+            </div>
+          )}
           {uptimeData.length > 0 ? (
             uptimeData.length === 1 ? (
               <ScrollableContainer maxHeight='24rem'>
                 {renderMonitorList(uptimeData[0].monitors)}
               </ScrollableContainer>
             ) : (
-              <Tabs
-                type='card'
-                collapsible
-                activeKey={activeUptimeTab}
-                onChange={setActiveUptimeTab}
-                size='small'
-              >
+              <Tabs value={activeUptimeTab} onValueChange={setActiveUptimeTab}>
+                <TabsList className='w-full justify-start flex-wrap h-auto p-1'>
+                  {uptimeData.map((group, groupIdx) => (
+                    <TabsTrigger
+                      value={group.categoryName}
+                      key={groupIdx}
+                      className='text-xs gap-1'
+                    >
+                      <Gauge size={14} />
+                      {group.categoryName}
+                      <Badge
+                        variant={activeUptimeTab === group.categoryName ? 'destructive' : 'secondary'}
+                        className='rounded-full text-xs px-1.5 py-0'
+                      >
+                        {group.monitors ? group.monitors.length : 0}
+                      </Badge>
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
                 {uptimeData.map((group, groupIdx) => (
-                  <TabPane
-                    tab={
-                      <span className='flex items-center gap-2'>
-                        <Gauge size={14} />
-                        {group.categoryName}
-                        <Tag
-                          color={
-                            activeUptimeTab === group.categoryName
-                              ? 'red'
-                              : 'grey'
-                          }
-                          size='small'
-                          shape='circle'
-                        >
-                          {group.monitors ? group.monitors.length : 0}
-                        </Tag>
-                      </span>
-                    }
-                    itemKey={group.categoryName}
-                    key={groupIdx}
-                  >
+                  <TabsContent value={group.categoryName} key={groupIdx}>
                     <ScrollableContainer maxHeight='21.5rem'>
                       {renderMonitorList(group.monitors)}
                     </ScrollableContainer>
-                  </TabPane>
+                  </TabsContent>
                 ))}
               </Tabs>
             )
           ) : (
             <div className='flex justify-center items-center py-8'>
-              <Empty
-                image={<IllustrationConstruction style={ILLUSTRATION_SIZE} />}
-                darkModeImage={
-                  <IllustrationConstructionDark style={ILLUSTRATION_SIZE} />
-                }
+              <EmptyState
+                type='construction'
                 title={t('暂无监控数据')}
                 description={t('请联系管理员在系统设置中配置Uptime')}
               />
             </div>
           )}
-        </Spin>
-      </div>
-
-      {/* 图例 */}
-      {uptimeData.length > 0 && (
-        <div className='p-3 bg-gray-50 rounded-b-2xl'>
-          <div className='flex flex-wrap gap-3 text-xs justify-center'>
-            {uptimeLegendData.map((legend, index) => (
-              <div key={index} className='flex items-center gap-1'>
-                <div
-                  className='w-2 h-2 rounded-full'
-                  style={{ backgroundColor: legend.color }}
-                />
-                <span className='text-gray-600'>{legend.label}</span>
-              </div>
-            ))}
-          </div>
         </div>
-      )}
+
+        {/* Legend */}
+        {uptimeData.length > 0 && (
+          <div className='p-3 bg-gray-50 rounded-b-2xl'>
+            <div className='flex flex-wrap gap-3 text-xs justify-center'>
+              {uptimeLegendData.map((legend, index) => (
+                <div key={index} className='flex items-center gap-1'>
+                  <div
+                    className='w-2 h-2 rounded-full'
+                    style={{ backgroundColor: legend.color }}
+                  />
+                  <span className='text-gray-600'>{legend.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </CardContent>
     </Card>
   );
 };

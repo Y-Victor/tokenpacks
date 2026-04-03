@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Button } from '@douyinfe/semi-ui';
+import { Button } from '../../../components/ui/semi-compat';
 
 const SubscriptionsActions = ({ openCreate, t }) => {
   return (

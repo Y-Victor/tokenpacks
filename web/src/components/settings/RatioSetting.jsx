@@ -18,7 +18,9 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useEffect, useState } from 'react';
-import { Card, Spin, Tabs } from '@douyinfe/semi-ui';
+import { Card } from '../ui/semi-compat';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import GroupRatioSettings from '../../pages/Setting/Ratio/GroupRatioSettings';
@@ -94,28 +96,40 @@ const RatioSetting = () => {
   }, []);
 
   return (
-    <Spin spinning={loading} size='large'>
+    <div className="settings-panel-stack relative">
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      )}
       {/* 模型倍率设置以及价格编辑器 */}
-      <Card style={{ marginTop: '10px' }}>
-        <Tabs type='card' defaultActiveKey='visual'>
-          <Tabs.TabPane tab={t('模型倍率设置')} itemKey='model'>
+      <Card className="settings-panel-card">
+        <Tabs defaultValue='visual'>
+          <TabsList className='settings-tabs-list flex h-auto w-full flex-wrap justify-start gap-2'>
+            <TabsTrigger className='settings-tabs-trigger' value='model'>{t('模型倍率设置')}</TabsTrigger>
+            <TabsTrigger className='settings-tabs-trigger' value='group'>{t('分组相关设置')}</TabsTrigger>
+            <TabsTrigger className='settings-tabs-trigger' value='visual'>{t('价格设置')}</TabsTrigger>
+            <TabsTrigger className='settings-tabs-trigger' value='unset_models'>{t('未设置价格模型')}</TabsTrigger>
+            <TabsTrigger className='settings-tabs-trigger' value='upstream_sync'>{t('上游倍率同步')}</TabsTrigger>
+          </TabsList>
+          <TabsContent className='settings-tabs-content' value='model'>
             <ModelRatioSettings options={inputs} refresh={onRefresh} />
-          </Tabs.TabPane>
-          <Tabs.TabPane tab={t('分组相关设置')} itemKey='group'>
+          </TabsContent>
+          <TabsContent className='settings-tabs-content' value='group'>
             <GroupRatioSettings options={inputs} refresh={onRefresh} />
-          </Tabs.TabPane>
-          <Tabs.TabPane tab={t('价格设置')} itemKey='visual'>
+          </TabsContent>
+          <TabsContent className='settings-tabs-content' value='visual'>
             <ModelSettingsVisualEditor options={inputs} refresh={onRefresh} />
-          </Tabs.TabPane>
-          <Tabs.TabPane tab={t('未设置价格模型')} itemKey='unset_models'>
+          </TabsContent>
+          <TabsContent className='settings-tabs-content' value='unset_models'>
             <ModelRatioNotSetEditor options={inputs} refresh={onRefresh} />
-          </Tabs.TabPane>
-          <Tabs.TabPane tab={t('上游倍率同步')} itemKey='upstream_sync'>
+          </TabsContent>
+          <TabsContent className='settings-tabs-content' value='upstream_sync'>
             <UpstreamRatioSync options={inputs} refresh={onRefresh} />
-          </Tabs.TabPane>
+          </TabsContent>
         </Tabs>
       </Card>
-    </Spin>
+    </div>
   );
 };
 

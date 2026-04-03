@@ -32,7 +32,7 @@ import {
   loadMessages,
   saveMessages,
 } from '../../components/playground/configStorage';
-import { processIncompleteThinkTags } from '../../helpers';
+import { normalizeMessageIds, processIncompleteThinkTags } from '../../helpers';
 
 export const usePlaygroundState = () => {
   const { t } = useTranslation();
@@ -59,7 +59,7 @@ export const usePlaygroundState = () => {
         return null;
       }
     }
-    return loaded;
+    return Array.isArray(loaded) ? normalizeMessageIds(loaded) : loaded;
   });
 
   // 基础配置状态
@@ -97,6 +97,20 @@ export const usePlaygroundState = () => {
       setMessage(getDefaultMessages(t));
     }
   }, [t, initialMessages]); // 当语言改变时
+
+  useEffect(() => {
+    if (!Array.isArray(message) || message.length === 0) return;
+
+    const normalizedMessages = normalizeMessageIds(message);
+    const hasDuplicateOrInvalidIds = normalizedMessages.some(
+      (currentMessage, index) => currentMessage.id !== message[index]?.id,
+    );
+
+    if (!hasDuplicateOrInvalidIds) return;
+
+    setMessage(normalizedMessages);
+    setTimeout(() => saveMessages(normalizedMessages), 0);
+  }, [message]);
 
   // 调试状态
   const [debugData, setDebugData] = useState({
@@ -186,7 +200,7 @@ export const usePlaygroundState = () => {
     }
     // 如果导入的配置包含消息，也恢复消息
     if (importedConfig.messages && Array.isArray(importedConfig.messages)) {
-      setMessage(importedConfig.messages);
+      setMessage(normalizeMessageIds(importedConfig.messages));
     }
   }, []);
 

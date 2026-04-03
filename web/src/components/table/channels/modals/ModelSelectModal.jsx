@@ -20,21 +20,27 @@ For commercial licensing, please contact support@quantumnous.com
 import React, { useState, useEffect, useMemo } from 'react';
 import { useIsMobile } from '../../../../hooks/common/useIsMobile';
 import {
-  Modal,
-  Checkbox,
-  Spin,
-  Input,
-  Typography,
-  Empty,
-  Tabs,
-  Collapse,
-  Tooltip,
-} from '@douyinfe/semi-ui';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../../../ui/dialog';
+import { Button } from '../../../ui/button';
+import { Checkbox } from '../../../ui/checkbox';
+import { Input } from '../../../ui/input';
+import { Tabs, TabsList, TabsTrigger } from '../../../ui/tabs';
 import {
-  IllustrationNoResult,
-  IllustrationNoResultDark,
-} from '@douyinfe/semi-illustrations';
-import { IconSearch, IconInfoCircle } from '@douyinfe/semi-icons';
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '../../../ui/collapsible';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '../../../ui/tooltip';
+import { Search, Info, ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getModelCategories } from '../../../../helpers/render';
 
@@ -240,179 +246,159 @@ const ModelSelectModal = ({
     const categoryEntries = Object.entries(modelsByCategory);
     if (categoryEntries.length === 0) return null;
 
-    // 生成所有面板的key，确保都展开
-    const allActiveKeys = categoryEntries.map(
-      (_, index) => `${categoryKeyPrefix}_${index}`,
-    );
-
     return (
-      <Collapse
-        key={`${categoryKeyPrefix}_${categoryEntries.length}`}
-        defaultActiveKey={[]}
-      >
+      <div key={`${categoryKeyPrefix}_${categoryEntries.length}`}>
         {categoryEntries.map(([key, categoryData], index) => (
-          <Collapse.Panel
-            key={`${categoryKeyPrefix}_${index}`}
-            itemKey={`${categoryKeyPrefix}_${index}`}
-            header={`${categoryData.label} (${categoryData.models.length})`}
-            extra={
+          <Collapsible key={`${categoryKeyPrefix}_${index}`}>
+            <div className='flex items-center justify-between'>
+              <CollapsibleTrigger className='flex items-center gap-2 p-2 hover:bg-muted/50 rounded flex-1'>
+                <ChevronDown className='h-4 w-4' />
+                <span>{`${categoryData.label} (${categoryData.models.length})`}</span>
+              </CollapsibleTrigger>
               <Checkbox
                 checked={isCategoryAllSelected(categoryData.models)}
-                indeterminate={isCategoryIndeterminate(categoryData.models)}
-                onChange={(e) => {
-                  e.stopPropagation(); // 防止触发面板折叠
-                  handleCategorySelectAll(
-                    categoryData.models,
-                    e.target.checked,
-                  );
+                onCheckedChange={(checked) => {
+                  handleCategorySelectAll(categoryData.models, !!checked);
                 }}
-                onClick={(e) => e.stopPropagation()} // 防止点击checkbox时折叠面板
+                onClick={(e) => e.stopPropagation()}
               />
-            }
-          >
-            <div className='flex items-center gap-2 mb-3'>
-              {categoryData.icon}
-              <Typography.Text type='secondary' size='small'>
-                {t('已选择 {{selected}} / {{total}}', {
-                  selected: categoryData.models.filter((model) =>
-                    checkedList.includes(model),
-                  ).length,
-                  total: categoryData.models.length,
-                })}
-              </Typography.Text>
             </div>
-            <div className='grid grid-cols-2 gap-x-4'>
-              {categoryData.models.map((model) => (
-                <Checkbox key={model} value={model} className='my-1'>
-                  <span className='flex items-center gap-2'>
-                    <span>{model}</span>
-                    {redirectOnlySet.has(normalizeModelName(model)) && (
-                      <Tooltip
-                        position='top'
-                        content={t('来自模型重定向，尚未加入模型列表')}
-                      >
-                        <IconInfoCircle
-                          size='small'
-                          className='text-amber-500 cursor-help'
-                        />
-                      </Tooltip>
-                    )}
-                  </span>
-                </Checkbox>
-              ))}
-            </div>
-          </Collapse.Panel>
+            <CollapsibleContent>
+              <div className='flex items-center gap-2 mb-3 pl-6'>
+                {categoryData.icon}
+                <span className='text-sm text-muted-foreground'>
+                  {t('已选择 {{selected}} / {{total}}', {
+                    selected: categoryData.models.filter((model) =>
+                      checkedList.includes(model),
+                    ).length,
+                    total: categoryData.models.length,
+                  })}
+                </span>
+              </div>
+              <div className='grid grid-cols-2 gap-x-4 pl-6'>
+                {categoryData.models.map((model) => (
+                  <div key={model} className='flex items-center gap-2 my-1'>
+                    <Checkbox
+                      checked={checkedList.includes(model)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setCheckedList([...checkedList, model]);
+                        } else {
+                          setCheckedList(checkedList.filter((m) => m !== model));
+                        }
+                      }}
+                    />
+                    <span className='flex items-center gap-2'>
+                      <span className='text-sm'>{model}</span>
+                      {redirectOnlySet.has(normalizeModelName(model)) && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className='h-3 w-3 text-amber-500 cursor-help' />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {t('来自模型重定向，尚未加入模型列表')}
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
         ))}
-      </Collapse>
+      </div>
     );
   };
 
   return (
-    <Modal
-      header={
-        <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 py-4'>
-          <Typography.Title heading={5} className='m-0'>
-            {t('选择模型')}
-          </Typography.Title>
-          <div className='flex-shrink-0'>
-            <Tabs
-              type='slash'
-              size='small'
-              tabList={tabList}
-              activeKey={activeTab}
-              onChange={(key) => setActiveTab(key)}
-            />
+    <Dialog open={visible} onOpenChange={(open) => !open && onCancel?.()}>
+      <DialogContent className={isMobile ? 'max-w-full' : 'max-w-3xl'}>
+        <DialogHeader>
+          <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4'>
+            <DialogTitle>{t('选择模型')}</DialogTitle>
+            <div className='flex-shrink-0'>
+              <Tabs value={activeTab} onValueChange={(key) => setActiveTab(key)}>
+                <TabsList>
+                  {tabList.map((tab) => (
+                    <TabsTrigger key={tab.itemKey} value={tab.itemKey}>
+                      {tab.tab}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+            </div>
           </div>
-        </div>
-      }
-      visible={visible}
-      onOk={handleOk}
-      onCancel={onCancel}
-      okText={t('确定')}
-      cancelText={t('取消')}
-      size={isMobile ? 'full-width' : 'large'}
-      closeOnEsc
-      maskClosable
-      centered
-    >
-      <Input
-        prefix={<IconSearch size={14} />}
-        placeholder={t('搜索模型')}
-        value={keyword}
-        onChange={(v) => setKeyword(v)}
-        showClear
-      />
+        </DialogHeader>
 
-      <Spin spinning={!models || models.length === 0}>
-        <div style={{ maxHeight: 400, overflowY: 'auto', paddingRight: 8 }}>
-          {filteredModels.length === 0 ? (
-            <Empty
-              image={
-                <IllustrationNoResult style={{ width: 150, height: 150 }} />
-              }
-              darkModeImage={
-                <IllustrationNoResultDark style={{ width: 150, height: 150 }} />
-              }
-              description={t('暂无匹配模型')}
-              style={{ padding: 30 }}
-            />
-          ) : (
-            <Checkbox.Group
-              value={checkedList}
-              onChange={(vals) => setCheckedList(vals)}
-            >
-              {activeTab === 'new' && newModels.length > 0 && (
-                <div>{renderModelsByCategory(newModelsByCategory, 'new')}</div>
-              )}
-              {activeTab === 'existing' && existingModels.length > 0 && (
-                <div>
-                  {renderModelsByCategory(existingModelsByCategory, 'existing')}
-                </div>
-              )}
-            </Checkbox.Group>
-          )}
+        <div className='relative'>
+          <Search className='absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
+          <Input
+            className='pl-8'
+            placeholder={t('搜索模型')}
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+          />
         </div>
-      </Spin>
 
-      <Typography.Text
-        type='secondary'
-        size='small'
-        className='block text-right mt-4'
-      >
-        <div className='flex items-center justify-end gap-2'>
+        {(!models || models.length === 0) ? (
+          <div className='flex justify-center py-4'>
+            <div className='animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full' />
+          </div>
+        ) : (
+          <div style={{ maxHeight: 400, overflowY: 'auto', paddingRight: 8 }}>
+            {filteredModels.length === 0 ? (
+              <div className='flex flex-col items-center justify-center py-8 text-muted-foreground'>
+                <p>{t('暂无匹配模型')}</p>
+              </div>
+            ) : (
+              <div>
+                {activeTab === 'new' && newModels.length > 0 && (
+                  <div>{renderModelsByCategory(newModelsByCategory, 'new')}</div>
+                )}
+                {activeTab === 'existing' && existingModels.length > 0 && (
+                  <div>
+                    {renderModelsByCategory(existingModelsByCategory, 'existing')}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className='flex items-center justify-end gap-2 mt-4'>
           {(() => {
             const currentModels =
               activeTab === 'new' ? newModels : existingModels;
             const currentSelected = currentModels.filter((model) =>
               checkedList.includes(model),
             ).length;
-            const isAllSelected =
-              currentModels.length > 0 &&
-              currentSelected === currentModels.length;
-            const isIndeterminate =
-              currentSelected > 0 && currentSelected < currentModels.length;
 
             return (
               <>
-                <span>
+                <span className='text-sm text-muted-foreground'>
                   {t('已选择 {{selected}} / {{total}}', {
                     selected: currentSelected,
                     total: currentModels.length,
                   })}
                 </span>
                 <Checkbox
-                  checked={isAllSelected}
-                  indeterminate={isIndeterminate}
-                  onChange={(e) => {
-                    handleCategorySelectAll(currentModels, e.target.checked);
+                  checked={currentModels.length > 0 && currentSelected === currentModels.length}
+                  onCheckedChange={(checked) => {
+                    handleCategorySelectAll(currentModels, !!checked);
                   }}
                 />
               </>
             );
           })()}
         </div>
-      </Typography.Text>
-    </Modal>
+
+        <DialogFooter>
+          <Button variant='outline' onClick={onCancel}>{t('取消')}</Button>
+          <Button onClick={handleOk}>{t('确定')}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

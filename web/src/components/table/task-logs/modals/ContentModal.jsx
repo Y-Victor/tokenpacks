@@ -18,8 +18,8 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Typography, Spin } from '@douyinfe/semi-ui';
-import { IconExternalOpen, IconCopy } from '@douyinfe/semi-icons';
+import { Modal, Button, Typography, Spin } from '../../../ui/semi-compat';
+import { IconExternalOpen, IconCopy } from '../../../ui/semi-icons-compat';
 import { useTranslation } from 'react-i18next';
 
 const { Text } = Typography;

@@ -19,19 +19,11 @@ For commercial licensing, please contact support@quantumnous.com
 
 import React, { useState, useEffect, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Card,
-  Form,
-  Button,
-  Switch,
-  Row,
-  Col,
-  Typography,
-} from '@douyinfe/semi-ui';
 import { API, showSuccess, showError } from '../../../helpers';
 import { StatusContext } from '../../../context/Status';
-
-const { Text } = Typography;
+import { Button } from '../../../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
+import { Switch } from '../../../components/ui/switch';
 
 export default function SettingsSidebarModulesAdmin(props) {
   const { t } = useTranslation();
@@ -282,157 +274,87 @@ export default function SettingsSidebarModulesAdmin(props) {
 
   return (
     <Card>
-      <Form.Section
-        text={t('侧边栏管理（全局控制）')}
-        extraText={t(
-          '全局控制侧边栏区域和功能显示，管理员隐藏的功能用户无法启用',
-        )}
-      >
+      <CardContent>
+        <div className='mb-2'>
+          <h4 className='text-base font-semibold'>{t('侧边栏管理（全局控制）')}</h4>
+          <p className='text-sm text-muted-foreground'>{t('全局控制侧边栏区域和功能显示，管理员隐藏的功能用户无法启用')}</p>
+        </div>
         {sectionConfigs.map((section) => (
           <div key={section.key} style={{ marginBottom: '32px' }}>
             {/* 区域标题和总开关 */}
             <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '16px',
-                padding: '12px 16px',
-                backgroundColor: 'var(--semi-color-fill-0)',
-                borderRadius: '8px',
-                border: '1px solid var(--semi-color-border)',
-              }}
+              className='flex justify-between items-center mb-4 p-3 bg-muted rounded-lg border'
             >
               <div>
-                <div
-                  style={{
-                    fontWeight: '600',
-                    fontSize: '16px',
-                    color: 'var(--semi-color-text-0)',
-                    marginBottom: '4px',
-                  }}
-                >
+                <div className='font-semibold text-base mb-1'>
                   {section.title}
                 </div>
-                <Text
-                  type='secondary'
-                  size='small'
-                  style={{
-                    fontSize: '12px',
-                    color: 'var(--semi-color-text-2)',
-                    lineHeight: '1.4',
-                  }}
-                >
+                <span className='text-xs text-muted-foreground'>
                   {section.description}
-                </Text>
+                </span>
               </div>
               <Switch
                 checked={sidebarModulesAdmin[section.key]?.enabled}
-                onChange={handleSectionChange(section.key)}
-                size='default'
+                onCheckedChange={handleSectionChange(section.key)}
               />
             </div>
 
             {/* 功能模块网格 */}
-            <Row gutter={[16, 16]}>
+            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
               {section.modules.map((module) => (
-                <Col key={module.key} xs={24} sm={12} md={8} lg={6} xl={6}>
-                  <Card
-                    bodyStyle={{ padding: '16px' }}
-                    hoverable
-                    style={{
-                      opacity: sidebarModulesAdmin[section.key]?.enabled
-                        ? 1
-                        : 0.5,
-                      transition: 'opacity 0.2s',
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        height: '100%',
-                      }}
-                    >
-                      <div style={{ flex: 1, textAlign: 'left' }}>
-                        <div
-                          style={{
-                            fontWeight: '600',
-                            fontSize: '14px',
-                            color: 'var(--semi-color-text-0)',
-                            marginBottom: '4px',
-                          }}
-                        >
+                <Card
+                  key={module.key}
+                  className='cursor-pointer hover:shadow-sm transition-shadow'
+                  style={{
+                    opacity: sidebarModulesAdmin[section.key]?.enabled
+                      ? 1
+                      : 0.5,
+                    transition: 'opacity 0.2s',
+                  }}
+                >
+                  <CardContent className='p-4'>
+                    <div className='flex justify-between items-center h-full'>
+                      <div className='flex-1 text-left'>
+                        <div className='font-semibold text-sm mb-1'>
                           {module.title}
                         </div>
-                        <Text
-                          type='secondary'
-                          size='small'
-                          style={{
-                            fontSize: '12px',
-                            color: 'var(--semi-color-text-2)',
-                            lineHeight: '1.4',
-                            display: 'block',
-                          }}
-                        >
+                        <span className='text-xs text-muted-foreground leading-snug block'>
                           {module.description}
-                        </Text>
+                        </span>
                       </div>
-                      <div style={{ marginLeft: '16px' }}>
+                      <div className='ml-4'>
                         <Switch
                           checked={
                             sidebarModulesAdmin[section.key]?.[module.key]
                           }
-                          onChange={handleModuleChange(section.key, module.key)}
-                          size='default'
+                          onCheckedChange={handleModuleChange(section.key, module.key)}
                           disabled={!sidebarModulesAdmin[section.key]?.enabled}
                         />
                       </div>
                     </div>
-                  </Card>
-                </Col>
+                  </CardContent>
+                </Card>
               ))}
-            </Row>
+            </div>
           </div>
         ))}
 
-        <div
-          style={{
-            display: 'flex',
-            gap: '12px',
-            justifyContent: 'flex-start',
-            alignItems: 'center',
-            paddingTop: '8px',
-            borderTop: '1px solid var(--semi-color-border)',
-          }}
-        >
+        <div className='flex gap-3 items-center pt-2 border-t'>
           <Button
-            size='default'
-            type='tertiary'
+            variant='outline'
             onClick={resetSidebarModules}
-            style={{
-              borderRadius: '6px',
-              fontWeight: '500',
-            }}
           >
             {t('重置为默认')}
           </Button>
           <Button
-            size='default'
-            type='primary'
             onClick={onSubmit}
-            loading={loading}
-            style={{
-              borderRadius: '6px',
-              fontWeight: '500',
-              minWidth: '100px',
-            }}
+            disabled={loading}
           >
+            {loading && <span className='mr-2 animate-spin'>⟳</span>}
             {t('保存设置')}
           </Button>
         </div>
-      </Form.Section>
+      </CardContent>
     </Card>
   );
 }

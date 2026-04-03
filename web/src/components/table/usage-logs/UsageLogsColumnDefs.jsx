@@ -25,7 +25,7 @@ import {
   Tooltip,
   Popover,
   Typography,
-} from '@douyinfe/semi-ui';
+} from '../../ui/semi-compat';
 import {
   renderGroup,
   renderQuota,
@@ -34,7 +34,7 @@ import {
   renderModelTag,
   renderModelPriceSimple,
 } from '../../../helpers';
-import { IconHelpCircle } from '@douyinfe/semi-icons';
+import { IconHelpCircle } from '../../ui/semi-icons-compat';
 import { Route, Sparkles } from 'lucide-react';
 
 const colors = [
@@ -348,32 +348,55 @@ function renderCompactDetailSummary(summarySegments) {
     return null;
   }
 
-  return (
+  const tooltipContent = (
     <div
       style={{
-        maxWidth: 180,
-        lineHeight: 1.35,
+        maxWidth: 360,
+        lineHeight: 1.5,
       }}
     >
       {segments.map((segment, index) => (
         <Typography.Text
-          key={`${segment.text}-${index}`}
+          key={`${segment.text}-${index}-tooltip`}
           type={segment.tone === 'secondary' ? 'tertiary' : undefined}
-          size={segment.tone === 'secondary' ? 'small' : undefined}
           style={{
             display: 'block',
-            maxWidth: '100%',
-            fontSize: 12,
-            marginTop: index === 0 ? 0 : 2,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
+            marginTop: index === 0 ? 0 : 6,
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
           }}
         >
           {segment.text}
         </Typography.Text>
       ))}
     </div>
+  );
+
+  const summaryText = segments.map((segment) => segment.text).join(' · ');
+
+  return (
+    <Tooltip content={tooltipContent} position='left'>
+      <div
+        style={{
+          maxWidth: 180,
+          lineHeight: 1.35,
+          cursor: 'help',
+        }}
+      >
+        <Typography.Text
+          style={{
+            display: 'block',
+            maxWidth: '100%',
+            fontSize: 12,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {summaryText}
+        </Typography.Text>
+      </div>
+    </Tooltip>
   );
 }
 
@@ -894,18 +917,34 @@ export const getLogsColumns = ({
 
         if (!detailSummary) {
           return (
-            <Typography.Paragraph
-              ellipsis={{
-                rows: 2,
-                showTooltip: {
-                  type: 'popover',
-                  opts: { style: { width: 240 } },
-                },
-              }}
-              style={{ maxWidth: 200, marginBottom: 0 }}
+            <Tooltip
+              content={
+                <div
+                  style={{
+                    maxWidth: 360,
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {text}
+                </div>
+              }
+              position='left'
             >
-              {text}
-            </Typography.Paragraph>
+              <Typography.Text
+                style={{
+                  display: 'block',
+                  maxWidth: 200,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  cursor: 'help',
+                }}
+              >
+                {text}
+              </Typography.Text>
+            </Tooltip>
           );
         }
 

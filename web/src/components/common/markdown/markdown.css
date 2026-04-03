@@ -8,13 +8,13 @@
   word-break: break-word;
 }
 
-/* 用户消息样式 - 白色字体适配蓝色背景 */
+/* 用户消息样式 - 适配当前浅色聊天卡片 */
 .user-message {
-  color: white !important;
+  color: var(--semi-color-text-0) !important;
 }
 
 .user-message .markdown-body {
-  color: white !important;
+  color: var(--semi-color-text-0) !important;
 }
 
 .user-message h1,
@@ -23,63 +23,61 @@
 .user-message h4,
 .user-message h5,
 .user-message h6 {
-  color: white !important;
+  color: var(--semi-color-text-0) !important;
 }
 
 .user-message p {
-  color: white !important;
+  color: var(--semi-color-text-0) !important;
 }
 
 .user-message span {
-  color: white !important;
+  color: inherit !important;
 }
 
 .user-message div {
-  color: white !important;
+  color: inherit !important;
 }
 
 .user-message li {
-  color: white !important;
+  color: var(--semi-color-text-0) !important;
 }
 
 .user-message td,
 .user-message th {
-  color: white !important;
+  color: var(--semi-color-text-0) !important;
 }
 
 .user-message blockquote {
-  color: white !important;
-  border-left-color: rgba(255, 255, 255, 0.5) !important;
-  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: var(--semi-color-text-1) !important;
+  border-left-color: rgba(148, 163, 184, 0.5) !important;
+  background-color: rgba(241, 245, 249, 0.9) !important;
 }
 
 .user-message code:not(pre code) {
-  color: #000 !important;
-  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: var(--semi-color-text-0) !important;
+  background-color: rgba(226, 232, 240, 0.8) !important;
 }
 
 .user-message a {
-  color: #87ceeb !important;
-  /* 浅蓝色链接 */
+  color: #2563eb !important;
 }
 
 .user-message a:hover {
-  color: #b0e0e6 !important;
-  /* hover时更浅的蓝色 */
+  color: #1d4ed8 !important;
 }
 
 /* 表格在用户消息中的样式 */
 .user-message table {
-  border-color: rgba(255, 255, 255, 0.3) !important;
+  border-color: rgba(203, 213, 225, 0.8) !important;
 }
 
 .user-message th {
-  background-color: rgba(255, 255, 255, 0.2) !important;
-  border-color: rgba(255, 255, 255, 0.3) !important;
+  background-color: rgba(241, 245, 249, 0.9) !important;
+  border-color: rgba(203, 213, 225, 0.8) !important;
 }
 
 .user-message td {
-  border-color: rgba(255, 255, 255, 0.3) !important;
+  border-color: rgba(203, 213, 225, 0.8) !important;
 }
 
 /* 加载动画 */

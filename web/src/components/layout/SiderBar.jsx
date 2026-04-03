@@ -21,14 +21,15 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getLucideIcon } from '../../helpers/render';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, ChevronRight as ChevronRightIcon } from 'lucide-react';
 import { useSidebarCollapsed } from '../../hooks/common/useSidebarCollapsed';
 import { useSidebar } from '../../hooks/common/useSidebar';
 import { useMinimumLoadingTime } from '../../hooks/common/useMinimumLoadingTime';
 import { isAdmin, isRoot, showError } from '../../helpers';
 import SkeletonWrapper from './components/SkeletonWrapper';
-
-import { Nav, Divider, Button } from '@douyinfe/semi-ui';
+import { cn } from '../../lib/utils';
+import { Separator } from '../ui/separator';
+import { ScrollArea } from '../ui/scroll-area';
 
 const routerMap = {
   home: '/',
@@ -107,7 +108,6 @@ const SiderBar = ({ onNavigate = () => {} }) => {
       },
     ];
 
-    // 根据配置过滤项目
     const filteredItems = items.filter((item) => {
       const configVisible = isModuleVisible('console', item.itemKey);
       return configVisible;
@@ -136,7 +136,6 @@ const SiderBar = ({ onNavigate = () => {} }) => {
       },
     ];
 
-    // 根据配置过滤项目
     const filteredItems = items.filter((item) => {
       const configVisible = isModuleVisible('personal', item.itemKey);
       return configVisible;
@@ -191,7 +190,6 @@ const SiderBar = ({ onNavigate = () => {} }) => {
       },
     ];
 
-    // 根据配置过滤项目
     const filteredItems = items.filter((item) => {
       const configVisible = isModuleVisible('admin', item.itemKey);
       return configVisible;
@@ -214,7 +212,6 @@ const SiderBar = ({ onNavigate = () => {} }) => {
       },
     ];
 
-    // 根据配置过滤项目
     const filteredItems = items.filter((item) => {
       const configVisible = isModuleVisible('chat', item.itemKey);
       return configVisible;
@@ -223,7 +220,6 @@ const SiderBar = ({ onNavigate = () => {} }) => {
     return filteredItems;
   }, [chatItems, t, isModuleVisible]);
 
-  // 更新路由映射，添加聊天路由
   const updateRouterMapWithChats = (chats) => {
     const newRouterMap = { ...routerMap };
 
@@ -237,7 +233,6 @@ const SiderBar = ({ onNavigate = () => {} }) => {
     return newRouterMap;
   };
 
-  // 加载聊天项
   useEffect(() => {
     let chats = localStorage.getItem('chats');
     if (chats) {
@@ -250,7 +245,7 @@ const SiderBar = ({ onNavigate = () => {} }) => {
             let chat = {};
             for (let key in chats[i]) {
               let link = chats[i][key];
-              if (typeof link !== 'string') continue; // 确保链接是字符串
+              if (typeof link !== 'string') continue;
               if (link.startsWith('fluent') || link.startsWith('ccswitch')) {
                 shouldSkip = true;
                 break;
@@ -259,7 +254,7 @@ const SiderBar = ({ onNavigate = () => {} }) => {
               chat.itemKey = 'chat' + i;
               chat.to = '/console/chat/' + i;
             }
-            if (shouldSkip || !chat.text) continue; // 避免推入空项
+            if (shouldSkip || !chat.text) continue;
             chatItems.push(chat);
           }
           setChatItems(chatItems);
@@ -271,14 +266,12 @@ const SiderBar = ({ onNavigate = () => {} }) => {
     }
   }, []);
 
-  // 根据当前路径设置选中的菜单项
   useEffect(() => {
     const currentPath = location.pathname;
     let matchingKey = Object.keys(routerMapState).find(
       (key) => routerMapState[key] === currentPath,
     );
 
-    // 处理聊天路由
     if (!matchingKey && currentPath.startsWith('/console/chat/')) {
       const chatIndex = currentPath.split('/').pop();
       if (!isNaN(chatIndex)) {
@@ -288,13 +281,11 @@ const SiderBar = ({ onNavigate = () => {} }) => {
       }
     }
 
-    // 如果找到匹配的键，更新选中的键
     if (matchingKey) {
       setSelectedKeys([matchingKey]);
     }
   }, [location.pathname, routerMapState]);
 
-  // 监控折叠状态变化以更新 body class
   useEffect(() => {
     if (collapsed) {
       document.body.classList.add('sidebar-collapsed');
@@ -303,83 +294,128 @@ const SiderBar = ({ onNavigate = () => {} }) => {
     }
   }, [collapsed]);
 
-  // 选中高亮颜色（统一）
-  const SELECTED_COLOR = 'var(--semi-color-primary)';
-
-  // 渲染自定义菜单项
   const renderNavItem = (item) => {
-    // 跳过隐藏的项目
     if (item.className === 'tableHiddle') return null;
 
     const isSelected = selectedKeys.includes(item.itemKey);
-    const textColor = isSelected ? SELECTED_COLOR : 'inherit';
+    const to = routerMapState[item.itemKey] || routerMap[item.itemKey];
 
-    return (
-      <Nav.Item
-        key={item.itemKey}
-        itemKey={item.itemKey}
-        text={
-          <span
-            className='truncate font-medium text-sm'
-            style={{ color: textColor }}
-          >
-            {item.text}
-          </span>
-        }
-        icon={
-          <div className='sidebar-icon-container flex-shrink-0'>
-            {getLucideIcon(item.itemKey, isSelected)}
-          </div>
-        }
-        className={item.className}
-      />
+    const content = (
+      <div
+        className={cn(
+          'sidebar-nav-item group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all cursor-pointer',
+          isSelected
+            ? 'sidebar-nav-item-selected text-primary'
+            : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+        )}
+        onClick={() => {
+          setSelectedKeys([item.itemKey]);
+          onNavigate();
+        }}
+      >
+        <div className='sidebar-icon-container flex-shrink-0'>
+          {getLucideIcon(item.itemKey, isSelected)}
+        </div>
+        {!collapsed && <span className='truncate'>{item.text}</span>}
+      </div>
     );
+
+    if (to) {
+      return (
+        <Link
+          key={item.itemKey}
+          to={to}
+          className='block'
+          style={{ textDecoration: 'none' }}
+        >
+          {content}
+        </Link>
+      );
+    }
+
+    return <div key={item.itemKey}>{content}</div>;
   };
 
-  // 渲染子菜单项
   const renderSubItem = (item) => {
     if (item.items && item.items.length > 0) {
+      const isOpen = openedKeys.includes(item.itemKey);
       const isSelected = selectedKeys.includes(item.itemKey);
-      const textColor = isSelected ? SELECTED_COLOR : 'inherit';
 
       return (
-        <Nav.Sub
-          key={item.itemKey}
-          itemKey={item.itemKey}
-          text={
-            <span
-              className='truncate font-medium text-sm'
-              style={{ color: textColor }}
-            >
-              {item.text}
-            </span>
-          }
-          icon={
+        <div key={item.itemKey}>
+          <div
+            className={cn(
+              'sidebar-nav-item group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all cursor-pointer',
+              isSelected
+                ? 'sidebar-nav-item-selected text-primary'
+                : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+            )}
+            onClick={() => {
+              if (isOpen) {
+                setOpenedKeys(openedKeys.filter((k) => k !== item.itemKey));
+              } else {
+                setOpenedKeys([...openedKeys, item.itemKey]);
+              }
+            }}
+          >
             <div className='sidebar-icon-container flex-shrink-0'>
               {getLucideIcon(item.itemKey, isSelected)}
             </div>
-          }
-        >
-          {item.items.map((subItem) => {
-            const isSubSelected = selectedKeys.includes(subItem.itemKey);
-            const subTextColor = isSubSelected ? SELECTED_COLOR : 'inherit';
+            {!collapsed && (
+              <>
+                <span className='truncate flex-1'>{item.text}</span>
+                <ChevronRightIcon
+                  size={14}
+                  className={cn(
+                    'transition-transform',
+                    isOpen && 'rotate-90',
+                  )}
+                />
+              </>
+            )}
+          </div>
+          {isOpen && !collapsed && (
+            <div className='sidebar-sub-list ml-4 mt-2 flex flex-col gap-1'>
+              {item.items.map((subItem) => {
+                const isSubSelected = selectedKeys.includes(subItem.itemKey);
+                const to =
+                  routerMapState[subItem.itemKey] ||
+                  routerMap[subItem.itemKey];
 
-            return (
-              <Nav.Item
-                key={subItem.itemKey}
-                itemKey={subItem.itemKey}
-                text={
-                  <span
-                    className='truncate font-medium text-sm'
-                    style={{ color: subTextColor }}
+                const subContent = (
+                  <div
+                    className={cn(
+                      'sidebar-sub-item flex items-center rounded-xl px-3 py-2 text-sm transition-all cursor-pointer',
+                      isSubSelected
+                        ? 'sidebar-sub-item-selected text-primary font-medium'
+                        : 'text-muted-foreground hover:text-accent-foreground',
+                    )}
+                    onClick={() => {
+                      setSelectedKeys([subItem.itemKey]);
+                      onNavigate();
+                    }}
                   >
-                    {subItem.text}
-                  </span>
+                    <span className='truncate'>{subItem.text}</span>
+                  </div>
+                );
+
+                if (to) {
+                  return (
+                    <Link
+                      key={subItem.itemKey}
+                      to={to}
+                      className='block'
+                      style={{ textDecoration: 'none' }}
+                    >
+                      {subContent}
+                    </Link>
+                  );
                 }
-              />
-            );
-          })}
-        </Nav.Sub>
+                return <div key={subItem.itemKey}>{subContent}</div>;
+              })}
+            </div>
+          )}
+        </div>
       );
     } else {
       return renderNavItem(item);
@@ -400,94 +436,58 @@ const SiderBar = ({ onNavigate = () => {} }) => {
         collapsed={collapsed}
         showAdmin={isAdmin()}
       >
-        <Nav
-          className='sidebar-nav'
-          defaultIsCollapsed={collapsed}
-          isCollapsed={collapsed}
-          onCollapseChange={toggleCollapsed}
-          selectedKeys={selectedKeys}
-          itemStyle='sidebar-nav-item'
-          hoverStyle='sidebar-nav-item:hover'
-          selectedStyle='sidebar-nav-item-selected'
-          renderWrapper={({ itemElement, props }) => {
-            const to =
-              routerMapState[props.itemKey] || routerMap[props.itemKey];
-
-            // 如果没有路由，直接返回元素
-            if (!to) return itemElement;
-
-            return (
-              <Link
-                style={{ textDecoration: 'none' }}
-                to={to}
-                onClick={onNavigate}
-              >
-                {itemElement}
-              </Link>
-            );
-          }}
-          onSelect={(key) => {
-            // 如果点击的是已经展开的子菜单的父项，则收起子菜单
-            if (openedKeys.includes(key.itemKey)) {
-              setOpenedKeys(openedKeys.filter((k) => k !== key.itemKey));
-            }
-
-            setSelectedKeys([key.itemKey]);
-          }}
-          openKeys={openedKeys}
-          onOpenChange={(data) => {
-            setOpenedKeys(data.openKeys);
-          }}
-        >
-          {/* 聊天区域 */}
-          {hasSectionVisibleModules('chat') && (
-            <div className='sidebar-section'>
-              {!collapsed && (
-                <div className='sidebar-group-label'>{t('聊天')}</div>
-              )}
-              {chatMenuItems.map((item) => renderSubItem(item))}
-            </div>
-          )}
-
-          {/* 控制台区域 */}
-          {hasSectionVisibleModules('console') && (
-            <>
-              <Divider className='sidebar-divider' />
-              <div>
+        <ScrollArea className='sidebar-nav h-full'>
+          <div className='flex flex-col gap-3 px-2 py-3'>
+            {/* 聊天区域 */}
+            {hasSectionVisibleModules('chat') && (
+              <div className='sidebar-section sidebar-section-card'>
                 {!collapsed && (
-                  <div className='sidebar-group-label'>{t('控制台')}</div>
+                  <div className='sidebar-group-label'>{t('聊天')}</div>
                 )}
-                {workspaceItems.map((item) => renderNavItem(item))}
+                {chatMenuItems.map((item) => renderSubItem(item))}
               </div>
-            </>
-          )}
+            )}
 
-          {/* 个人中心区域 */}
-          {hasSectionVisibleModules('personal') && (
-            <>
-              <Divider className='sidebar-divider' />
-              <div>
-                {!collapsed && (
-                  <div className='sidebar-group-label'>{t('个人中心')}</div>
-                )}
-                {financeItems.map((item) => renderNavItem(item))}
-              </div>
-            </>
-          )}
+            {/* 控制台区域 */}
+            {hasSectionVisibleModules('console') && (
+              <>
+                {!collapsed && <Separator className='sidebar-divider my-2' />}
+                <div className='sidebar-section sidebar-section-card'>
+                  {!collapsed && (
+                    <div className='sidebar-group-label'>{t('控制台')}</div>
+                  )}
+                  {workspaceItems.map((item) => renderNavItem(item))}
+                </div>
+              </>
+            )}
 
-          {/* 管理员区域 - 只在管理员时显示且配置允许时显示 */}
-          {isAdmin() && hasSectionVisibleModules('admin') && (
-            <>
-              <Divider className='sidebar-divider' />
-              <div>
-                {!collapsed && (
-                  <div className='sidebar-group-label'>{t('管理员')}</div>
-                )}
-                {adminItems.map((item) => renderNavItem(item))}
-              </div>
-            </>
-          )}
-        </Nav>
+            {/* 个人中心区域 */}
+            {hasSectionVisibleModules('personal') && (
+              <>
+                {!collapsed && <Separator className='sidebar-divider my-2' />}
+                <div className='sidebar-section sidebar-section-card'>
+                  {!collapsed && (
+                    <div className='sidebar-group-label'>{t('个人中心')}</div>
+                  )}
+                  {financeItems.map((item) => renderNavItem(item))}
+                </div>
+              </>
+            )}
+
+            {/* 管理员区域 */}
+            {isAdmin() && hasSectionVisibleModules('admin') && (
+              <>
+                {!collapsed && <Separator className='sidebar-divider my-2' />}
+                <div className='sidebar-section sidebar-section-card'>
+                  {!collapsed && (
+                    <div className='sidebar-group-label'>{t('管理员')}</div>
+                  )}
+                  {adminItems.map((item) => renderNavItem(item))}
+                </div>
+              </>
+            )}
+          </div>
+        </ScrollArea>
       </SkeletonWrapper>
 
       {/* 底部折叠按钮 */}
@@ -499,30 +499,27 @@ const SiderBar = ({ onNavigate = () => {} }) => {
           height={24}
           className='w-full'
         >
-          <Button
-            theme='outline'
-            type='tertiary'
-            size='small'
-            icon={
-              <ChevronLeft
-                size={16}
-                strokeWidth={2.5}
-                color='var(--semi-color-text-2)'
-                style={{
-                  transform: collapsed ? 'rotate(180deg)' : 'rotate(0deg)',
-                }}
-              />
-            }
-            onClick={toggleCollapsed}
-            icononly={collapsed}
-            style={
+          <button
+            className={cn(
+              'sidebar-collapse-trigger inline-flex items-center justify-center rounded-2xl text-sm font-medium transition-all border border-input bg-background hover:bg-accent hover:text-accent-foreground',
               collapsed
-                ? { width: 36, height: 24, padding: 0 }
-                : { padding: '4px 12px', width: '100%' }
-            }
+                ? 'w-9 h-6 p-0'
+                : 'px-3 py-1 w-full',
+            )}
+            onClick={toggleCollapsed}
           >
-            {!collapsed ? t('收起侧边栏') : null}
-          </Button>
+            <ChevronLeft
+              size={16}
+              strokeWidth={2.5}
+              className={cn(
+                'text-muted-foreground transition-transform',
+                collapsed && 'rotate-180',
+              )}
+            />
+            {!collapsed ? (
+              <span className='ml-2 text-muted-foreground'>{t('收起侧边栏')}</span>
+            ) : null}
+          </button>
         </SkeletonWrapper>
       </div>
     </div>

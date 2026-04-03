@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Modal, Button, Checkbox, RadioGroup, Radio } from '@douyinfe/semi-ui';
+import { Modal, Button, Checkbox, RadioGroup, Radio } from '../../../ui/semi-compat';
 import { getLogsColumns } from '../UsageLogsColumnDefs';
 
 const ColumnSelectorModal = ({

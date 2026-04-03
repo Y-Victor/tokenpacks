@@ -33,7 +33,7 @@ import {
   Collapse,
   TextArea,
   Switch,
-} from '@douyinfe/semi-ui';
+} from '../../../../components/ui/semi-compat';
 import {
   FaCog,
   FaDocker,

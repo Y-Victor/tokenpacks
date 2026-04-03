@@ -18,19 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import {
-  Button,
-  Table,
-  Tag,
-  Empty,
-  Checkbox,
-  Form,
-  Input,
-  Tooltip,
-  Select,
-  Modal,
-} from '@douyinfe/semi-ui';
-import { IconSearch } from '@douyinfe/semi-icons';
+import { Search } from 'lucide-react';
 import {
   RefreshCcw,
   CheckSquare,
@@ -47,11 +35,19 @@ import {
 import { useIsMobile } from '../../../hooks/common/useIsMobile';
 import { DEFAULT_ENDPOINT } from '../../../constants';
 import { useTranslation } from 'react-i18next';
-import {
-  IllustrationNoResult,
-  IllustrationNoResultDark,
-} from '@douyinfe/semi-illustrations';
+import { EmptyState } from '../../../components/ui/empty-state';
 import ChannelSelectorModal from '../../../components/settings/ChannelSelectorModal';
+import { Form } from '../../../components/ui/form-compat';
+import {
+  Button,
+  Checkbox,
+  Input,
+  Modal as Dialog,
+  Select,
+  Table,
+  Tag,
+  Tooltip,
+} from '../../../components/ui/semi-compat';
 
 const OFFICIAL_RATIO_PRESET_ID = -100;
 const OFFICIAL_RATIO_PRESET_NAME = '官方倍率预设';
@@ -81,9 +77,9 @@ function ConflictConfirmModal({ t, visible, items, onOk, onCancel }) {
   ];
 
   return (
-    <Modal
+    <Dialog
       title={t('确认冲突项修改')}
-      visible={visible}
+      open={visible}
       onCancel={onCancel}
       onOk={onOk}
       size={isMobile ? 'full-width' : 'large'}
@@ -94,7 +90,7 @@ function ConflictConfirmModal({ t, visible, items, onOk, onCancel }) {
         pagination={false}
         size='small'
       />
-    </Modal>
+    </Dialog>
   );
 }
 
@@ -479,7 +475,7 @@ export default function UpstreamRatioSync(props) {
 
           <div className='flex flex-col sm:flex-row gap-2 w-full md:w-auto mt-2'>
             <Input
-              prefix={<IconSearch size={14} />}
+              prefix={<Search size={14} />}
               placeholder={t('搜索模型名称')}
               value={searchKeyword}
               onChange={setSearchKeyword}
@@ -564,11 +560,8 @@ export default function UpstreamRatioSync(props) {
 
     if (filteredDataSource.length === 0) {
       return (
-        <Empty
-          image={<IllustrationNoResult style={{ width: 150, height: 150 }} />}
-          darkModeImage={
-            <IllustrationNoResultDark style={{ width: 150, height: 150 }} />
-          }
+        <EmptyState
+          type='no-result'
           description={
             searchKeyword.trim()
               ? t('未找到匹配的模型')
@@ -578,7 +571,7 @@ export default function UpstreamRatioSync(props) {
                   : t('请先选择同步渠道')
                 : t('请先选择同步渠道')
           }
-          style={{ padding: 30 }}
+          className='py-8'
         />
       );
     }
@@ -860,7 +853,7 @@ export default function UpstreamRatioSync(props) {
       <ChannelSelectorModal
         ref={channelSelectorRef}
         t={t}
-        visible={modalVisible}
+        open={modalVisible}
         onCancel={handleModalClose}
         onOk={confirmChannelSelection}
         allChannels={allChannels}
@@ -872,7 +865,7 @@ export default function UpstreamRatioSync(props) {
 
       <ConflictConfirmModal
         t={t}
-        visible={confirmVisible}
+        open={confirmVisible}
         items={conflictItems}
         onOk={async () => {
           setConfirmVisible(false);

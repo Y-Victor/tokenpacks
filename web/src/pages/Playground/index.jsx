@@ -20,7 +20,7 @@ For commercial licensing, please contact support@quantumnous.com
 import React, { useContext, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Layout, Toast, Modal } from '@douyinfe/semi-ui';
+import { toast } from 'sonner';
 
 // Context
 import { UserContext } from '../../context/User';
@@ -262,7 +262,7 @@ const Playground = () => {
         return;
       } catch (error) {
         console.error('自定义请求体JSON解析失败:', error);
-        Toast.error(ERROR_MESSAGES.JSON_PARSE_ERROR);
+        toast.error(ERROR_MESSAGES.JSON_PARSE_ERROR);
         return;
       }
     }
@@ -388,7 +388,7 @@ const Playground = () => {
   // 处理URL参数
   useEffect(() => {
     if (searchParams.get('expired')) {
-      Toast.warning(t('登录过期，请重新登录！'));
+      toast.warning(t('登录过期，请重新登录！'));
     }
   }, [searchParams, t]);
 
@@ -459,19 +459,19 @@ const Playground = () => {
 
   return (
     <PlaygroundProvider value={playgroundContextValue}>
-      <div className='h-full'>
-        <Layout className='h-full bg-transparent flex flex-col md:flex-row'>
+      <div className='playground-shell h-full'>
+        <div className='playground-layout h-full bg-transparent flex flex-col md:flex-row gap-4'>
           {(showSettings || !isMobile) && (
-            <Layout.Sider
+            <div
               className={`
-              bg-transparent border-r-0 flex-shrink-0 overflow-auto mt-[60px]
+              playground-settings-shell bg-transparent border-r-0 flex-shrink-0 overflow-auto mt-[60px]
               ${
                 isMobile
                   ? 'fixed top-0 left-0 right-0 bottom-0 z-[1000] w-full h-auto bg-white shadow-lg'
                   : 'relative z-[1] w-80 h-[calc(100vh-66px)]'
               }
             `}
-              width={isMobile ? '100%' : 320}
+              style={{ width: isMobile ? '100%' : 320 }}
             >
               <OptimizedSettingsPanel
                 inputs={inputs}
@@ -493,12 +493,12 @@ const Playground = () => {
                 previewPayload={previewPayload}
                 messages={message}
               />
-            </Layout.Sider>
+            </div>
           )}
 
-          <Layout.Content className='relative flex-1 overflow-hidden'>
-            <div className='overflow-hidden flex flex-col lg:flex-row h-[calc(100vh-66px)] mt-[60px]'>
-              <div className='flex-1 flex flex-col'>
+          <div className='playground-main-shell relative flex-1 overflow-hidden'>
+            <div className='playground-workspace overflow-hidden flex flex-col lg:flex-row h-[calc(100vh-66px)] mt-[60px] gap-4'>
+              <div className='flex-1 flex flex-col min-w-0'>
                 <ChatArea
                   chatRef={chatRef}
                   message={message}
@@ -520,7 +520,7 @@ const Playground = () => {
 
               {/* 调试面板 - 桌面端 */}
               {showDebugPanel && !isMobile && (
-                <div className='w-96 flex-shrink-0 h-full'>
+                <div className='playground-debug-shell h-full w-96 flex-shrink-0'>
                   <OptimizedDebugPanel
                     debugData={debugData}
                     activeDebugTab={activeDebugTab}
@@ -555,8 +555,8 @@ const Playground = () => {
               onToggleSettings={() => setShowSettings(!showSettings)}
               onToggleDebugPanel={() => setShowDebugPanel(!showDebugPanel)}
             />
-          </Layout.Content>
-        </Layout>
+          </div>
+        </div>
       </div>
     </PlaygroundProvider>
   );

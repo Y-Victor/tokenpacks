@@ -18,27 +18,19 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useEffect, useState } from 'react';
-import {
-  Button,
-  Space,
-  Table,
-  Form,
-  Typography,
-  Empty,
-  Divider,
-  Modal,
-  Switch,
-  Tooltip,
-} from '@douyinfe/semi-ui';
-import {
-  IllustrationNoResult,
-  IllustrationNoResultDark,
-} from '@douyinfe/semi-illustrations';
+import { EmptyState } from '../../../components/ui/empty-state';
 import { Plus, Edit, Trash2, Save, HelpCircle } from 'lucide-react';
 import { API, showError, showSuccess } from '../../../helpers';
 import { useTranslation } from 'react-i18next';
-
-const { Text } = Typography;
+import { Form } from '../../../components/ui/form-compat';
+import {
+  Button,
+  Divider,
+  Modal as Dialog,
+  Switch,
+  Table,
+  Tooltip,
+} from '../../../components/ui/semi-compat';
 
 const SettingsFAQ = ({ options, refresh }) => {
   const { t } = useTranslation();
@@ -109,7 +101,7 @@ const SettingsFAQ = ({ options, refresh }) => {
       fixed: 'right',
       width: 150,
       render: (text, record) => (
-        <Space>
+        <div className="flex items-center gap-2">
           <Button
             icon={<Edit size={14} />}
             theme='light'
@@ -128,7 +120,7 @@ const SettingsFAQ = ({ options, refresh }) => {
           >
             {t('删除')}
           </Button>
-        </Space>
+        </div>
       ),
     },
   ];
@@ -310,11 +302,11 @@ const SettingsFAQ = ({ options, refresh }) => {
       <div className='mb-2'>
         <div className='flex items-center text-blue-500'>
           <HelpCircle size={16} className='mr-2' />
-          <Text>
+          <span>
             {t(
               '常见问答管理，为用户提供常见问题的答案（最多50个，前端显示最新20条）',
             )}
-          </Text>
+          </span>
         </div>
       </div>
 
@@ -357,7 +349,7 @@ const SettingsFAQ = ({ options, refresh }) => {
         {/* 启用开关 */}
         <div className='order-1 md:order-2 flex items-center gap-2'>
           <Switch checked={panelEnabled} onChange={handleToggleEnabled} />
-          <Text>{panelEnabled ? t('已启用') : t('已禁用')}</Text>
+          <span>{panelEnabled ? t('已启用') : t('已禁用')}</span>
         </div>
       </div>
     </div>
@@ -415,24 +407,19 @@ const SettingsFAQ = ({ options, refresh }) => {
           size='middle'
           loading={loading}
           empty={
-            <Empty
-              image={
-                <IllustrationNoResult style={{ width: 150, height: 150 }} />
-              }
-              darkModeImage={
-                <IllustrationNoResultDark style={{ width: 150, height: 150 }} />
-              }
+            <EmptyState
+              type='no-result'
               description={t('暂无常见问答')}
-              style={{ padding: 30 }}
+              className='py-8'
             />
           }
           className='overflow-hidden'
         />
       </Form.Section>
 
-      <Modal
+      <Dialog
         title={editingFaq ? t('编辑问答') : t('添加问答')}
-        visible={showFaqModal}
+        open={showFaqModal}
         onOk={handleSaveFaq}
         onCancel={() => setShowFaqModal(false)}
         okText={t('保存')}
@@ -463,11 +450,11 @@ const SettingsFAQ = ({ options, refresh }) => {
             onChange={(value) => setFaqForm({ ...faqForm, answer: value })}
           />
         </Form>
-      </Modal>
+      </Dialog>
 
-      <Modal
+      <Dialog
         title={t('确认删除')}
-        visible={showDeleteModal}
+        open={showDeleteModal}
         onOk={confirmDeleteFaq}
         onCancel={() => {
           setShowDeleteModal(false);
@@ -481,8 +468,8 @@ const SettingsFAQ = ({ options, refresh }) => {
           theme: 'solid',
         }}
       >
-        <Text>{t('确定要删除此问答吗？')}</Text>
-      </Modal>
+        <span>{t('确定要删除此问答吗？')}</span>
+      </Dialog>
     </>
   );
 };

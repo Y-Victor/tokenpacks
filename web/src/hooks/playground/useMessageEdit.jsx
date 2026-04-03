@@ -18,7 +18,8 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import { useCallback, useState, useRef } from 'react';
-import { Toast, Modal } from '@douyinfe/semi-ui';
+import { confirm } from '../../lib/confirm';
+import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import {
   getTextContent,
@@ -82,12 +83,12 @@ export const useMessageEdit = (
           prevMessages[messageIndex + 1].role === MESSAGE_ROLES.ASSISTANT;
 
         if (hasSubsequentAssistantReply) {
-          Modal.confirm({
+          confirm({
             title: t('消息已编辑'),
             content: t('检测到该消息后有AI回复，是否删除后续回复并重新生成？'),
             okText: t('重新生成'),
             cancelText: t('仅保存'),
-            onOk: () => {
+            onConfirm: () => {
               const messagesUntilUser = updatedMessages.slice(
                 0,
                 messageIndex + 1,
@@ -128,7 +129,7 @@ export const useMessageEdit = (
     setEditingMessageId(null);
     editingMessageRef.current = null;
     setEditValue('');
-    Toast.success({ content: t('消息已更新'), duration: 2 });
+    toast.success({ content: t('消息已更新'), duration: 2 });
   }, [
     editingMessageId,
     editValue,

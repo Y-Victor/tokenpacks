@@ -18,18 +18,11 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import {
-  Avatar,
-  Typography,
-  Card,
-  Button,
-  Input,
-  Badge,
-  Space,
-} from '@douyinfe/semi-ui';
+import { Avatar, AvatarFallback } from '../ui/avatar';
+import { Card, CardContent } from '../ui/card';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
 import { Copy, Users, BarChart2, TrendingUp, Gift, Zap } from 'lucide-react';
-
-const { Text } = Typography;
 
 const InvitationCard = ({
   t,
@@ -41,25 +34,26 @@ const InvitationCard = ({
 }) => {
   return (
     <Card className='!rounded-2xl shadow-sm border-0'>
-      {/* 卡片头部 */}
-      <div className='flex items-center mb-4'>
-        <Avatar size='small' color='green' className='mr-3 shadow-md'>
-          <Gift size={16} />
-        </Avatar>
-        <div>
-          <Typography.Text className='text-lg font-medium'>
-            {t('邀请奖励')}
-          </Typography.Text>
-          <div className='text-xs'>{t('邀请好友获得额外奖励')}</div>
+      <CardContent className='p-6'>
+        {/* 卡片头部 */}
+        <div className='flex items-center mb-4'>
+          <Avatar className='mr-3 shadow-md h-8 w-8 bg-green-500'>
+            <AvatarFallback className='bg-green-500 text-white'>
+              <Gift size={16} />
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <span className='text-lg font-medium block'>
+              {t('邀请奖励')}
+            </span>
+            <div className='text-xs'>{t('邀请好友获得额外奖励')}</div>
+          </div>
         </div>
-      </div>
 
-      {/* 收益展示区域 */}
-      <Space vertical style={{ width: '100%' }}>
-        {/* 统计数据统一卡片 */}
-        <Card
-          className='!rounded-xl w-full'
-          cover={
+        {/* 收益展示区域 */}
+        <div className='flex flex-col gap-4 w-full'>
+          {/* 统计数据统一卡片 */}
+          <Card className='!rounded-xl w-full overflow-hidden'>
             <div
               className='relative h-30'
               style={{
@@ -73,13 +67,11 @@ const InvitationCard = ({
               {/* 标题和按钮 */}
               <div className='relative z-10 h-full flex flex-col justify-between p-4'>
                 <div className='flex justify-between items-center'>
-                  <Text strong style={{ color: 'white', fontSize: '16px' }}>
+                  <span className='font-semibold' style={{ color: 'white', fontSize: '16px' }}>
                     {t('收益统计')}
-                  </Text>
+                  </span>
                   <Button
-                    type='primary'
-                    theme='solid'
-                    size='small'
+                    size='sm'
                     disabled={
                       !userState?.user?.aff_quota ||
                       userState?.user?.aff_quota <= 0
@@ -108,14 +100,14 @@ const InvitationCard = ({
                         className='mr-1'
                         style={{ color: 'rgba(255,255,255,0.8)' }}
                       />
-                      <Text
+                      <span
                         style={{
                           color: 'rgba(255,255,255,0.8)',
                           fontSize: '12px',
                         }}
                       >
                         {t('待使用收益')}
-                      </Text>
+                      </span>
                     </div>
                   </div>
 
@@ -133,14 +125,14 @@ const InvitationCard = ({
                         className='mr-1'
                         style={{ color: 'rgba(255,255,255,0.8)' }}
                       />
-                      <Text
+                      <span
                         style={{
                           color: 'rgba(255,255,255,0.8)',
                           fontSize: '12px',
                         }}
                       >
                         {t('总收益')}
-                      </Text>
+                      </span>
                     </div>
                   </div>
 
@@ -158,70 +150,69 @@ const InvitationCard = ({
                         className='mr-1'
                         style={{ color: 'rgba(255,255,255,0.8)' }}
                       />
-                      <Text
+                      <span
                         style={{
                           color: 'rgba(255,255,255,0.8)',
                           fontSize: '12px',
                         }}
                       >
                         {t('邀请人数')}
-                      </Text>
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          }
-        >
-          {/* 邀请链接部分 */}
-          <Input
-            value={affLink}
-            readonly
-            className='!rounded-lg'
-            prefix={t('邀请链接')}
-            suffix={
-              <Button
-                type='primary'
-                theme='solid'
-                onClick={handleAffLinkClick}
-                icon={<Copy size={14} />}
-                className='!rounded-lg'
-              >
-                {t('复制')}
-              </Button>
-            }
-          />
-        </Card>
+            <CardContent className='p-4'>
+              {/* 邀请链接部分 */}
+              <div className='flex items-center gap-2'>
+                <span className='text-sm text-muted-foreground whitespace-nowrap'>{t('邀请链接')}</span>
+                <Input
+                  value={affLink}
+                  readOnly
+                  className='!rounded-lg flex-1'
+                />
+                <Button
+                  onClick={handleAffLinkClick}
+                  className='!rounded-lg'
+                >
+                  <Copy size={14} className='mr-1' />
+                  {t('复制')}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* 奖励说明 */}
-        <Card
-          className='!rounded-xl w-full'
-          title={<Text type='tertiary'>{t('奖励说明')}</Text>}
-        >
-          <div className='space-y-3'>
-            <div className='flex items-start gap-2'>
-              <Badge dot type='success' />
-              <Text type='tertiary' className='text-sm'>
-                {t('邀请好友注册，好友充值后您可获得相应奖励')}
-              </Text>
-            </div>
+          {/* 奖励说明 */}
+          <Card className='!rounded-xl w-full'>
+            <CardContent className='p-4'>
+              <span className='text-muted-foreground font-medium block mb-3'>{t('奖励说明')}</span>
+              <div className='space-y-3'>
+                <div className='flex items-start gap-2'>
+                  <div className='w-2 h-2 rounded-full bg-green-500 mt-1.5 flex-shrink-0' />
+                  <span className='text-sm text-muted-foreground'>
+                    {t('邀请好友注册，好友充值后您可获得相应奖励')}
+                  </span>
+                </div>
 
-            <div className='flex items-start gap-2'>
-              <Badge dot type='success' />
-              <Text type='tertiary' className='text-sm'>
-                {t('通过划转功能将奖励额度转入到您的账户余额中')}
-              </Text>
-            </div>
+                <div className='flex items-start gap-2'>
+                  <div className='w-2 h-2 rounded-full bg-green-500 mt-1.5 flex-shrink-0' />
+                  <span className='text-sm text-muted-foreground'>
+                    {t('通过划转功能将奖励额度转入到您的账户余额中')}
+                  </span>
+                </div>
 
-            <div className='flex items-start gap-2'>
-              <Badge dot type='success' />
-              <Text type='tertiary' className='text-sm'>
-                {t('邀请的好友越多，获得的奖励越多')}
-              </Text>
-            </div>
-          </div>
-        </Card>
-      </Space>
+                <div className='flex items-start gap-2'>
+                  <div className='w-2 h-2 rounded-full bg-green-500 mt-1.5 flex-shrink-0' />
+                  <span className='text-sm text-muted-foreground'>
+                    {t('邀请的好友越多，获得的奖励越多')}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </CardContent>
     </Card>
   );
 };

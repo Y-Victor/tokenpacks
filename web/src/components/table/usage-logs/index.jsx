@@ -45,6 +45,7 @@ const LogsPage = () => {
       {/* Main Content */}
       <CardPro
         type='type2'
+        className='usage-logs-cardpro'
         statsArea={<LogsActions {...logsData} />}
         searchArea={<LogsFilters {...logsData} />}
         paginationArea={createCardProPagination({

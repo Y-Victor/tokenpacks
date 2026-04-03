@@ -19,22 +19,14 @@ For commercial licensing, please contact support@quantumnous.com
 
 import React, { useEffect, useState, useRef } from 'react';
 import {
-  Banner,
-  Button,
-  Form,
-  Row,
-  Col,
-  Typography,
-  Spin,
-} from '@douyinfe/semi-ui';
-const { Text } = Typography;
-import {
   API,
   removeTrailingSlash,
   showError,
   showSuccess,
 } from '../../../helpers';
 import { useTranslation } from 'react-i18next';
+import { Form, Row, Col, Spin } from '../../../components/ui/form-compat';
+import { Banner, Button } from '../../../components/ui/semi-compat';
 
 export default function SettingsPaymentGateway(props) {
   const { t } = useTranslation();
@@ -166,7 +158,7 @@ export default function SettingsPaymentGateway(props) {
         getFormApi={(api) => (formApiRef.current = api)}
       >
         <Form.Section text={t('Stripe 设置')}>
-          <Text>
+          <span>
             Stripe 密钥、Webhook 等设置请
             <a
               href='https://dashboard.stripe.com/developers'
@@ -185,7 +177,7 @@ export default function SettingsPaymentGateway(props) {
             </a>
             进行测试。
             <br />
-          </Text>
+          </span>
           <Banner
             type='info'
             description={`Webhook 填：${props.options.ServerAddress ? removeTrailingSlash(props.options.ServerAddress) : t('网站地址')}/api/stripe/webhook`}

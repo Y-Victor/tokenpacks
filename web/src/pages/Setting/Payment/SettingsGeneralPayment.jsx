@@ -18,7 +18,6 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Button, Form, Spin } from '@douyinfe/semi-ui';
 import {
   API,
   removeTrailingSlash,
@@ -26,6 +25,8 @@ import {
   showSuccess,
 } from '../../../helpers';
 import { useTranslation } from 'react-i18next';
+import { Form, Row, Col, Spin } from '../../../components/ui/form-compat';
+import { Button } from '../../../components/ui/button';
 
 export default function SettingsGeneralPayment(props) {
   const { t } = useTranslation();

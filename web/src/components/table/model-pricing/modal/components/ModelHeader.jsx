@@ -18,10 +18,14 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Typography, Toast, Avatar } from '@douyinfe/semi-ui';
+import {
+  Avatar,
+  AvatarFallback,
+} from '../../../../ui/avatar';
+import { Button } from '../../../../ui/button';
+import { toast } from 'sonner';
+import { Copy } from 'lucide-react';
 import { getLobeHubIcon } from '../../../../../helpers';
-
-const { Paragraph } = Typography;
 
 const CARD_STYLES = {
   container:
@@ -58,36 +62,36 @@ const ModelHeader = ({ modelData, vendorsMap = {}, t }) => {
     return (
       <div className={CARD_STYLES.container}>
         <Avatar
-          size='large'
-          style={{
-            width: 48,
-            height: 48,
-            borderRadius: 16,
-            fontSize: 16,
-            fontWeight: 'bold',
-          }}
+          className='h-12 w-12 rounded-2xl text-base font-bold'
         >
-          {avatarText}
+          <AvatarFallback className='rounded-2xl text-base font-bold'>{avatarText}</AvatarFallback>
         </Avatar>
       </div>
     );
   };
 
+  const handleCopy = () => {
+    const name = modelData?.model_name || '';
+    navigator.clipboard.writeText(name).then(() => {
+      toast.success(t('已复制模型名称'));
+    });
+  };
+
   return (
     <div className='flex items-center'>
       {getModelIcon()}
-      <div className='ml-3 font-normal'>
-        <Paragraph
-          className='!mb-0 !text-lg !font-medium'
-          copyable={{
-            content: modelData?.model_name || '',
-            onCopy: () => Toast.success({ content: t('已复制模型名称') }),
-          }}
+      <div className='ml-3 font-normal flex items-center gap-2'>
+        <span className='truncate max-w-60 font-bold text-lg'>
+          {modelData?.model_name || t('未知模型')}
+        </span>
+        <Button
+          variant='ghost'
+          size='sm'
+          onClick={handleCopy}
+          className='h-6 w-6 p-0'
         >
-          <span className='truncate max-w-60 font-bold'>
-            {modelData?.model_name || t('未知模型')}
-          </span>
-        </Paragraph>
+          <Copy className='h-3.5 w-3.5' />
+        </Button>
       </div>
     </div>
   );

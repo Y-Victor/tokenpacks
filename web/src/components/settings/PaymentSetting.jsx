@@ -18,7 +18,8 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useEffect, useState } from 'react';
-import { Card, Spin } from '@douyinfe/semi-ui';
+import { Card } from '../ui/semi-compat';
+import { Loader2 } from 'lucide-react';
 import SettingsGeneralPayment from '../../pages/Setting/Payment/SettingsGeneralPayment';
 import SettingsPaymentGateway from '../../pages/Setting/Payment/SettingsPaymentGateway';
 import SettingsPaymentGatewayStripe from '../../pages/Setting/Payment/SettingsPaymentGatewayStripe';
@@ -131,23 +132,28 @@ const PaymentSetting = () => {
 
   return (
     <>
-      <Spin spinning={loading} size='large'>
-        <Card style={{ marginTop: '10px' }}>
+      <div className="settings-panel-stack relative">
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        )}
+        <Card className="settings-panel-card">
           <SettingsGeneralPayment options={inputs} refresh={onRefresh} />
         </Card>
-        <Card style={{ marginTop: '10px' }}>
+        <Card className="settings-panel-card">
           <SettingsPaymentGateway options={inputs} refresh={onRefresh} />
         </Card>
-        <Card style={{ marginTop: '10px' }}>
+        <Card className="settings-panel-card">
           <SettingsPaymentGatewayStripe options={inputs} refresh={onRefresh} />
         </Card>
-        <Card style={{ marginTop: '10px' }}>
+        <Card className="settings-panel-card">
           <SettingsPaymentGatewayCreem options={inputs} refresh={onRefresh} />
         </Card>
-        <Card style={{ marginTop: '10px' }}>
+        <Card className="settings-panel-card">
           <SettingsPaymentGatewayWaffo options={inputs} refresh={onRefresh} />
         </Card>
-      </Spin>
+      </div>
     </>
   );
 };

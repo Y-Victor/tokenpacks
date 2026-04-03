@@ -18,8 +18,8 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useRef } from 'react';
-import { Form, Button } from '@douyinfe/semi-ui';
-import { IconSearch } from '@douyinfe/semi-icons';
+import { Form, Button } from '../../../components/ui/semi-compat';
+import { IconSearch } from '../../../components/ui/semi-icons-compat';
 
 const RedemptionsFilters = ({
   formInitValues,

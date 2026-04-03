@@ -18,7 +18,14 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Modal } from '@douyinfe/semi-ui';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../../../ui/dialog';
+import { Button } from '../../../ui/button';
 
 const DeleteUserModal = ({
   visible,
@@ -43,15 +50,22 @@ const DeleteUserModal = ({
   };
 
   return (
-    <Modal
-      title={t('确定是否要注销此用户？')}
-      visible={visible}
-      onCancel={onCancel}
-      onOk={handleConfirm}
-      type='danger'
-    >
-      {t('相当于删除用户，此修改将不可逆')}
-    </Modal>
+    <Dialog open={visible} onOpenChange={(open) => !open && onCancel()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t('确定是否要注销此用户？')}</DialogTitle>
+        </DialogHeader>
+        <div>{t('相当于删除用户，此修改将不可逆')}</div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onCancel}>
+            {t('取消')}
+          </Button>
+          <Button variant="destructive" onClick={handleConfirm}>
+            {t('确定')}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

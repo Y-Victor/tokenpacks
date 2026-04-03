@@ -20,29 +20,31 @@ For commercial licensing, please contact support@quantumnous.com
 import React, { useState, useRef } from 'react';
 import { API, showError, showSuccess } from '../../../../helpers';
 import { useIsMobile } from '../../../../hooks/common/useIsMobile';
+import { Button } from '../../../ui/button';
+import { Input } from '../../../ui/input';
+import { Card } from '../../../ui/card';
+import { Badge } from '../../../ui/badge';
 import {
-  Button,
-  SideSheet,
-  Space,
-  Spin,
-  Typography,
-  Card,
-  Tag,
-  Avatar,
-  Form,
-  Row,
-  Col,
-} from '@douyinfe/semi-ui';
-import { IconSave, IconClose, IconUserAdd } from '@douyinfe/semi-icons';
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+} from '../../../ui/sheet';
+import { Save, X, UserPlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-
-const { Text, Title } = Typography;
 
 const AddUserModal = (props) => {
   const { t } = useTranslation();
-  const formApiRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const isMobile = useIsMobile();
+  const [formValues, setFormValues] = useState({
+    username: '',
+    display_name: '',
+    password: '',
+    remark: '',
+  });
+  const [errors, setErrors] = useState({});
 
   const getInitValues = () => ({
     username: '',
@@ -51,13 +53,26 @@ const AddUserModal = (props) => {
     remark: '',
   });
 
-  const submit = async (values) => {
+  const validate = () => {
+    const errs = {};
+    if (!formValues.username) errs.username = t('请输入用户名');
+    if (!formValues.password) errs.password = t('请输入密码');
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) {
+      showError(Object.values(errs)[0]);
+      return false;
+    }
+    return true;
+  };
+
+  const submit = async () => {
+    if (!validate()) return;
     setLoading(true);
-    const res = await API.post(`/api/user/`, values);
+    const res = await API.post(`/api/user/`, formValues);
     const { success, message } = res.data;
     if (success) {
       showSuccess(t('用户账户创建成功！'));
-      formApiRef.current?.setValues(getInitValues());
+      setFormValues(getInitValues());
       props.refresh();
       props.handleClose();
     } else {
@@ -70,116 +85,99 @@ const AddUserModal = (props) => {
     props.handleClose();
   };
 
+  const updateField = (field, value) => {
+    setFormValues((prev) => ({ ...prev, [field]: value }));
+  };
+
   return (
-    <>
-      <SideSheet
-        placement={'left'}
-        title={
-          <Space>
-            <Tag color='green' shape='circle'>
-              {t('新建')}
-            </Tag>
-            <Title heading={4} className='m-0'>
-              {t('添加用户')}
-            </Title>
-          </Space>
-        }
-        bodyStyle={{ padding: '0' }}
-        visible={props.visible}
-        width={isMobile ? '100%' : 600}
-        footer={
-          <div className='flex justify-end bg-white'>
-            <Space>
-              <Button
-                theme='solid'
-                onClick={() => formApiRef.current?.submitForm()}
-                icon={<IconSave />}
-                loading={loading}
-              >
-                {t('提交')}
-              </Button>
-              <Button
-                theme='light'
-                type='primary'
-                onClick={handleCancel}
-                icon={<IconClose />}
-              >
-                {t('取消')}
-              </Button>
-            </Space>
-          </div>
-        }
-        closeIcon={null}
-        onCancel={() => handleCancel()}
-      >
-        <Spin spinning={loading}>
-          <Form
-            initValues={getInitValues()}
-            getFormApi={(api) => (formApiRef.current = api)}
-            onSubmit={submit}
-            onSubmitFail={(errs) => {
-              const first = Object.values(errs)[0];
-              if (first) showError(Array.isArray(first) ? first[0] : first);
-              formApiRef.current?.scrollToError();
-            }}
-          >
-            <div className='p-2'>
-              <Card className='!rounded-2xl shadow-sm border-0'>
-                <div className='flex items-center mb-2'>
-                  <Avatar size='small' color='blue' className='mr-2 shadow-md'>
-                    <IconUserAdd size={16} />
-                  </Avatar>
-                  <div>
-                    <Text className='text-lg font-medium'>{t('用户信息')}</Text>
-                    <div className='text-xs text-gray-600'>
-                      {t('创建新用户账户')}
-                    </div>
+    <Sheet open={props.visible} onOpenChange={(open) => !open && handleCancel()}>
+      <SheetContent side='left' className={isMobile ? 'w-full' : 'w-[600px] sm:max-w-[600px]'}>
+        <SheetHeader>
+          <SheetTitle>
+            <div className='flex items-center gap-2'>
+              <Badge variant='outline' className='text-green-600 border-green-300'>
+                {t('新建')}
+              </Badge>
+              <span>{t('添加用户')}</span>
+            </div>
+          </SheetTitle>
+        </SheetHeader>
+
+        <div className='flex-1 overflow-y-auto p-2'>
+          {loading && (
+            <div className='flex items-center justify-center py-8'>
+              <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-primary' />
+            </div>
+          )}
+          <Card className='rounded-2xl shadow-sm border-0'>
+            <div className='p-4'>
+              <div className='flex items-center mb-2'>
+                <div className='w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-2 shadow-md'>
+                  <UserPlus className='h-4 w-4 text-blue-600' />
+                </div>
+                <div>
+                  <span className='text-lg font-medium'>{t('用户信息')}</span>
+                  <div className='text-xs text-gray-600'>
+                    {t('创建新用户账户')}
                   </div>
                 </div>
+              </div>
 
-                <Row gutter={12}>
-                  <Col span={24}>
-                    <Form.Input
-                      field='username'
-                      label={t('用户名')}
-                      placeholder={t('请输入用户名')}
-                      rules={[{ required: true, message: t('请输入用户名') }]}
-                      showClear
-                    />
-                  </Col>
-                  <Col span={24}>
-                    <Form.Input
-                      field='display_name'
-                      label={t('显示名称')}
-                      placeholder={t('请输入显示名称')}
-                      showClear
-                    />
-                  </Col>
-                  <Col span={24}>
-                    <Form.Input
-                      field='password'
-                      label={t('密码')}
-                      type='password'
-                      placeholder={t('请输入密码')}
-                      rules={[{ required: true, message: t('请输入密码') }]}
-                      showClear
-                    />
-                  </Col>
-                  <Col span={24}>
-                    <Form.Input
-                      field='remark'
-                      label={t('备注')}
-                      placeholder={t('请输入备注（仅管理员可见）')}
-                      showClear
-                    />
-                  </Col>
-                </Row>
-              </Card>
+              <div className='space-y-4'>
+                <div>
+                  <label className='text-sm font-medium mb-1 block'>{t('用户名')} *</label>
+                  <Input
+                    value={formValues.username}
+                    onChange={(e) => updateField('username', e.target.value)}
+                    placeholder={t('请输入用户名')}
+                  />
+                  {errors.username && <p className='text-xs text-destructive mt-1'>{errors.username}</p>}
+                </div>
+                <div>
+                  <label className='text-sm font-medium mb-1 block'>{t('显示名称')}</label>
+                  <Input
+                    value={formValues.display_name}
+                    onChange={(e) => updateField('display_name', e.target.value)}
+                    placeholder={t('请输入显示名称')}
+                  />
+                </div>
+                <div>
+                  <label className='text-sm font-medium mb-1 block'>{t('密码')} *</label>
+                  <Input
+                    type='password'
+                    value={formValues.password}
+                    onChange={(e) => updateField('password', e.target.value)}
+                    placeholder={t('请输入密码')}
+                  />
+                  {errors.password && <p className='text-xs text-destructive mt-1'>{errors.password}</p>}
+                </div>
+                <div>
+                  <label className='text-sm font-medium mb-1 block'>{t('备注')}</label>
+                  <Input
+                    value={formValues.remark}
+                    onChange={(e) => updateField('remark', e.target.value)}
+                    placeholder={t('请输入备注（仅管理员可见）')}
+                  />
+                </div>
+              </div>
             </div>
-          </Form>
-        </Spin>
-      </SideSheet>
-    </>
+          </Card>
+        </div>
+
+        <SheetFooter>
+          <div className='flex justify-end gap-2'>
+            <Button onClick={submit} disabled={loading}>
+              <Save className='h-4 w-4 mr-1' />
+              {t('提交')}
+            </Button>
+            <Button variant='outline' onClick={handleCancel}>
+              <X className='h-4 w-4 mr-1' />
+              {t('取消')}
+            </Button>
+          </div>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 };
 

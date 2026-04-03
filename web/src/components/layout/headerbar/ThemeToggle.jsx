@@ -18,9 +18,16 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useMemo } from 'react';
-import { Button, Dropdown } from '@douyinfe/semi-ui';
 import { Sun, Moon, Monitor } from 'lucide-react';
 import { useActualTheme } from '../../../context/Theme';
+import { Button } from '../../ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '../../ui/dropdown-menu';
 
 const ThemeToggle = ({ theme, onThemeToggle, t }) => {
   const actualTheme = useActualTheme();
@@ -52,57 +59,50 @@ const ThemeToggle = ({ theme, onThemeToggle, t }) => {
     [t],
   );
 
-  const getItemClassName = (isSelected) =>
-    isSelected
-      ? '!bg-semi-color-primary-light-default !font-semibold'
-      : 'hover:!bg-semi-color-fill-1';
-
   const currentButtonIcon = useMemo(() => {
     const currentOption = themeOptions.find((option) => option.key === theme);
     return currentOption?.buttonIcon || themeOptions[2].buttonIcon;
   }, [theme, themeOptions]);
 
   return (
-    <Dropdown
-      position='bottomRight'
-      render={
-        <Dropdown.Menu>
-          {themeOptions.map((option) => (
-            <Dropdown.Item
-              key={option.key}
-              icon={option.icon}
-              onClick={() => onThemeToggle(option.key)}
-              className={getItemClassName(theme === option.key)}
-            >
-              <div className='flex flex-col'>
-                <span>{option.label}</span>
-                <span className='text-xs text-semi-color-text-2'>
-                  {option.description}
-                </span>
-              </div>
-            </Dropdown.Item>
-          ))}
-
-          {theme === 'auto' && (
-            <>
-              <Dropdown.Divider />
-              <div className='px-3 py-2 text-xs text-semi-color-text-2'>
-                {t('当前跟随系统')}：
-                {actualTheme === 'dark' ? t('深色') : t('浅色')}
-              </div>
-            </>
-          )}
-        </Dropdown.Menu>
-      }
-    >
-      <Button
-        icon={currentButtonIcon}
-        aria-label={t('切换主题')}
-        theme='borderless'
-        type='tertiary'
-        className='!p-1.5 !text-current focus:!bg-semi-color-fill-1 !rounded-full !bg-semi-color-fill-0 hover:!bg-semi-color-fill-1'
-      />
-    </Dropdown>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant='ghost'
+          size='icon'
+          aria-label={t('切换主题')}
+          className='header-icon-button rounded-full'
+        >
+          {currentButtonIcon}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align='end'>
+        {themeOptions.map((option) => (
+          <DropdownMenuItem
+            key={option.key}
+            onClick={() => onThemeToggle(option.key)}
+            className={theme === option.key ? 'bg-accent font-semibold' : ''}
+          >
+            <span className='mr-2'>{option.icon}</span>
+            <div className='flex flex-col'>
+              <span>{option.label}</span>
+              <span className='text-xs text-muted-foreground'>
+                {option.description}
+              </span>
+            </div>
+          </DropdownMenuItem>
+        ))}
+        {theme === 'auto' && (
+          <>
+            <DropdownMenuSeparator />
+            <div className='px-3 py-2 text-xs text-muted-foreground'>
+              {t('当前跟随系统')}：
+              {actualTheme === 'dark' ? t('深色') : t('浅色')}
+            </div>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 

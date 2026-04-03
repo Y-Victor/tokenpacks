@@ -18,23 +18,18 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useState, useEffect } from 'react';
+import { Button } from '../../../ui/button';
+import { Badge } from '../../../ui/badge';
+import { Card } from '../../../ui/card';
+import { EmptyState } from '../../../ui/empty-state';
 import {
-  SideSheet,
-  Button,
-  Typography,
-  Space,
-  Tag,
-  Popconfirm,
-  Card,
-  Avatar,
-  Spin,
-  Empty,
-} from '@douyinfe/semi-ui';
-import { IconPlus, IconLayers } from '@douyinfe/semi-icons';
-import {
-  IllustrationNoResult,
-  IllustrationNoResultDark,
-} from '@douyinfe/semi-illustrations';
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '../../../ui/sheet';
+import { Plus, Layers } from 'lucide-react';
+import { confirm } from '../../../../lib/confirm';
 import {
   API,
   showError,
@@ -50,8 +45,6 @@ import {
   renderDescription,
 } from '../../../common/ui/RenderUtils';
 
-const { Text, Title } = Typography;
-
 const PrefillGroupManagement = ({ visible, onClose }) => {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
@@ -66,7 +59,6 @@ const PrefillGroupManagement = ({ visible, onClose }) => {
     { label: t('端点组'), value: 'endpoint' },
   ];
 
-  // 加载组列表
   const loadGroups = async () => {
     setLoading(true);
     try {
@@ -82,7 +74,6 @@ const PrefillGroupManagement = ({ visible, onClose }) => {
     setLoading(false);
   };
 
-  // 删除组
   const deleteGroup = async (id) => {
     try {
       const res = await API.delete(`/api/prefill_group/${id}`);
@@ -97,13 +88,11 @@ const PrefillGroupManagement = ({ visible, onClose }) => {
     }
   };
 
-  // 编辑组
   const handleEdit = (group = {}) => {
     setEditingGroup(group);
     setShowEdit(true);
   };
 
-  // 关闭编辑
   const closeEdit = () => {
     setShowEdit(false);
     setTimeout(() => {
@@ -111,26 +100,24 @@ const PrefillGroupManagement = ({ visible, onClose }) => {
     }, 300);
   };
 
-  // 编辑成功回调
   const handleEditSuccess = () => {
     closeEdit();
     loadGroups();
   };
 
-  // 表格列定义
   const columns = [
     {
       title: t('组名'),
       dataIndex: 'name',
       key: 'name',
       render: (text, record) => (
-        <Space>
-          <Text strong>{text}</Text>
-          <Tag color='white' shape='circle' size='small'>
+        <div className='flex items-center gap-2'>
+          <span className='font-semibold'>{text}</span>
+          <Badge variant='outline'>
             {typeOptions.find((opt) => opt.value === record.type)?.label ||
               record.type}
-          </Tag>
-        </Space>
+          </Badge>
+        </div>
       ),
     },
     {
@@ -152,18 +139,17 @@ const PrefillGroupManagement = ({ visible, onClose }) => {
                 : items || {};
             const keys = Object.keys(obj);
             if (keys.length === 0)
-              return <Text type='tertiary'>{t('暂无项目')}</Text>;
+              return <span className='text-muted-foreground'>{t('暂无项目')}</span>;
             return renderLimitedItems({
               items: keys,
               renderItem: (key, idx) => (
-                <Tag
+                <Badge
                   key={idx}
-                  size='small'
-                  shape='circle'
-                  color={stringToColor(key)}
+                  variant='outline'
+                  style={{ borderColor: stringToColor(key), color: stringToColor(key) }}
                 >
                   {key}
-                </Tag>
+                </Badge>
               ),
               maxDisplay: 3,
             });
@@ -171,24 +157,23 @@ const PrefillGroupManagement = ({ visible, onClose }) => {
           const itemsArray =
             typeof items === 'string' ? JSON.parse(items) : items;
           if (!Array.isArray(itemsArray) || itemsArray.length === 0) {
-            return <Text type='tertiary'>{t('暂无项目')}</Text>;
+            return <span className='text-muted-foreground'>{t('暂无项目')}</span>;
           }
           return renderLimitedItems({
             items: itemsArray,
             renderItem: (item, idx) => (
-              <Tag
+              <Badge
                 key={idx}
-                size='small'
-                shape='circle'
-                color={stringToColor(item)}
+                variant='outline'
+                style={{ borderColor: stringToColor(item), color: stringToColor(item) }}
               >
                 {item}
-              </Tag>
+              </Badge>
             ),
             maxDisplay: 3,
           });
         } catch {
-          return <Text type='tertiary'>{t('数据格式错误')}</Text>;
+          return <span className='text-muted-foreground'>{t('数据格式错误')}</span>;
         }
       },
     },
@@ -198,19 +183,23 @@ const PrefillGroupManagement = ({ visible, onClose }) => {
       fixed: 'right',
       width: 140,
       render: (_, record) => (
-        <Space>
-          <Button size='small' onClick={() => handleEdit(record)}>
+        <div className='flex items-center gap-1'>
+          <Button size='sm' variant='outline' onClick={() => handleEdit(record)}>
             {t('编辑')}
           </Button>
-          <Popconfirm
-            title={t('确定删除此组？')}
-            onConfirm={() => deleteGroup(record.id)}
+          <Button
+            size='sm'
+            variant='destructive'
+            onClick={() => {
+              confirm({
+                title: t('确定删除此组？'),
+                onConfirm: () => deleteGroup(record.id),
+              });
+            }}
           >
-            <Button size='small' type='danger'>
-              {t('删除')}
-            </Button>
-          </Popconfirm>
-        </Space>
+            {t('删除')}
+          </Button>
+        </div>
       ),
     },
   ];
@@ -223,78 +212,68 @@ const PrefillGroupManagement = ({ visible, onClose }) => {
 
   return (
     <>
-      <SideSheet
-        placement='left'
-        title={
-          <Space>
-            <Tag color='blue' shape='circle'>
-              {t('管理')}
-            </Tag>
-            <Title heading={4} className='m-0'>
-              {t('预填组管理')}
-            </Title>
-          </Space>
-        }
-        visible={visible}
-        onCancel={onClose}
-        width={isMobile ? '100%' : 800}
-        bodyStyle={{ padding: '0' }}
-        closeIcon={null}
-      >
-        <Spin spinning={loading}>
-          <div className='p-2'>
-            <Card className='!rounded-2xl shadow-sm border-0'>
-              <div className='flex items-center mb-2'>
-                <Avatar size='small' color='blue' className='mr-2 shadow-md'>
-                  <IconLayers size={16} />
-                </Avatar>
-                <div>
-                  <Text className='text-lg font-medium'>{t('组列表')}</Text>
-                  <div className='text-xs text-gray-600'>
-                    {t('管理模型、标签、端点等预填组')}
-                  </div>
-                </div>
+      <Sheet open={visible} onOpenChange={(open) => !open && onClose()}>
+        <SheetContent side='left' className={isMobile ? 'w-full' : 'w-[800px] sm:max-w-[800px]'}>
+          <SheetHeader>
+            <SheetTitle>
+              <div className='flex items-center gap-2'>
+                <Badge variant='outline' className='text-blue-600 border-blue-300'>
+                  {t('管理')}
+                </Badge>
+                <span>{t('预填组管理')}</span>
               </div>
-              <div className='flex justify-end mb-4'>
-                <Button
-                  type='primary'
-                  theme='solid'
-                  size='small'
-                  icon={<IconPlus />}
-                  onClick={() => handleEdit()}
-                >
-                  {t('新建组')}
-                </Button>
-              </div>
-              {groups.length > 0 ? (
-                <CardTable
-                  columns={columns}
-                  dataSource={groups}
-                  rowKey='id'
-                  hidePagination={true}
-                  size='small'
-                  scroll={{ x: 'max-content' }}
-                />
-              ) : (
-                <Empty
-                  image={
-                    <IllustrationNoResult style={{ width: 150, height: 150 }} />
-                  }
-                  darkModeImage={
-                    <IllustrationNoResultDark
-                      style={{ width: 150, height: 150 }}
-                    />
-                  }
-                  description={t('暂无预填组')}
-                  style={{ padding: 30 }}
-                />
-              )}
-            </Card>
-          </div>
-        </Spin>
-      </SideSheet>
+            </SheetTitle>
+          </SheetHeader>
 
-      {/* 编辑组件 */}
+          <div className='flex-1 overflow-y-auto'>
+            {loading ? (
+              <div className='flex items-center justify-center py-8'>
+                <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-primary' />
+              </div>
+            ) : (
+              <div className='p-2'>
+                <Card className='rounded-2xl shadow-sm border-0'>
+                  <div className='p-4'>
+                    <div className='flex items-center mb-2'>
+                      <div className='w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-2 shadow-md'>
+                        <Layers className='h-4 w-4 text-blue-600' />
+                      </div>
+                      <div>
+                        <span className='text-lg font-medium'>{t('组列表')}</span>
+                        <div className='text-xs text-gray-600'>
+                          {t('管理模型、标签、端点等预填组')}
+                        </div>
+                      </div>
+                    </div>
+                    <div className='flex justify-end mb-4'>
+                      <Button
+                        size='sm'
+                        onClick={() => handleEdit()}
+                      >
+                        <Plus className='h-4 w-4 mr-1' />
+                        {t('新建组')}
+                      </Button>
+                    </div>
+                    {groups.length > 0 ? (
+                      <CardTable
+                        columns={columns}
+                        dataSource={groups}
+                        rowKey='id'
+                        hidePagination={true}
+                        size='small'
+                        scroll={{ x: 'max-content' }}
+                      />
+                    ) : (
+                      <EmptyState title={t('暂无预填组')} />
+                    )}
+                  </div>
+                </Card>
+              </div>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
+
       <EditPrefillGroupModal
         visible={showEdit}
         onClose={closeEdit}

@@ -18,26 +18,18 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useEffect, useState } from 'react';
-import {
-  Button,
-  Space,
-  Table,
-  Form,
-  Typography,
-  Empty,
-  Divider,
-  Modal,
-  Switch,
-} from '@douyinfe/semi-ui';
-import {
-  IllustrationNoResult,
-  IllustrationNoResultDark,
-} from '@douyinfe/semi-illustrations';
+import { EmptyState } from '../../../components/ui/empty-state';
 import { Plus, Edit, Trash2, Save, Activity } from 'lucide-react';
 import { API, showError, showSuccess } from '../../../helpers';
 import { useTranslation } from 'react-i18next';
-
-const { Text } = Typography;
+import { Form } from '../../../components/ui/form-compat';
+import {
+  Button,
+  Divider,
+  Modal as Dialog,
+  Switch,
+  Table,
+} from '../../../components/ui/semi-compat';
 
 const SettingsUptimeKuma = ({ options, refresh }) => {
   const { t } = useTranslation();
@@ -114,7 +106,7 @@ const SettingsUptimeKuma = ({ options, refresh }) => {
       fixed: 'right',
       width: 150,
       render: (text, record) => (
-        <Space>
+        <div className="flex items-center gap-2">
           <Button
             icon={<Edit size={14} />}
             theme='light'
@@ -133,7 +125,7 @@ const SettingsUptimeKuma = ({ options, refresh }) => {
           >
             {t('删除')}
           </Button>
-        </Space>
+        </div>
       ),
     },
   ];
@@ -332,11 +324,11 @@ const SettingsUptimeKuma = ({ options, refresh }) => {
       <div className='mb-2'>
         <div className='flex items-center text-blue-500'>
           <Activity size={16} className='mr-2' />
-          <Text>
+          <span>
             {t(
               'Uptime Kuma监控分类管理，可以配置多个监控分类用于服务状态展示（最多20个）',
             )}
-          </Text>
+          </span>
         </div>
       </div>
 
@@ -379,7 +371,7 @@ const SettingsUptimeKuma = ({ options, refresh }) => {
         {/* 启用开关 */}
         <div className='order-1 md:order-2 flex items-center gap-2'>
           <Switch checked={panelEnabled} onChange={handleToggleEnabled} />
-          <Text>{panelEnabled ? t('已启用') : t('已禁用')}</Text>
+          <span>{panelEnabled ? t('已启用') : t('已禁用')}</span>
         </div>
       </div>
     </div>
@@ -436,24 +428,19 @@ const SettingsUptimeKuma = ({ options, refresh }) => {
           size='middle'
           loading={loading}
           empty={
-            <Empty
-              image={
-                <IllustrationNoResult style={{ width: 150, height: 150 }} />
-              }
-              darkModeImage={
-                <IllustrationNoResultDark style={{ width: 150, height: 150 }} />
-              }
+            <EmptyState
+              type='no-result'
               description={t('暂无监控数据')}
-              style={{ padding: 30 }}
+              className='py-8'
             />
           }
           className='overflow-hidden'
         />
       </Form.Section>
 
-      <Modal
+      <Dialog
         title={editingGroup ? t('编辑分类') : t('添加分类')}
-        visible={showUptimeModal}
+        open={showUptimeModal}
         onOk={handleSaveGroup}
         onCancel={() => setShowUptimeModal(false)}
         okText={t('保存')}
@@ -495,11 +482,11 @@ const SettingsUptimeKuma = ({ options, refresh }) => {
             onChange={(value) => setUptimeForm({ ...uptimeForm, slug: value })}
           />
         </Form>
-      </Modal>
+      </Dialog>
 
-      <Modal
+      <Dialog
         title={t('确认删除')}
-        visible={showDeleteModal}
+        open={showDeleteModal}
         onOk={confirmDeleteGroup}
         onCancel={() => {
           setShowDeleteModal(false);
@@ -513,8 +500,8 @@ const SettingsUptimeKuma = ({ options, refresh }) => {
           theme: 'solid',
         }}
       >
-        <Text>{t('确定要删除此分类吗？')}</Text>
-      </Modal>
+        <span>{t('确定要删除此分类吗？')}</span>
+      </Dialog>
     </>
   );
 };

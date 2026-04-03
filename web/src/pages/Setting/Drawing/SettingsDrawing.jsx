@@ -18,7 +18,6 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Button, Col, Form, Row, Spin, Tag } from '@douyinfe/semi-ui';
 import {
   compareObjects,
   API,
@@ -27,6 +26,9 @@ import {
   showWarning,
 } from '../../../helpers';
 import { useTranslation } from 'react-i18next';
+import { Form, Row, Col, Spin } from '../../../components/ui/form-compat';
+import { Button } from '../../../components/ui/button';
+import { Badge } from '../../../components/ui/badge';
 
 export default function SettingsDrawing(props) {
   const { t } = useTranslation();
@@ -96,7 +98,6 @@ export default function SettingsDrawing(props) {
         <Form
           values={inputs}
           getFormApi={(formAPI) => (refForm.current = formAPI)}
-          style={{ marginBottom: 15 }}
         >
           <Form.Section text={t('绘图设置')}>
             <Row gutter={16}>
@@ -165,8 +166,8 @@ export default function SettingsDrawing(props) {
                   field={'MjModeClearEnabled'}
                   label={
                     <>
-                      {t('开启之后会清除用户提示词中的')} <Tag>--fast</Tag> 、
-                      <Tag>--relax</Tag> {t('以及')} <Tag>--turbo</Tag>{' '}
+                      {t('开启之后会清除用户提示词中的')} <Badge>--fast</Badge> 、
+                      <Badge>--relax</Badge> {t('以及')} <Badge>--turbo</Badge>{' '}
                       {t('参数')}
                     </>
                   }

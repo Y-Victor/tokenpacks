@@ -18,8 +18,6 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Button, Form, Row, Col, Typography, Spin } from '@douyinfe/semi-ui';
-const { Text } = Typography;
 import {
   API,
   removeTrailingSlash,
@@ -28,6 +26,8 @@ import {
   verifyJSON,
 } from '../../../helpers';
 import { useTranslation } from 'react-i18next';
+import { Form, Row, Col, Spin } from '../../../components/ui/form-compat';
+import { Button } from '../../../components/ui/button';
 
 export default function SettingsPaymentGateway(props) {
   const { t } = useTranslation();
@@ -217,11 +217,11 @@ export default function SettingsPaymentGateway(props) {
         getFormApi={(api) => (formApiRef.current = api)}
       >
         <Form.Section text={t('支付设置')}>
-          <Text>
+          <span>
             {t(
               '（当前仅支持易支付接口，默认使用上方服务器地址作为回调地址！）',
             )}
-          </Text>
+          </span>
           <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 24, xl: 24, xxl: 24 }}>
             <Col xs={24} sm={24} md={8} lg={8} xl={8}>
               <Form.Input

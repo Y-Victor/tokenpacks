@@ -32,7 +32,7 @@ import {
   setUserData,
 } from '../../helpers';
 import { UserContext } from '../../context/User';
-import { Modal } from '@douyinfe/semi-ui';
+import { alertError } from '../../lib/confirm';
 import { useTranslation } from 'react-i18next';
 
 // 导入子组件
@@ -397,7 +397,7 @@ const PersonalSetting = () => {
       showSuccess(t('已复制：') + text);
     } else {
       // setSearchKeyword(text);
-      Modal.error({ title: t('无法复制到剪贴板，请手动复制'), content: text });
+      alertError({ title: t('无法复制到剪贴板，请手动复制'), content: text });
     }
   };
 

@@ -18,28 +18,21 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useEffect, useState } from 'react';
-import {
-  Button,
-  Space,
-  Table,
-  Form,
-  Typography,
-  Empty,
-  Divider,
-  Avatar,
-  Modal,
-  Tag,
-  Switch,
-} from '@douyinfe/semi-ui';
-import {
-  IllustrationNoResult,
-  IllustrationNoResultDark,
-} from '@douyinfe/semi-illustrations';
+import { Separator } from '../../../components/ui/separator';
+import { Form, Row, Col, Spin } from '../../../components/ui/form-compat';
+import { confirm } from '../../../lib/confirm';
+import { EmptyState } from '../../../components/ui/empty-state';
 import { Plus, Edit, Trash2, Save, Settings } from 'lucide-react';
 import { API, showError, showSuccess } from '../../../helpers';
 import { useTranslation } from 'react-i18next';
-
-const { Text } = Typography;
+import {
+  Avatar,
+  Badge,
+  Button,
+  Modal as Dialog,
+  Switch,
+  Table,
+} from '../../../components/ui/semi-compat';
 
 const SettingsAPIInfo = ({ options, refresh }) => {
   const { t } = useTranslation();
@@ -247,21 +240,21 @@ const SettingsAPIInfo = ({ options, refresh }) => {
       title: t('API地址'),
       dataIndex: 'url',
       render: (text, record) => (
-        <Tag color={record.color} shape='circle' style={{ maxWidth: '280px' }}>
+        <Badge color={record.color} shape='circle' style={{ maxWidth: '280px' }}>
           {text}
-        </Tag>
+        </Badge>
       ),
     },
     {
       title: t('线路描述'),
       dataIndex: 'route',
-      render: (text, record) => <Tag shape='circle'>{text}</Tag>,
+      render: (text, record) => <Badge shape='circle'>{text}</Badge>,
     },
     {
       title: t('说明'),
       dataIndex: 'description',
       ellipsis: true,
-      render: (text, record) => <Tag shape='circle'>{text || '-'}</Tag>,
+      render: (text, record) => <Badge shape='circle'>{text || '-'}</Badge>,
     },
     {
       title: t('颜色'),
@@ -273,7 +266,7 @@ const SettingsAPIInfo = ({ options, refresh }) => {
       fixed: 'right',
       width: 150,
       render: (_, record) => (
-        <Space>
+        <div className="flex items-center gap-2">
           <Button
             icon={<Edit size={14} />}
             theme='light'
@@ -292,7 +285,7 @@ const SettingsAPIInfo = ({ options, refresh }) => {
           >
             {t('删除')}
           </Button>
-        </Space>
+        </div>
       ),
     },
   ];
@@ -319,15 +312,15 @@ const SettingsAPIInfo = ({ options, refresh }) => {
       <div className='mb-2'>
         <div className='flex items-center text-blue-500'>
           <Settings size={16} className='mr-2' />
-          <Text>
+          <span>
             {t(
               'API信息管理，可以配置多个API地址用于状态展示和负载均衡（最多50个）',
             )}
-          </Text>
+          </span>
         </div>
       </div>
 
-      <Divider margin='12px' />
+      <Separator margin='12px' />
 
       <div className='flex flex-col md:flex-row justify-between items-center gap-4 w-full'>
         <div className='flex gap-2 w-full md:w-auto order-2 md:order-1'>
@@ -366,7 +359,7 @@ const SettingsAPIInfo = ({ options, refresh }) => {
         {/* 启用开关 */}
         <div className='order-1 md:order-2 flex items-center gap-2'>
           <Switch checked={panelEnabled} onChange={handleToggleEnabled} />
-          <Text>{panelEnabled ? t('已启用') : t('已禁用')}</Text>
+          <span>{panelEnabled ? t('已启用') : t('已禁用')}</span>
         </div>
       </div>
     </div>
@@ -424,24 +417,19 @@ const SettingsAPIInfo = ({ options, refresh }) => {
           size='middle'
           loading={loading}
           empty={
-            <Empty
-              image={
-                <IllustrationNoResult style={{ width: 150, height: 150 }} />
-              }
-              darkModeImage={
-                <IllustrationNoResultDark style={{ width: 150, height: 150 }} />
-              }
+            <EmptyState
+              type='no-result'
               description={t('暂无API信息')}
-              style={{ padding: 30 }}
+              className='py-8'
             />
           }
           className='overflow-hidden'
         />
       </Form.Section>
 
-      <Modal
+      <Dialog
         title={editingApi ? t('编辑API') : t('添加API')}
-        visible={showApiModal}
+        open={showApiModal}
         onOk={handleSaveApi}
         onCancel={() => setShowApiModal(false)}
         okText={t('保存')}
@@ -487,11 +475,11 @@ const SettingsAPIInfo = ({ options, refresh }) => {
             )}
           />
         </Form>
-      </Modal>
+      </Dialog>
 
-      <Modal
+      <Dialog
         title={t('确认删除')}
-        visible={showDeleteModal}
+        open={showDeleteModal}
         onOk={confirmDeleteApi}
         onCancel={() => {
           setShowDeleteModal(false);
@@ -505,8 +493,8 @@ const SettingsAPIInfo = ({ options, refresh }) => {
           theme: 'solid',
         }}
       >
-        <Text>{t('确定要删除此API信息吗？')}</Text>
-      </Modal>
+        <span>{t('确定要删除此API信息吗？')}</span>
+      </Dialog>
     </>
   );
 };

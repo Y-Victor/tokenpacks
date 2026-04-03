@@ -18,18 +18,26 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
+import { Card } from '../../../../ui/card';
+import { Badge } from '../../../../ui/badge';
 import {
-  Card,
-  Tag,
   Avatar,
-  Typography,
+  AvatarFallback,
+  AvatarImage,
+} from '../../../../ui/avatar';
+import {
   Tooltip,
-  Modal,
-} from '@douyinfe/semi-ui';
+  TooltipContent,
+  TooltipTrigger,
+} from '../../../../ui/tooltip';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '../../../../ui/dialog';
 import { getLobeHubIcon } from '../../../../../helpers';
 import SearchActions from './SearchActions';
-
-const { Paragraph } = Typography;
 
 const CONFIG = {
   CAROUSEL_INTERVAL: 2000,
@@ -86,8 +94,8 @@ const getVendorDisplayName = (vendorName, t) => {
 
 const createDefaultAvatar = () => (
   <div className={COMPONENT_STYLES.avatarContainer}>
-    <Avatar size='large' color='transparent'>
-      AI
+    <Avatar className='h-10 w-10'>
+      <AvatarFallback>AI</AvatarFallback>
     </Avatar>
   </div>
 );
@@ -109,10 +117,10 @@ const createAvatarContent = (vendor, isAllVendors) => {
 
   return (
     <Avatar
-      size='large'
+      className='h-10 w-10'
       style={{ backgroundColor: getAvatarBackgroundColor(isAllVendors) }}
     >
-      {getAvatarText(vendor.name)}
+      <AvatarFallback>{getAvatarText(vendor.name)}</AvatarFallback>
     </Avatar>
   );
 };
@@ -126,8 +134,11 @@ const renderVendorAvatar = (vendor, t, isAllVendors = false) => {
   const avatarContent = createAvatarContent(vendor, isAllVendors);
 
   return (
-    <Tooltip content={displayName} position='top'>
-      <div className={COMPONENT_STYLES.avatarContainer}>{avatarContent}</div>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className={COMPONENT_STYLES.avatarContainer}>{avatarContent}</div>
+      </TooltipTrigger>
+      <TooltipContent side='top'>{displayName}</TooltipContent>
     </Tooltip>
   );
 };
@@ -172,19 +183,27 @@ const PricingVendorIntro = memo(
 
     const renderDescriptionModal = useCallback(
       () => (
-        <Modal
-          title={t('供应商介绍')}
-          visible={descModalVisible}
-          onCancel={handleCloseDescModal}
-          footer={null}
-          width={isMobile ? '95%' : 600}
-          bodyStyle={{
-            maxHeight: isMobile ? '70vh' : '60vh',
-            overflowY: 'auto',
-          }}
+        <Dialog
+          open={descModalVisible}
+          onOpenChange={(open) => !open && handleCloseDescModal()}
         >
-          <div className='text-sm mb-4'>{descModalContent}</div>
-        </Modal>
+          <DialogContent
+            className={isMobile ? 'w-[95%]' : 'max-w-[600px]'}
+          >
+            <DialogHeader>
+              <DialogTitle>{t('供应商介绍')}</DialogTitle>
+            </DialogHeader>
+            <div
+              className='text-sm mb-4'
+              style={{
+                maxHeight: isMobile ? '70vh' : '60vh',
+                overflowY: 'auto',
+              }}
+            >
+              {descModalContent}
+            </div>
+          </DialogContent>
+        </Dialog>
       ),
       [descModalVisible, descModalContent, handleCloseDescModal, isMobile, t],
     );
@@ -320,46 +339,44 @@ const PricingVendorIntro = memo(
     const renderHeaderCard = useCallback(
       ({ title, count, description, rightContent, primaryDarkerChannel }) => (
         <Card
-          className='!rounded-2xl shadow-sm border-0'
-          cover={
-            <div
-              className='relative h-full'
-              style={createCoverStyle(primaryDarkerChannel)}
-            >
-              <div className='relative z-10 h-full flex items-center justify-between p-4'>
-                <div className='flex-1 min-w-0 mr-4'>
-                  <div className='flex flex-row flex-wrap items-center gap-2 sm:gap-3 mb-2'>
-                    <h2
-                      className='text-lg sm:text-xl font-bold truncate'
-                      style={COMPONENT_STYLES.titleText}
-                    >
-                      {title}
-                    </h2>
-                    <Tag
-                      style={COMPONENT_STYLES.tag}
-                      shape='circle'
-                      size='small'
-                      className='self-center'
-                    >
-                      {t('共 {{count}} 个模型', { count })}
-                    </Tag>
-                  </div>
-                  <Paragraph
-                    className='text-xs sm:text-sm leading-relaxed !mb-0 cursor-pointer'
-                    style={COMPONENT_STYLES.descriptionText}
-                    ellipsis={{ rows: 2 }}
-                    onClick={() => handleOpenDescModal(description)}
-                  >
-                    {description}
-                  </Paragraph>
-                </div>
-
-                <div className='flex-shrink-0'>{rightContent}</div>
-              </div>
-            </div>
-          }
+          className='pricing-hero-card !rounded-2xl shadow-sm border-0 overflow-hidden'
         >
-          {renderSearchActions()}
+          <div
+            className='relative h-full'
+            style={createCoverStyle(primaryDarkerChannel)}
+          >
+            <div className='relative z-10 h-full flex items-center justify-between p-4'>
+              <div className='flex-1 min-w-0 mr-4'>
+                <div className='flex flex-row flex-wrap items-center gap-2 sm:gap-3 mb-2'>
+                  <h2
+                    className='text-lg sm:text-xl font-bold truncate'
+                    style={COMPONENT_STYLES.titleText}
+                  >
+                    {title}
+                  </h2>
+                  <Badge
+                    variant='secondary'
+                    className='self-center'
+                    style={COMPONENT_STYLES.tag}
+                  >
+                    {t('共 {{count}} 个模型', { count })}
+                  </Badge>
+                </div>
+                <p
+                  className='text-xs sm:text-sm leading-relaxed !mb-0 cursor-pointer line-clamp-2'
+                  style={COMPONENT_STYLES.descriptionText}
+                  onClick={() => handleOpenDescModal(description)}
+                >
+                  {description}
+                </p>
+              </div>
+
+              <div className='flex-shrink-0'>{rightContent}</div>
+            </div>
+          </div>
+          <div className='pricing-toolbar-shell p-4'>
+            {renderSearchActions()}
+          </div>
         </Card>
       ),
       [renderSearchActions, createCoverStyle, handleOpenDescModal, t],

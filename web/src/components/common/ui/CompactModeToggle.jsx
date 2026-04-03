@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Button } from '@douyinfe/semi-ui';
+import { Button } from '../../ui/button';
 import PropTypes from 'prop-types';
 import { useIsMobile } from '../../../hooks/common/useIsMobile';
 
@@ -45,8 +45,8 @@ const CompactModeToggle = ({
 
   return (
     <Button
-      type={type}
-      size={size}
+      variant={type === 'tertiary' ? 'ghost' : 'outline'}
+      size={size === 'small' ? 'sm' : 'default'}
       className={`w-full md:w-auto ${className}`}
       onClick={() => setCompactMode(!compactMode)}
       {...props}

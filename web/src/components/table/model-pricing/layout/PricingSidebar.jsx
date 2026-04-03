@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Button } from '@douyinfe/semi-ui';
+import { Button } from '../../../ui/button';
 import PricingGroups from '../filter/PricingGroups';
 import PricingQuotaTypes from '../filter/PricingQuotaTypes';
 import PricingEndpointTypes from '../filter/PricingEndpointTypes';
@@ -91,14 +91,13 @@ const PricingSidebar = ({
     });
 
   return (
-    <div className='p-2'>
-      <div className='flex items-center justify-between mb-6'>
+    <div className='pricing-sidebar-panel'>
+      <div className='pricing-sidebar-header'>
         <div className='text-lg font-semibold text-gray-800'>{t('筛选')}</div>
         <Button
-          theme='outline'
-          type='tertiary'
+          variant='outline'
           onClick={handleResetFilters}
-          className='text-gray-500 hover:text-gray-700'
+          className='pricing-sidebar-reset text-gray-500 hover:text-gray-700'
         >
           {t('重置')}
         </Button>

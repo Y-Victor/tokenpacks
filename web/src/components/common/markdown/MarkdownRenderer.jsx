@@ -31,9 +31,16 @@ import mermaid from 'mermaid';
 import React from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import clsx from 'clsx';
-import { Button, Tooltip, Toast } from '@douyinfe/semi-ui';
+import { Button } from '../../ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '../../ui/tooltip';
+import { toast } from 'sonner';
 import { copy, rehypeSplitWordsIntoSpans } from '../../../helpers';
-import { IconCopy } from '@douyinfe/semi-icons';
+import { Copy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 mermaid.initialize({
@@ -215,36 +222,35 @@ export function PreCode(props) {
             transition: 'opacity 0.2s ease',
           }}
         >
-          <Tooltip content={t('复制代码')}>
-            <Button
-              size='small'
-              theme='borderless'
-              icon={<IconCopy />}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (ref.current) {
-                  const codeElement = ref.current.querySelector('code');
-                  const code = codeElement?.textContent ?? '';
-                  copy(code).then((success) => {
-                    if (success) {
-                      Toast.success(t('代码已复制到剪贴板'));
-                    } else {
-                      Toast.error(t('复制失败，请手动复制'));
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant='ghost'
+                  size='icon'
+                  className='h-7 w-7 bg-background border border-border shadow-sm'
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (ref.current) {
+                      const codeElement = ref.current.querySelector('code');
+                      const code = codeElement?.textContent ?? '';
+                      copy(code).then((success) => {
+                        if (success) {
+                          toast.success(t('代码已复制到剪贴板'));
+                        } else {
+                          toast.error(t('复制失败，请手动复制'));
+                        }
+                      });
                     }
-                  });
-                }
-              }}
-              style={{
-                padding: '4px',
-                backgroundColor: 'var(--semi-color-bg-2)',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                border: '1px solid var(--semi-color-border)',
-                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
-              }}
-            />
-          </Tooltip>
+                  }}
+                >
+                  <Copy className='h-3.5 w-3.5' />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{t('复制代码')}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         {props.children}
       </pre>
@@ -308,7 +314,7 @@ function CustomCode(props) {
             justifyContent: 'center',
           }}
         >
-          <Button size='small' onClick={toggleCollapsed} theme='solid'>
+          <Button size='sm' onClick={toggleCollapsed} variant='default'>
             {t('显示更多')}
           </Button>
         </div>

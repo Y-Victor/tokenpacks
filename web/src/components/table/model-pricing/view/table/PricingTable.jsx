@@ -18,11 +18,26 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useMemo } from 'react';
-import { Card, Table, Empty } from '@douyinfe/semi-ui';
+import { Card } from '../../../../ui/card';
+import { EmptyState } from '../../../../ui/empty-state';
 import {
-  IllustrationNoResult,
-  IllustrationNoResultDark,
-} from '@douyinfe/semi-illustrations';
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../../../../ui/table';
+import { Checkbox } from '../../../../ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../../../ui/select';
+import { Button } from '../../../../ui/button';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { getPricingTableColumns } from './PricingTableColumns';
 
 const PricingTable = ({
@@ -46,6 +61,9 @@ const PricingTable = ({
   openModelDetail,
   t,
 }) => {
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [selectedKeys, setSelectedKeys] = React.useState([]);
+
   const columns = useMemo(() => {
     return getPricingTableColumns({
       t,
@@ -74,71 +92,174 @@ const PricingTable = ({
     showRatio,
   ]);
 
-  // 更新列定义中的 searchValue
-  const processedColumns = useMemo(() => {
-    const cols = columns.map((column) => {
-      if (column.dataIndex === 'model_name') {
-        return {
-          ...column,
-          filteredValue: searchValue ? [searchValue] : [],
-        };
-      }
-      return column;
-    });
+  // Filter data by searchValue
+  const filteredData = useMemo(() => {
+    if (!searchValue) return filteredModels;
+    return filteredModels.filter((row) =>
+      row.model_name?.toLowerCase().includes(searchValue.toLowerCase()),
+    );
+  }, [filteredModels, searchValue]);
 
-    // Remove fixed property when in compact mode (mobile view)
-    if (compactMode) {
-      return cols.map(({ fixed, ...rest }) => rest);
+  // Paginate
+  const totalPages = Math.max(1, Math.ceil(filteredData.length / pageSize));
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredData.slice(start, start + pageSize);
+  }, [filteredData, currentPage, pageSize]);
+
+  // Reset page if out of range
+  React.useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(1);
+  }, [totalPages, currentPage]);
+
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      const allKeys = paginatedData.map(
+        (row) => row.key ?? row.model_name ?? row.id,
+      );
+      setSelectedKeys(allKeys);
+      rowSelection?.onChange?.(allKeys, null);
+    } else {
+      setSelectedKeys([]);
+      rowSelection?.onChange?.([], null);
     }
-    return cols;
-  }, [columns, searchValue, compactMode]);
+  };
 
-  const ModelTable = useMemo(
-    () => (
-      <Card className='!rounded-xl overflow-hidden' bordered={false}>
-        <Table
-          columns={processedColumns}
-          dataSource={filteredModels}
-          loading={loading}
-          rowSelection={rowSelection}
-          scroll={compactMode ? undefined : { x: 'max-content' }}
-          onRow={(record) => ({
-            onClick: () => openModelDetail && openModelDetail(record),
-            style: { cursor: 'pointer' },
-          })}
-          empty={
-            <Empty
-              image={
-                <IllustrationNoResult style={{ width: 150, height: 150 }} />
-              }
-              darkModeImage={
-                <IllustrationNoResultDark style={{ width: 150, height: 150 }} />
-              }
-              description={t('搜索无结果')}
-              style={{ padding: 30 }}
-            />
-          }
-          pagination={{
-            defaultPageSize: 20,
-            pageSize: pageSize,
-            showSizeChanger: true,
-            pageSizeOptions: [10, 20, 50, 100],
-            onPageSizeChange: (size) => setPageSize(size),
-          }}
-        />
+  const handleSelectRow = (row, checked) => {
+    const key = row.key ?? row.model_name ?? row.id;
+    const newKeys = checked
+      ? [...selectedKeys, key]
+      : selectedKeys.filter((k) => k !== key);
+    setSelectedKeys(newKeys);
+    rowSelection?.onChange?.(newKeys, null);
+  };
+
+  if (!filteredData || filteredData.length === 0) {
+    return (
+      <Card className='pricing-table-card !rounded-xl overflow-hidden border-0'>
+        <div className='p-8'>
+          <EmptyState title={t('搜索无结果')} />
+        </div>
       </Card>
-    ),
-    [
-      filteredModels,
-      loading,
-      processedColumns,
-      rowSelection,
-      pageSize,
-      setPageSize,
-      openModelDetail,
-      t,
-      compactMode,
-    ],
+    );
+  }
+
+  const ModelTable = (
+    <Card className='pricing-table-card !rounded-xl overflow-hidden border-0'>
+      <div className={compactMode ? '' : 'overflow-x-auto'}>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              {rowSelection && (
+                <TableHead className='w-10'>
+                  <Checkbox
+                    checked={
+                      paginatedData.length > 0 &&
+                      paginatedData.every((row) =>
+                        selectedKeys.includes(
+                          row.key ?? row.model_name ?? row.id,
+                        ),
+                      )
+                    }
+                    onCheckedChange={handleSelectAll}
+                  />
+                </TableHead>
+              )}
+              {columns.map((col, idx) => (
+                <TableHead key={col.dataIndex || idx}>
+                  {typeof col.title === 'function' ? col.title() : col.title}
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length + (rowSelection ? 1 : 0)}
+                  className='text-center py-8 text-muted-foreground'
+                >
+                  {t('加载中...')}
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedData.map((row, rowIdx) => {
+                const rowKey = row.key ?? row.model_name ?? row.id ?? rowIdx;
+                const isSelected = selectedKeys.includes(rowKey);
+                return (
+                  <TableRow
+                    key={`${String(rowKey)}-${rowIdx}`}
+                    className='cursor-pointer hover:bg-muted/50'
+                    onClick={() => openModelDetail && openModelDetail(row)}
+                    data-state={isSelected ? 'selected' : undefined}
+                  >
+                    {rowSelection && (
+                      <TableCell onClick={(e) => e.stopPropagation()}>
+                        <Checkbox
+                          checked={isSelected}
+                          onCheckedChange={(checked) =>
+                            handleSelectRow(row, checked)
+                          }
+                        />
+                      </TableCell>
+                    )}
+                    {columns.map((col, colIdx) => (
+                      <TableCell key={col.dataIndex || colIdx}>
+                        {col.render
+                          ? col.render(row[col.dataIndex], row, rowIdx)
+                          : row[col.dataIndex]}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      {/* Pagination */}
+      <div className='flex justify-center items-center gap-2 p-4 border-t'>
+        <Button
+          variant='outline'
+          size='sm'
+          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+          disabled={currentPage <= 1}
+        >
+          <ChevronLeft className='h-4 w-4' />
+        </Button>
+        <span className='text-sm text-muted-foreground'>
+          {currentPage} / {totalPages}
+        </span>
+        <Button
+          variant='outline'
+          size='sm'
+          onClick={() =>
+            setCurrentPage(Math.min(totalPages, currentPage + 1))
+          }
+          disabled={currentPage >= totalPages}
+        >
+          <ChevronRight className='h-4 w-4' />
+        </Button>
+        <Select
+          value={String(pageSize)}
+          onValueChange={(val) => {
+            setPageSize(Number(val));
+            setCurrentPage(1);
+          }}
+        >
+          <SelectTrigger className='w-[80px] h-8'>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {[10, 20, 50, 100].map((size) => (
+              <SelectItem key={size} value={String(size)}>
+                {size}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </Card>
   );
 
   return ModelTable;

@@ -24,8 +24,8 @@ import {
   Empty,
   Divider,
   Typography,
-} from '@douyinfe/semi-ui';
-import { IconCopy } from '@douyinfe/semi-icons';
+} from '../../../ui/semi-compat';
+import { IconCopy } from '../../../ui/semi-icons-compat';
 import { copy, showError, showSuccess } from '../../../../helpers';
 
 const { Text } = Typography;

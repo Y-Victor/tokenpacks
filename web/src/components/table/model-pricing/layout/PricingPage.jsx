@@ -18,7 +18,10 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Layout, ImagePreview } from '@douyinfe/semi-ui';
+import {
+  Dialog,
+  DialogContent,
+} from '../../../ui/dialog';
 import PricingSidebar from './PricingSidebar';
 import PricingContent from './content/PricingContent';
 import ModelDetailSideSheet from '../modal/ModelDetailSideSheet';
@@ -27,7 +30,6 @@ import { useIsMobile } from '../../../../hooks/common/useIsMobile';
 
 const PricingPage = () => {
   const pricingData = useModelPricingData();
-  const { Sider, Content } = Layout;
   const isMobile = useIsMobile();
   const [showRatio, setShowRatio] = React.useState(false);
   const [viewMode, setViewMode] = React.useState('card');
@@ -40,28 +42,37 @@ const PricingPage = () => {
   };
 
   return (
-    <div className='bg-white'>
-      <Layout className='pricing-layout'>
+    <div className='pricing-page-shell'>
+      <div className='pricing-layout'>
         {!isMobile && (
-          <Sider className='pricing-scroll-hide pricing-sidebar'>
+          <aside className='pricing-scroll-hide pricing-sidebar'>
             <PricingSidebar {...allProps} />
-          </Sider>
+          </aside>
         )}
 
-        <Content className='pricing-scroll-hide pricing-content'>
+        <main className='pricing-scroll-hide pricing-content'>
           <PricingContent
             {...allProps}
             isMobile={isMobile}
             sidebarProps={allProps}
           />
-        </Content>
-      </Layout>
+        </main>
+      </div>
 
-      <ImagePreview
-        src={pricingData.modalImageUrl}
-        visible={pricingData.isModalOpenurl}
-        onVisibleChange={(visible) => pricingData.setIsModalOpenurl(visible)}
-      />
+      <Dialog
+        open={pricingData.isModalOpenurl}
+        onOpenChange={(open) => pricingData.setIsModalOpenurl(open)}
+      >
+        <DialogContent className='max-w-fit p-0'>
+          {pricingData.modalImageUrl && (
+            <img
+              src={pricingData.modalImageUrl}
+              alt='Preview'
+              className='max-w-[90vw] max-h-[90vh] object-contain'
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
       <ModelDetailSideSheet
         visible={pricingData.showModelDetail}

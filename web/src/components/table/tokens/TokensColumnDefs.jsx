@@ -18,21 +18,26 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
+import { Button } from '../../ui/button';
+import { Badge } from '../../ui/badge';
+import { Input } from '../../ui/input';
 import {
-  Button,
-  Dropdown,
-  Space,
-  SplitButtonGroup,
-  Tag,
-  AvatarGroup,
-  Avatar,
   Tooltip,
-  Progress,
+  TooltipContent,
+  TooltipTrigger,
+} from '../../ui/tooltip';
+import {
   Popover,
-  Typography,
-  Input,
-  Modal,
-} from '@douyinfe/semi-ui';
+  PopoverContent,
+  PopoverTrigger,
+} from '../../ui/popover';
+import { Progress } from '../../ui/progress';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../../ui/dropdown-menu';
 import {
   timestamp2string,
   renderGroup,
@@ -40,18 +45,14 @@ import {
   getModelCategories,
   showError,
 } from '../../../helpers';
-import {
-  IconTreeTriangleDown,
-  IconCopy,
-  IconEyeOpened,
-  IconEyeClosed,
-} from '@douyinfe/semi-icons';
+import { confirm } from '../../../lib/confirm';
+import { ChevronDown, Copy, Eye, EyeOff } from 'lucide-react';
 
 // progress color helper
 const getProgressColor = (pct) => {
-  if (pct === 100) return 'var(--semi-color-success)';
-  if (pct <= 10) return 'var(--semi-color-danger)';
-  if (pct <= 30) return 'var(--semi-color-warning)';
+  if (pct === 100) return 'bg-green-500';
+  if (pct <= 10) return 'bg-red-500';
+  if (pct <= 30) return 'bg-yellow-500';
   return undefined;
 };
 
@@ -64,26 +65,26 @@ function renderTimestamp(timestamp) {
 const renderStatus = (text, record, t) => {
   const enabled = text === 1;
 
-  let tagColor = 'black';
+  let variant = 'secondary';
   let tagText = t('未知状态');
   if (enabled) {
-    tagColor = 'green';
+    variant = 'default';
     tagText = t('已启用');
   } else if (text === 2) {
-    tagColor = 'red';
+    variant = 'destructive';
     tagText = t('已禁用');
   } else if (text === 3) {
-    tagColor = 'yellow';
+    variant = 'outline';
     tagText = t('已过期');
   } else if (text === 4) {
-    tagColor = 'grey';
+    variant = 'secondary';
     tagText = t('已耗尽');
   }
 
   return (
-    <Tag color={tagColor} shape='circle' size='small'>
+    <Badge variant={variant}>
       {tagText}
-    </Tag>
+    </Badge>
   );
 };
 
@@ -91,16 +92,20 @@ const renderStatus = (text, record, t) => {
 const renderGroupColumn = (text, record, t) => {
   if (text === 'auto') {
     return (
-      <Tooltip
-        content={t(
-          '当前分组为 auto，会自动选择最优分组，当一个组不可用时自动降级到下一个组（熔断机制）',
-        )}
-        position='top'
-      >
-        <Tag color='white' shape='circle'>
-          {t('智能熔断')}
-          {record && record.cross_group_retry ? `(${t('跨分组')})` : ''}
-        </Tag>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span>
+            <Badge variant='outline'>
+              {t('智能熔断')}
+              {record && record.cross_group_retry ? `(${t('跨分组')})` : ''}
+            </Badge>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>
+          {t(
+            '当前分组为 auto，会自动选择最优分组，当一个组不可用时自动降级到下一个组（熔断机制）',
+          )}
+        </TooltipContent>
       </Tooltip>
     );
   }
@@ -127,39 +132,41 @@ const renderTokenKey = (
 
   return (
     <div className='w-[200px]'>
-      <Input
-        readOnly
-        value={displayedKey}
-        size='small'
-        suffix={
-          <div className='flex items-center'>
-            <Button
-              theme='borderless'
-              size='small'
-              type='tertiary'
-              icon={revealed ? <IconEyeClosed /> : <IconEyeOpened />}
-              loading={loading}
-              aria-label='toggle token visibility'
-              onClick={async (e) => {
-                e.stopPropagation();
-                await toggleTokenVisibility(record);
-              }}
-            />
-            <Button
-              theme='borderless'
-              size='small'
-              type='tertiary'
-              icon={<IconCopy />}
-              loading={loading}
-              aria-label='copy token key'
-              onClick={async (e) => {
-                e.stopPropagation();
-                await copyTokenKey(record);
-              }}
-            />
-          </div>
-        }
-      />
+      <div className='flex items-center'>
+        <Input
+          readOnly
+          value={displayedKey}
+          className='h-8 text-sm'
+        />
+        <div className='flex items-center ml-1'>
+          <Button
+            variant='ghost'
+            size='icon'
+            className='h-7 w-7'
+            disabled={loading}
+            aria-label='toggle token visibility'
+            onClick={async (e) => {
+              e.stopPropagation();
+              await toggleTokenVisibility(record);
+            }}
+          >
+            {revealed ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
+          </Button>
+          <Button
+            variant='ghost'
+            size='icon'
+            className='h-7 w-7'
+            disabled={loading}
+            aria-label='copy token key'
+            onClick={async (e) => {
+              e.stopPropagation();
+              await copyTokenKey(record);
+            }}
+          >
+            <Copy className='h-4 w-4' />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };
@@ -180,19 +187,13 @@ const renderModelLimits = (text, record, t) => {
       );
       if (vendorModels.length > 0) {
         vendorAvatars.push(
-          <Tooltip
-            key={key}
-            content={vendorModels.join(', ')}
-            position='top'
-            showArrow
-          >
-            <Avatar
-              size='extra-extra-small'
-              alt={category.label}
-              color='transparent'
-            >
-              {category.icon}
-            </Avatar>
+          <Tooltip key={key}>
+            <TooltipTrigger asChild>
+              <span className='inline-flex items-center justify-center h-6 w-6 rounded-full bg-muted text-xs'>
+                {category.icon}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{vendorModels.join(', ')}</TooltipContent>
           </Tooltip>,
         );
         vendorModels.forEach((m) => matchedModels.add(m));
@@ -202,25 +203,23 @@ const renderModelLimits = (text, record, t) => {
     const unmatchedModels = models.filter((m) => !matchedModels.has(m));
     if (unmatchedModels.length > 0) {
       vendorAvatars.push(
-        <Tooltip
-          key='unknown'
-          content={unmatchedModels.join(', ')}
-          position='top'
-          showArrow
-        >
-          <Avatar size='extra-extra-small' alt='unknown'>
-            {t('其他')}
-          </Avatar>
+        <Tooltip key='unknown'>
+          <TooltipTrigger asChild>
+            <span className='inline-flex items-center justify-center h-6 w-6 rounded-full bg-muted text-xs'>
+              {t('其他')}
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>{unmatchedModels.join(', ')}</TooltipContent>
         </Tooltip>,
       );
     }
 
-    return <AvatarGroup size='extra-extra-small'>{vendorAvatars}</AvatarGroup>;
+    return <div className='flex items-center -space-x-1'>{vendorAvatars}</div>;
   } else {
     return (
-      <Tag color='white' shape='circle'>
+      <Badge variant='outline'>
         {t('无限制')}
-      </Tag>
+      </Badge>
     );
   }
 };
@@ -229,9 +228,9 @@ const renderModelLimits = (text, record, t) => {
 const renderAllowIps = (text, t) => {
   if (!text || text.trim() === '') {
     return (
-      <Tag color='white' shape='circle'>
+      <Badge variant='outline'>
         {t('无限制')}
-      </Tag>
+      </Badge>
     );
   }
 
@@ -244,77 +243,76 @@ const renderAllowIps = (text, t) => {
   const extraCount = ips.length - displayIps.length;
 
   const ipTags = displayIps.map((ip, idx) => (
-    <Tag key={idx} shape='circle'>
+    <Badge key={idx} variant='secondary'>
       {ip}
-    </Tag>
+    </Badge>
   ));
 
   if (extraCount > 0) {
     ipTags.push(
-      <Tooltip
-        key='extra'
-        content={ips.slice(1).join(', ')}
-        position='top'
-        showArrow
-      >
-        <Tag shape='circle'>{'+' + extraCount}</Tag>
+      <Tooltip key='extra'>
+        <TooltipTrigger asChild>
+          <span>
+            <Badge variant='secondary'>{'+' + extraCount}</Badge>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>{ips.slice(1).join(', ')}</TooltipContent>
       </Tooltip>,
     );
   }
 
-  return <Space wrap>{ipTags}</Space>;
+  return <div className='flex items-center gap-1 flex-wrap'>{ipTags}</div>;
 };
 
 // Render separate quota usage column
 const renderQuotaUsage = (text, record, t) => {
-  const { Paragraph } = Typography;
   const used = parseInt(record.used_quota) || 0;
   const remain = parseInt(record.remain_quota) || 0;
   const total = used + remain;
   if (record.unlimited_quota) {
     const popoverContent = (
       <div className='text-xs p-2'>
-        <Paragraph copyable={{ content: renderQuota(used) }}>
-          {t('已用额度')}: {renderQuota(used)}
-        </Paragraph>
+        <p>{t('已用额度')}: {renderQuota(used)}</p>
       </div>
     );
     return (
-      <Popover content={popoverContent} position='top'>
-        <Tag color='white' shape='circle'>
-          {t('无限额度')}
-        </Tag>
+      <Popover>
+        <PopoverTrigger asChild>
+          <span className='cursor-pointer'>
+            <Badge variant='outline'>
+              {t('无限额度')}
+            </Badge>
+          </span>
+        </PopoverTrigger>
+        <PopoverContent className='w-auto'>{popoverContent}</PopoverContent>
       </Popover>
     );
   }
   const percent = total > 0 ? (remain / total) * 100 : 0;
   const popoverContent = (
-    <div className='text-xs p-2'>
-      <Paragraph copyable={{ content: renderQuota(used) }}>
-        {t('已用额度')}: {renderQuota(used)}
-      </Paragraph>
-      <Paragraph copyable={{ content: renderQuota(remain) }}>
-        {t('剩余额度')}: {renderQuota(remain)} ({percent.toFixed(0)}%)
-      </Paragraph>
-      <Paragraph copyable={{ content: renderQuota(total) }}>
-        {t('总额度')}: {renderQuota(total)}
-      </Paragraph>
+    <div className='text-xs p-2 space-y-1'>
+      <p>{t('已用额度')}: {renderQuota(used)}</p>
+      <p>{t('剩余额度')}: {renderQuota(remain)} ({percent.toFixed(0)}%)</p>
+      <p>{t('总额度')}: {renderQuota(total)}</p>
     </div>
   );
   return (
-    <Popover content={popoverContent} position='top'>
-      <Tag color='white' shape='circle'>
-        <div className='flex flex-col items-end'>
-          <span className='text-xs leading-none'>{`${renderQuota(remain)} / ${renderQuota(total)}`}</span>
-          <Progress
-            percent={percent}
-            stroke={getProgressColor(percent)}
-            aria-label='quota usage'
-            format={() => `${percent.toFixed(0)}%`}
-            style={{ width: '100%', marginTop: '1px', marginBottom: 0 }}
-          />
-        </div>
-      </Tag>
+    <Popover>
+      <PopoverTrigger asChild>
+        <span className='cursor-pointer'>
+          <Badge variant='outline'>
+            <div className='flex flex-col items-end'>
+              <span className='text-xs leading-none'>{`${renderQuota(remain)} / ${renderQuota(total)}`}</span>
+              <Progress
+                value={percent}
+                className={`w-full mt-0.5 h-1.5 ${getProgressColor(percent) || ''}`}
+                aria-label='quota usage'
+              />
+            </div>
+          </Badge>
+        </span>
+      </PopoverTrigger>
+      <PopoverContent className='w-auto'>{popoverContent}</PopoverContent>
     </Popover>
   );
 };
@@ -340,7 +338,6 @@ const renderOperations = (
         const name = Object.keys(item)[0];
         if (!name) continue;
         chatsArray.push({
-          node: 'item',
           key: i,
           name,
           value: item[name],
@@ -353,14 +350,12 @@ const renderOperations = (
   }
 
   return (
-    <Space wrap>
-      <SplitButtonGroup
-        className='overflow-hidden'
-        aria-label={t('项目操作按钮组')}
-      >
+    <div className='flex items-center gap-1 flex-wrap'>
+      <div className='inline-flex rounded-md shadow-sm' aria-label={t('项目操作按钮组')}>
         <Button
-          size='small'
-          type='tertiary'
+          size='sm'
+          variant='outline'
+          className='rounded-r-none'
           onClick={() => {
             if (chatsArray.length === 0) {
               showError(t('请联系管理员配置聊天链接'));
@@ -372,19 +367,30 @@ const renderOperations = (
         >
           {t('聊天')}
         </Button>
-        <Dropdown trigger='click' position='bottomRight' menu={chatsArray}>
-          <Button
-            type='tertiary'
-            icon={<IconTreeTriangleDown />}
-            size='small'
-          ></Button>
-        </Dropdown>
-      </SplitButtonGroup>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant='outline'
+              size='sm'
+              className='rounded-l-none border-l-0 px-1'
+            >
+              <ChevronDown className='h-4 w-4' />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align='end'>
+            {chatsArray.map((chat) => (
+              <DropdownMenuItem key={chat.key} onClick={chat.onClick}>
+                {chat.name}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
 
       {record.status === 1 ? (
         <Button
-          type='danger'
-          size='small'
+          variant='destructive'
+          size='sm'
           onClick={async () => {
             await manageToken(record.id, 'disable', record);
             await refresh();
@@ -394,7 +400,7 @@ const renderOperations = (
         </Button>
       ) : (
         <Button
-          size='small'
+          size='sm'
           onClick={async () => {
             await manageToken(record.id, 'enable', record);
             await refresh();
@@ -405,8 +411,8 @@ const renderOperations = (
       )}
 
       <Button
-        type='tertiary'
-        size='small'
+        variant='outline'
+        size='sm'
         onClick={() => {
           setEditingToken(record);
           setShowEdit(true);
@@ -416,13 +422,13 @@ const renderOperations = (
       </Button>
 
       <Button
-        type='danger'
-        size='small'
+        variant='destructive'
+        size='sm'
         onClick={() => {
-          Modal.confirm({
+          confirm({
             title: t('确定是否要删除此令牌？'),
             content: t('此修改将不可逆'),
-            onOk: () => {
+            onConfirm: () => {
               (async () => {
                 await manageToken(record.id, 'delete', record);
                 await refresh();
@@ -433,7 +439,7 @@ const renderOperations = (
       >
         {t('删除')}
       </Button>
-    </Space>
+    </div>
   );
 };
 

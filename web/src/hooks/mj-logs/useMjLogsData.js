@@ -19,7 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Modal } from '@douyinfe/semi-ui';
+import { alertError } from '../../lib/confirm';
 import {
   API,
   copy,
@@ -261,7 +261,7 @@ export const useMjLogsData = () => {
     if (await copy(text)) {
       showSuccess(t('已复制：') + text);
     } else {
-      Modal.error({ title: t('无法复制到剪贴板，请手动复制'), content: text });
+      alertError({ title: t('无法复制到剪贴板，请手动复制'), content: text });
     }
   };
 

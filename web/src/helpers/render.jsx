@@ -18,7 +18,8 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import i18next from 'i18next';
-import { Modal, Tag, Typography, Avatar } from '@douyinfe/semi-ui';
+import { Avatar, AvatarFallback } from '../components/ui/avatar';
+import { alertError } from '../lib/confirm';
 import { copy, showSuccess } from './utils';
 import { MOBILE_BREAKPOINT } from '../hooks/common/useIsMobile';
 import { visit } from 'unist-util-visit';
@@ -106,49 +107,47 @@ import { FaLinkedinIn } from 'react-icons/fa';
 export function getLucideIcon(key, selected = false) {
   const size = 16;
   const strokeWidth = 2;
-  const SELECTED_COLOR = 'var(--semi-color-primary)';
-  const iconColor = selected ? SELECTED_COLOR : 'currentColor';
   const commonProps = {
     size,
     strokeWidth,
-    className: `transition-colors duration-200 ${selected ? 'transition-transform duration-200 scale-105' : ''}`,
+    className: `transition-colors duration-200 ${selected ? 'transition-transform duration-200 scale-105 text-current' : 'text-current'}`,
   };
 
   // 根据不同的key返回不同的图标
   switch (key) {
     case 'detail':
-      return <LayoutDashboard {...commonProps} color={iconColor} />;
+      return <LayoutDashboard {...commonProps} />;
     case 'playground':
-      return <TerminalSquare {...commonProps} color={iconColor} />;
+      return <TerminalSquare {...commonProps} />;
     case 'chat':
-      return <MessageSquare {...commonProps} color={iconColor} />;
+      return <MessageSquare {...commonProps} />;
     case 'token':
-      return <Key {...commonProps} color={iconColor} />;
+      return <Key {...commonProps} />;
     case 'log':
-      return <BarChart3 {...commonProps} color={iconColor} />;
+      return <BarChart3 {...commonProps} />;
     case 'midjourney':
-      return <ImageIcon {...commonProps} color={iconColor} />;
+      return <ImageIcon {...commonProps} />;
     case 'task':
-      return <CheckSquare {...commonProps} color={iconColor} />;
+      return <CheckSquare {...commonProps} />;
     case 'topup':
-      return <CreditCard {...commonProps} color={iconColor} />;
+      return <CreditCard {...commonProps} />;
     case 'channel':
-      return <Layers {...commonProps} color={iconColor} />;
+      return <Layers {...commonProps} />;
     case 'redemption':
-      return <Gift {...commonProps} color={iconColor} />;
+      return <Gift {...commonProps} />;
     case 'user':
     case 'personal':
-      return <User {...commonProps} color={iconColor} />;
+      return <User {...commonProps} />;
     case 'models':
-      return <Package {...commonProps} color={iconColor} />;
+      return <Package {...commonProps} />;
     case 'deployment':
-      return <Server {...commonProps} color={iconColor} />;
+      return <Server {...commonProps} />;
     case 'subscription':
-      return <CalendarClock {...commonProps} color={iconColor} />;
+      return <CalendarClock {...commonProps} />;
     case 'setting':
-      return <Settings {...commonProps} color={iconColor} />;
+      return <Settings {...commonProps} />;
     default:
-      return <CircleUser {...commonProps} color={iconColor} />;
+      return <CircleUser {...commonProps} />;
   }
 }
 
@@ -424,7 +423,7 @@ export function getLobeHubIcon(iconName, size = 14) {
   if (typeof iconName === 'string') iconName = iconName.trim();
   // 如果没有图标名称，返回 Avatar
   if (!iconName) {
-    return <Avatar size='extra-extra-small'>?</Avatar>;
+    return <Avatar className="h-5 w-5 text-xs"><AvatarFallback>?</AvatarFallback></Avatar>;
   }
 
   // 解析组件路径与点号链式属性
@@ -449,7 +448,7 @@ export function getLobeHubIcon(iconName, size = 14) {
     (typeof IconComponent !== 'function' && typeof IconComponent !== 'object')
   ) {
     const firstLetter = String(iconName).charAt(0).toUpperCase();
-    return <Avatar size='extra-extra-small'>{firstLetter}</Avatar>;
+    return <Avatar className="h-5 w-5 text-xs"><AvatarFallback>{firstLetter}</AvatarFallback></Avatar>;
   }
 
   // 解析点号链式属性，形如：key={...}、key='...'、key="..."、key=123、key、key=true/false
@@ -595,7 +594,7 @@ export function getOAuthProviderIcon(iconName, size = 20) {
   }
 
   return (
-    <Avatar size='extra-extra-small'>{raw.charAt(0).toUpperCase()}</Avatar>
+    <Avatar className="h-5 w-5 text-xs"><AvatarFallback>{raw.charAt(0).toUpperCase()}</AvatarFallback></Avatar>
   );
 }
 
@@ -751,17 +750,21 @@ export function renderModelTag(modelName, options = {}) {
     }
   }
 
+  const tagColor = color || stringToColor(modelName);
   return (
-    <Tag
-      color={color || stringToColor(modelName)}
-      prefixIcon={icon}
-      suffixIcon={suffixIcon}
-      size={size}
-      shape={shape}
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium cursor-default`}
+      style={{
+        backgroundColor: `color-mix(in srgb, ${tagColor} 15%, transparent)`,
+        color: tagColor,
+        border: `1px solid color-mix(in srgb, ${tagColor} 30%, transparent)`,
+      }}
       onClick={onClick}
     >
+      {icon && <span className="inline-flex items-center">{icon}</span>}
       {modelName}
-    </Tag>
+      {suffixIcon && <span className="inline-flex items-center">{suffixIcon}</span>}
+    </span>
   );
 }
 
@@ -780,9 +783,17 @@ export function renderText(text, limit) {
 export function renderGroup(group) {
   if (group === '') {
     return (
-      <Tag key='default' color='white' shape='circle'>
+      <span
+        key='default'
+        className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
+        style={{
+          backgroundColor: 'var(--semi-color-bg-2, #f5f5f5)',
+          color: 'var(--semi-color-text-2, #666)',
+          border: '1px solid var(--semi-color-border, #e0e0e0)',
+        }}
+      >
         {i18next.t('用户分组')}
-      </Tag>
+      </span>
     );
   }
 
@@ -797,26 +808,33 @@ export function renderGroup(group) {
 
   return (
     <span key={group}>
-      {groups.map((group) => (
-        <Tag
-          color={tagColors[group] || stringToColor(group)}
-          key={group}
-          shape='circle'
-          onClick={async (event) => {
-            event.stopPropagation();
-            if (await copy(group)) {
-              showSuccess(i18next.t('已复制：') + group);
-            } else {
-              Modal.error({
-                title: i18next.t('无法复制到剪贴板，请手动复制'),
-                content: group,
-              });
-            }
-          }}
-        >
-          {group}
-        </Tag>
-      ))}
+      {groups.map((group) => {
+        const groupColor = tagColors[group] || stringToColor(group);
+        return (
+          <span
+            key={group}
+            className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium cursor-pointer"
+            style={{
+              backgroundColor: `color-mix(in srgb, ${groupColor} 15%, transparent)`,
+              color: groupColor,
+              border: `1px solid color-mix(in srgb, ${groupColor} 30%, transparent)`,
+            }}
+            onClick={async (event) => {
+              event.stopPropagation();
+              if (await copy(group)) {
+                showSuccess(i18next.t('已复制：') + group);
+              } else {
+                alertError({
+                  title: i18next.t('无法复制到剪贴板，请手动复制'),
+                  content: group,
+                });
+              }
+            }}
+          >
+            {group}
+          </span>
+        );
+      })}
     </span>
   );
 }
@@ -831,9 +849,16 @@ export function renderRatio(ratio) {
     color = 'blue';
   }
   return (
-    <Tag color={color}>
+    <span
+      className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
+      style={{
+        backgroundColor: `color-mix(in srgb, ${color} 15%, transparent)`,
+        color: color,
+        border: `1px solid color-mix(in srgb, ${color} 30%, transparent)`,
+      }}
+    >
       {ratio}x {i18next.t('倍率')}
-    </Tag>
+    </span>
   );
 }
 
@@ -960,21 +985,33 @@ export const renderGroupOption = (item) => {
   };
 
   return (
-    <div
+    <button
+      type='button'
       style={baseStyle}
+      className='w-full rounded-xl text-left transition-colors'
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
+      disabled={disabled}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        <Typography.Text strong type={disabled ? 'tertiary' : undefined}>
+        <span style={{ fontWeight: 600, color: disabled ? 'var(--semi-color-text-3, #999)' : undefined }}>
           {value}
-        </Typography.Text>
-        <Typography.Text type='secondary' size='small'>
+        </span>
+        <span style={{ color: 'var(--semi-color-text-2, #666)', fontSize: '12px' }}>
           {label}
-        </Typography.Text>
+        </span>
       </div>
-      {item.ratio && renderRatio(item.ratio)}
-    </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {item.ratio && renderRatio(item.ratio)}
+        {selected ? (
+          <span
+            className='inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-600'
+          >
+            ✓ {i18next.t('已选')}
+          </span>
+        ) : null}
+      </div>
+    </button>
   );
 };
 

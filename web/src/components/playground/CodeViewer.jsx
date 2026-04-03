@@ -18,7 +18,13 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { Button, Tooltip, Toast } from '@douyinfe/semi-ui';
+import { Button } from '../ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '../ui/tooltip';
+import { toast } from 'sonner';
 import { Copy, ChevronDown, ChevronUp } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { copy } from '../../helpers';
@@ -109,7 +115,6 @@ const highlightJson = (str) => {
   let match;
 
   while ((match = tokenRegex.exec(str)) !== null) {
-    // Escape non-token text (structural chars like {, }, [, ], :, comma, whitespace)
     result += escapeHtml(str.slice(lastIndex, match.index));
 
     const token = match[0];
@@ -119,12 +124,10 @@ const highlightJson = (str) => {
     } else if (/true|false|null/.test(token)) {
       color = '#569cd6';
     }
-    // Escape token content before wrapping in span
     result += `<span style="color: ${color}">${escapeHtml(token)}</span>`;
     lastIndex = tokenRegex.lastIndex;
   }
 
-  // Escape remaining text
   result += escapeHtml(str.slice(lastIndex));
   return result;
 };
@@ -230,14 +233,14 @@ const CodeViewer = ({ content, title, language = 'json' }) => {
 
       const success = await copy(textToCopy);
       setCopied(true);
-      Toast.success(t('已复制到剪贴板'));
+      toast.success(t('已复制到剪贴板'));
       setTimeout(() => setCopied(false), 2000);
 
       if (!success) {
         throw new Error('Copy operation failed');
       }
     } catch (err) {
-      Toast.error(t('复制失败'));
+      toast.error(t('复制失败'));
       console.error('Copy failed:', err);
     }
   }, [content, t]);
@@ -297,19 +300,23 @@ const CodeViewer = ({ content, title, language = 'json' }) => {
         onMouseEnter={() => setIsHoveringCopy(true)}
         onMouseLeave={() => setIsHoveringCopy(false)}
       >
-        <Tooltip content={copied ? t('已复制') : t('复制代码')}>
-          <Button
-            icon={<Copy size={14} />}
-            onClick={handleCopy}
-            size='small'
-            theme='borderless'
-            style={{
-              backgroundColor: 'transparent',
-              border: 'none',
-              color: copied ? '#4ade80' : '#d4d4d4',
-              padding: '6px',
-            }}
-          />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              size='icon'
+              variant='ghost'
+              onClick={handleCopy}
+              style={{
+                backgroundColor: 'transparent',
+                border: 'none',
+                color: copied ? '#4ade80' : '#d4d4d4',
+                padding: '6px',
+              }}
+            >
+              <Copy size={14} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{copied ? t('已复制') : t('复制代码')}</TooltipContent>
         </Tooltip>
       </div>
 
@@ -361,36 +368,37 @@ const CodeViewer = ({ content, title, language = 'json' }) => {
             transform: 'translateX(-50%)',
           }}
         >
-          <Tooltip content={isExpanded ? t('收起内容') : t('显示完整内容')}>
-            <Button
-              icon={
-                isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />
-              }
-              onClick={handleToggleExpand}
-              size='small'
-              theme='borderless'
-              style={{
-                backgroundColor: 'transparent',
-                border: 'none',
-                color: '#d4d4d4',
-                padding: '6px 12px',
-              }}
-            >
-              {isExpanded ? t('收起') : t('展开')}
-              {!isExpanded && (
-                <span
-                  style={{ fontSize: '11px', opacity: 0.7, marginLeft: '4px' }}
-                >
-                  (+
-                  {Math.round(
-                    (contentMetrics.length -
-                      PERFORMANCE_CONFIG.PREVIEW_LENGTH) /
-                      1000,
-                  )}
-                  K)
-                </span>
-              )}
-            </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant='ghost'
+                size='sm'
+                onClick={handleToggleExpand}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  color: '#d4d4d4',
+                  padding: '6px 12px',
+                }}
+              >
+                {isExpanded ? <ChevronUp size={14} className='mr-1' /> : <ChevronDown size={14} className='mr-1' />}
+                {isExpanded ? t('收起') : t('展开')}
+                {!isExpanded && (
+                  <span
+                    style={{ fontSize: '11px', opacity: 0.7, marginLeft: '4px' }}
+                  >
+                    (+
+                    {Math.round(
+                      (contentMetrics.length -
+                        PERFORMANCE_CONFIG.PREVIEW_LENGTH) /
+                        1000,
+                    )}
+                    K)
+                  </span>
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{isExpanded ? t('收起内容') : t('显示完整内容')}</TooltipContent>
           </Tooltip>
         </div>
       )}

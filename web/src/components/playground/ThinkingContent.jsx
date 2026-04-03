@@ -18,7 +18,6 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useEffect, useRef } from 'react';
-import { Typography } from '@douyinfe/semi-ui';
 import MarkdownRenderer from '../common/markdown/MarkdownRenderer';
 import { ChevronRight, ChevronUp, Brain, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -93,20 +92,19 @@ const ThinkingContent = ({
             />
           </div>
           <div className='flex flex-col'>
-            <Typography.Text
-              strong
+            <span
+              className='font-semibold text-sm sm:text-base'
               style={{ color: 'white' }}
-              className='text-sm sm:text-base'
             >
               {headerText}
-            </Typography.Text>
+            </span>
             {thinkingSource && (
-              <Typography.Text
-                style={{ color: 'white' }}
+              <span
                 className='text-xs mt-0.5 opacity-80 hidden sm:block'
+                style={{ color: 'white' }}
               >
                 来源: {thinkingSource}
-              </Typography.Text>
+              </span>
             )}
           </div>
         </div>
@@ -118,12 +116,12 @@ const ThinkingContent = ({
                 className='animate-spin'
                 size={styleState.isMobile ? 14 : 18}
               />
-              <Typography.Text
-                style={{ color: 'white' }}
+              <span
                 className='text-xs sm:text-sm font-medium opacity-90'
+                style={{ color: 'white' }}
               >
                 思考中
-              </Typography.Text>
+              </span>
             </div>
           )}
           {(!isThinkingStatus || message.isThinkingComplete) && (

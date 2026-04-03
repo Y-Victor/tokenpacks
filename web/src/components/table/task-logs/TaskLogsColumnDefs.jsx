@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Progress, Tag, Tooltip, Typography } from '@douyinfe/semi-ui';
+import { Progress, Tag, Tooltip, Typography } from '../../ui/semi-compat';
 import {
   Music,
   FileText,
@@ -43,7 +43,7 @@ import {
 } from '../../../constants/common.constant';
 import { CHANNEL_OPTIONS } from '../../../constants/channel.constants';
 import { stringToColor } from '../../../helpers/render';
-import { Avatar, Space } from '@douyinfe/semi-ui';
+import { Avatar, Space } from '../../ui/semi-compat';
 
 const colors = [
   'amber',

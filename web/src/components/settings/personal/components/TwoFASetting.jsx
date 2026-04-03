@@ -30,13 +30,13 @@ import {
   Steps,
   Space,
   Badge,
-} from '@douyinfe/semi-ui';
+} from '../../../ui/semi-compat';
 import {
   IconShield,
   IconAlertTriangle,
   IconRefresh,
   IconCopy,
-} from '@douyinfe/semi-icons';
+} from '../../../ui/semi-icons-compat';
 import React, { useEffect, useState } from 'react';
 
 import { QRCodeSVG } from 'qrcode.react';

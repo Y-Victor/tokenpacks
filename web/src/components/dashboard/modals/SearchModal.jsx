@@ -17,8 +17,24 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import React, { useRef } from 'react';
-import { Modal, Form } from '@douyinfe/semi-ui';
+import React from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../../ui/dialog';
+import { Button } from '../../ui/button';
+import { Input } from '../../ui/input';
+import { Label } from '../../ui/label';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '../../ui/select';
 
 const SearchModal = ({
   searchModalVisible,
@@ -32,71 +48,84 @@ const SearchModal = ({
   handleInputChange,
   t,
 }) => {
-  const formRef = useRef();
-
-  const FORM_FIELD_PROPS = {
-    className: 'w-full mb-2 !rounded-lg',
-  };
-
-  const createFormField = (Component, props) => (
-    <Component {...FORM_FIELD_PROPS} {...props} />
-  );
-
   const { start_timestamp, end_timestamp, username } = inputs;
 
+  // Format date for datetime-local input
+  const formatDateForInput = (date) => {
+    if (!date) return '';
+    const d = date instanceof Date ? date : new Date(date);
+    if (isNaN(d.getTime())) return '';
+    return d.toISOString().slice(0, 16);
+  };
+
   return (
-    <Modal
-      title={t('搜索条件')}
-      visible={searchModalVisible}
-      onOk={handleSearchConfirm}
-      onCancel={handleCloseModal}
-      closeOnEsc={true}
-      size={isMobile ? 'full-width' : 'small'}
-      centered
-    >
-      <Form ref={formRef} layout='vertical' className='w-full'>
-        {createFormField(Form.DatePicker, {
-          field: 'start_timestamp',
-          label: t('起始时间'),
-          initValue: start_timestamp,
-          value: start_timestamp,
-          type: 'dateTime',
-          name: 'start_timestamp',
-          onChange: (value) => handleInputChange(value, 'start_timestamp'),
-        })}
+    <Dialog open={searchModalVisible} onOpenChange={(open) => { if (!open) handleCloseModal(); }}>
+      <DialogContent className={isMobile ? 'w-full max-w-full h-full max-h-full rounded-none' : 'sm:max-w-md'}>
+        <DialogHeader>
+          <DialogTitle>{t('搜索条件')}</DialogTitle>
+        </DialogHeader>
+        <div className='space-y-4'>
+          <div className='space-y-2'>
+            <Label>{t('起始时间')}</Label>
+            <Input
+              type='datetime-local'
+              value={formatDateForInput(start_timestamp)}
+              onChange={(e) => handleInputChange(e.target.value ? new Date(e.target.value) : null, 'start_timestamp')}
+              className='w-full rounded-lg'
+            />
+          </div>
 
-        {createFormField(Form.DatePicker, {
-          field: 'end_timestamp',
-          label: t('结束时间'),
-          initValue: end_timestamp,
-          value: end_timestamp,
-          type: 'dateTime',
-          name: 'end_timestamp',
-          onChange: (value) => handleInputChange(value, 'end_timestamp'),
-        })}
+          <div className='space-y-2'>
+            <Label>{t('结束时间')}</Label>
+            <Input
+              type='datetime-local'
+              value={formatDateForInput(end_timestamp)}
+              onChange={(e) => handleInputChange(e.target.value ? new Date(e.target.value) : null, 'end_timestamp')}
+              className='w-full rounded-lg'
+            />
+          </div>
 
-        {createFormField(Form.Select, {
-          field: 'data_export_default_time',
-          label: t('时间粒度'),
-          initValue: dataExportDefaultTime,
-          placeholder: t('时间粒度'),
-          name: 'data_export_default_time',
-          optionList: timeOptions,
-          onChange: (value) =>
-            handleInputChange(value, 'data_export_default_time'),
-        })}
+          <div className='space-y-2'>
+            <Label>{t('时间粒度')}</Label>
+            <Select
+              value={dataExportDefaultTime}
+              onValueChange={(value) => handleInputChange(value, 'data_export_default_time')}
+            >
+              <SelectTrigger className='w-full rounded-lg'>
+                <SelectValue placeholder={t('时间粒度')} />
+              </SelectTrigger>
+              <SelectContent>
+                {timeOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        {isAdminUser &&
-          createFormField(Form.Input, {
-            field: 'username',
-            label: t('用户名称'),
-            value: username,
-            placeholder: t('可选值'),
-            name: 'username',
-            onChange: (value) => handleInputChange(value, 'username'),
-          })}
-      </Form>
-    </Modal>
+          {isAdminUser && (
+            <div className='space-y-2'>
+              <Label>{t('用户名称')}</Label>
+              <Input
+                value={username || ''}
+                placeholder={t('可选值')}
+                onChange={(e) => handleInputChange(e.target.value, 'username')}
+                className='w-full rounded-lg'
+              />
+            </div>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant='outline' onClick={handleCloseModal}>
+            {t('取消')}
+          </Button>
+          <Button onClick={handleSearchConfirm}>
+            {t('确定')}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

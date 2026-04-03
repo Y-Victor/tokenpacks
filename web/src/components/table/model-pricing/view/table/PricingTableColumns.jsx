@@ -18,8 +18,13 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Tag, Space, Tooltip } from '@douyinfe/semi-ui';
-import { IconHelpCircle } from '@douyinfe/semi-icons';
+import { Badge } from '../../../../ui/badge';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '../../../../ui/tooltip';
+import { HelpCircle } from 'lucide-react';
 import {
   renderModelTag,
   stringToColor,
@@ -37,15 +42,15 @@ function renderQuotaType(type, t) {
   switch (type) {
     case 1:
       return (
-        <Tag color='teal' shape='circle'>
+        <Badge variant='secondary' className='bg-teal-100 text-teal-800 rounded-full'>
           {t('按次计费')}
-        </Tag>
+        </Badge>
       );
     case 0:
       return (
-        <Tag color='violet' shape='circle'>
+        <Badge variant='secondary' className='bg-violet-100 text-violet-800 rounded-full'>
           {t('按量计费')}
-        </Tag>
+        </Badge>
       );
     default:
       return t('未知');
@@ -56,13 +61,13 @@ function renderQuotaType(type, t) {
 const renderVendor = (vendorName, vendorIcon, t) => {
   if (!vendorName) return '-';
   return (
-    <Tag
-      color='white'
-      shape='circle'
-      prefixIcon={getLobeHubIcon(vendorIcon || 'Layers', 14)}
+    <Badge
+      variant='outline'
+      className='rounded-full inline-flex items-center gap-1'
     >
+      {getLobeHubIcon(vendorIcon || 'Layers', 14)}
       {vendorName}
-    </Tag>
+    </Badge>
   );
 };
 
@@ -73,14 +78,14 @@ const renderTags = (text) => {
   return renderLimitedItems({
     items: tagsArr,
     renderItem: (tag, idx) => (
-      <Tag
+      <Badge
         key={idx}
-        color={stringToColor(tag.trim())}
-        shape='circle'
-        size='small'
+        variant='secondary'
+        className='rounded-full'
+        style={{ backgroundColor: stringToColor(tag.trim()), color: '#fff' }}
       >
         {tag.trim()}
-      </Tag>
+      </Badge>
     ),
     maxDisplay: 3,
   });
@@ -91,13 +96,18 @@ function renderSupportedEndpoints(endpoints) {
     return null;
   }
   return (
-    <Space wrap>
+    <div className='flex flex-wrap items-center gap-2'>
       {endpoints.map((endpoint, idx) => (
-        <Tag key={endpoint} color={stringToColor(endpoint)} shape='circle'>
+        <Badge
+          key={endpoint}
+          variant='secondary'
+          className='rounded-full'
+          style={{ backgroundColor: stringToColor(endpoint), color: '#fff' }}
+        >
           {endpoint}
-        </Tag>
+        </Badge>
       ))}
-    </Space>
+    </div>
   );
 }
 
@@ -195,14 +205,17 @@ export const getPricingTableColumns = ({
     title: () => (
       <div className='flex items-center space-x-1'>
         <span>{t('倍率')}</span>
-        <Tooltip content={t('倍率是为了方便换算不同价格的模型')}>
-          <IconHelpCircle
-            className='text-blue-500 cursor-pointer'
-            onClick={() => {
-              setModalImageUrl('/ratio.png');
-              setIsModalOpenurl(true);
-            }}
-          />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <HelpCircle
+              className='text-blue-500 cursor-pointer h-4 w-4'
+              onClick={() => {
+                setModalImageUrl('/ratio.png');
+                setIsModalOpenurl(true);
+              }}
+            />
+          </TooltipTrigger>
+          <TooltipContent>{t('倍率是为了方便换算不同价格的模型')}</TooltipContent>
         </Tooltip>
       </div>
     ),

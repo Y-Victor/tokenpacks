@@ -25,7 +25,7 @@ import {
   Divider,
   Typography,
   Badge,
-} from '@douyinfe/semi-ui';
+} from '../../../ui/semi-compat';
 import {
   isRoot,
   isAdmin,

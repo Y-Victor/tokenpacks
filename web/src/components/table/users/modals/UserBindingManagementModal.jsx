@@ -26,23 +26,18 @@ import {
   getOAuthProviderIcon,
 } from '../../../../helpers';
 import {
-  Modal,
-  Spin,
-  Typography,
-  Card,
-  Checkbox,
-  Tag,
-  Button,
-} from '@douyinfe/semi-ui';
-import {
-  IconLink,
-  IconMail,
-  IconDelete,
-  IconGithubLogo,
-} from '@douyinfe/semi-icons';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '../../../ui/dialog';
+import { Button } from '../../../ui/button';
+import { Card } from '../../../ui/card';
+import { Checkbox } from '../../../ui/checkbox';
+import { Badge } from '../../../ui/badge';
+import { Link, Mail, Trash2, Github } from 'lucide-react';
+import { confirm } from '../../../../lib/confirm';
 import { SiDiscord, SiTelegram, SiWechat, SiLinux } from 'react-icons/si';
-
-const { Text } = Typography;
 
 const UserBindingManagementModal = ({
   visible,
@@ -119,12 +114,12 @@ const UserBindingManagementModal = ({
   const handleUnbindBuiltInAccount = (bindingItem) => {
     if (!userId) return;
 
-    Modal.confirm({
+    confirm({
       title: t('确认解绑'),
       content: t('确定要解绑 {{name}} 吗？', { name: bindingItem.name }),
       okText: t('确认'),
       cancelText: t('取消'),
-      onOk: async () => {
+      onConfirm: async () => {
         const loadingKey = `builtin-${bindingItem.key}`;
         setBindingLoadingState(loadingKey, true);
         try {
@@ -155,12 +150,12 @@ const UserBindingManagementModal = ({
   const handleUnbindCustomOAuthAccount = (provider) => {
     if (!userId) return;
 
-    Modal.confirm({
+    confirm({
       title: t('确认解绑'),
       content: t('确定要解绑 {{name}} 吗？', { name: provider.name }),
       okText: t('确认'),
       cancelText: t('取消'),
-      onOk: async () => {
+      onConfirm: async () => {
         const loadingKey = `custom-${provider.id}`;
         setBindingLoadingState(loadingKey, true);
         try {
@@ -200,10 +195,7 @@ const UserBindingManagementModal = ({
       enabled: true,
       value: getBuiltInBindingValue('email'),
       icon: (
-        <IconMail
-          size='default'
-          className='text-slate-600 dark:text-slate-300'
-        />
+        <Mail className='h-5 w-5 text-slate-600 dark:text-slate-300' />
       ),
     },
     {
@@ -213,10 +205,7 @@ const UserBindingManagementModal = ({
       enabled: Boolean(statusInfo.github_oauth),
       value: getBuiltInBindingValue('github_id'),
       icon: (
-        <IconGithubLogo
-          size='default'
-          className='text-slate-600 dark:text-slate-300'
-        />
+        <Github className='h-5 w-5 text-slate-600 dark:text-slate-300' />
       ),
     },
     {
@@ -236,10 +225,7 @@ const UserBindingManagementModal = ({
       enabled: Boolean(statusInfo.oidc_enabled),
       value: getBuiltInBindingValue('oidc_id'),
       icon: (
-        <IconLink
-          size='default'
-          className='text-slate-600 dark:text-slate-300'
-        />
+        <Link className='h-5 w-5 text-slate-600 dark:text-slate-300' />
       ),
     },
     {
@@ -326,107 +312,115 @@ const UserBindingManagementModal = ({
     : allBindingItems;
 
   return (
-    <Modal
-      centered
-      visible={visible}
-      onCancel={onCancel}
-      footer={null}
-      width={isMobile ? '100%' : 760}
-      title={
-        <div className='flex items-center'>
-          <IconLink className='mr-2' />
-          {t('账户绑定管理')}
-        </div>
-      }
-    >
-      <Spin spinning={bindingLoading}>
-        <div className='max-h-[68vh] overflow-y-auto pr-1 pb-2'>
-          <div className='flex items-center justify-between mb-4 gap-3 flex-wrap'>
-            <Checkbox
-              checked={showBoundOnly}
-              onChange={(e) => setShowBoundOnly(Boolean(e.target.checked))}
-            >
-              {t('仅显示已绑定')}
-            </Checkbox>
-            <Text type='tertiary'>
-              {t('已绑定')} {boundCount} / {allBindingItems.length}
-            </Text>
-          </div>
-
-          {visibleBindingItems.length === 0 ? (
-            <Card className='!rounded-xl border-dashed'>
-              <Text type='tertiary'>{t('暂无已绑定项')}</Text>
-            </Card>
-          ) : (
-            <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
-              {visibleBindingItems.map((item, index) => {
-                const isBound = Boolean(item.value);
-                const loadingKey =
-                  item.type === 'builtin'
-                    ? `builtin-${item.key}`
-                    : `custom-${item.providerId}`;
-                const statusText = isBound
-                  ? item.value
-                  : item.enabled
-                    ? t('未绑定')
-                    : t('未启用');
-                const shouldSpanTwoColsOnDesktop =
-                  visibleBindingItems.length % 2 === 1 &&
-                  index === visibleBindingItems.length - 1;
-
-                return (
-                  <Card
-                    key={item.key}
-                    className={`!rounded-xl ${shouldSpanTwoColsOnDesktop ? 'lg:col-span-2' : ''}`}
-                  >
-                    <div className='flex items-center justify-between gap-3 min-h-[92px]'>
-                      <div className='flex items-center flex-1 min-w-0'>
-                        <div className='w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mr-3 flex-shrink-0'>
-                          {item.icon}
-                        </div>
-                        <div className='min-w-0 flex-1'>
-                          <div className='font-medium text-gray-900 flex items-center gap-2'>
-                            <span>{item.name}</span>
-                            <Tag size='small' color='white'>
-                              {item.type === 'builtin'
-                                ? t('内置')
-                                : t('自定义')}
-                            </Tag>
-                          </div>
-                          <div className='text-sm text-gray-500 truncate'>
-                            {statusText}
-                          </div>
-                        </div>
-                      </div>
-                      <Button
-                        type='danger'
-                        theme='borderless'
-                        icon={<IconDelete />}
-                        size='small'
-                        disabled={!isBound}
-                        loading={Boolean(bindingActionLoading[loadingKey])}
-                        onClick={() => {
-                          if (item.type === 'builtin') {
-                            handleUnbindBuiltInAccount(item);
-                            return;
-                          }
-                          handleUnbindCustomOAuthAccount({
-                            id: item.providerId,
-                            name: item.name,
-                          });
-                        }}
-                      >
-                        {t('解绑')}
-                      </Button>
-                    </div>
-                  </Card>
-                );
-              })}
+    <Dialog open={visible} onOpenChange={(open) => !open && onCancel()}>
+      <DialogContent className={isMobile ? 'w-full max-w-full' : 'max-w-[760px]'}>
+        <DialogHeader>
+          <DialogTitle>
+            <div className='flex items-center'>
+              <Link className='mr-2 h-4 w-4' />
+              {t('账户绑定管理')}
             </div>
-          )}
-        </div>
-      </Spin>
-    </Modal>
+          </DialogTitle>
+        </DialogHeader>
+
+        {bindingLoading ? (
+          <div className='flex items-center justify-center py-8'>
+            <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-primary' />
+          </div>
+        ) : (
+          <div className='max-h-[68vh] overflow-y-auto pr-1 pb-2'>
+            <div className='flex items-center justify-between mb-4 gap-3 flex-wrap'>
+              <div className='flex items-center gap-2'>
+                <Checkbox
+                  id='show-bound-only'
+                  checked={showBoundOnly}
+                  onCheckedChange={(checked) => setShowBoundOnly(Boolean(checked))}
+                />
+                <label htmlFor='show-bound-only' className='text-sm'>
+                  {t('仅显示已绑定')}
+                </label>
+              </div>
+              <span className='text-sm text-muted-foreground'>
+                {t('已绑定')} {boundCount} / {allBindingItems.length}
+              </span>
+            </div>
+
+            {visibleBindingItems.length === 0 ? (
+              <Card className='rounded-xl border-dashed'>
+                <div className='p-4'>
+                  <span className='text-muted-foreground'>{t('暂无已绑定项')}</span>
+                </div>
+              </Card>
+            ) : (
+              <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+                {visibleBindingItems.map((item, index) => {
+                  const isBound = Boolean(item.value);
+                  const loadingKey =
+                    item.type === 'builtin'
+                      ? `builtin-${item.key}`
+                      : `custom-${item.providerId}`;
+                  const statusText = isBound
+                    ? item.value
+                    : item.enabled
+                      ? t('未绑定')
+                      : t('未启用');
+                  const shouldSpanTwoColsOnDesktop =
+                    visibleBindingItems.length % 2 === 1 &&
+                    index === visibleBindingItems.length - 1;
+
+                  return (
+                    <Card
+                      key={item.key}
+                      className={`rounded-xl ${shouldSpanTwoColsOnDesktop ? 'lg:col-span-2' : ''}`}
+                    >
+                      <div className='p-4 flex items-center justify-between gap-3 min-h-[92px]'>
+                        <div className='flex items-center flex-1 min-w-0'>
+                          <div className='w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mr-3 flex-shrink-0'>
+                            {item.icon}
+                          </div>
+                          <div className='min-w-0 flex-1'>
+                            <div className='font-medium text-gray-900 flex items-center gap-2'>
+                              <span>{item.name}</span>
+                              <Badge variant='outline' className='text-xs'>
+                                {item.type === 'builtin'
+                                  ? t('内置')
+                                  : t('自定义')}
+                              </Badge>
+                            </div>
+                            <div className='text-sm text-gray-500 truncate'>
+                              {statusText}
+                            </div>
+                          </div>
+                        </div>
+                        <Button
+                          variant='ghost'
+                          size='sm'
+                          className='text-destructive'
+                          disabled={!isBound}
+                          onClick={() => {
+                            if (item.type === 'builtin') {
+                              handleUnbindBuiltInAccount(item);
+                              return;
+                            }
+                            handleUnbindCustomOAuthAccount({
+                              id: item.providerId,
+                              name: item.name,
+                            });
+                          }}
+                        >
+                          <Trash2 className='h-4 w-4 mr-1' />
+                          {t('解绑')}
+                        </Button>
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 };
 

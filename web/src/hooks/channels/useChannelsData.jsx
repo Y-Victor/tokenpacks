@@ -37,7 +37,8 @@ import { useIsMobile } from '../common/useIsMobile';
 import { useTableCompactMode } from '../common/useTableCompactMode';
 import { useChannelUpstreamUpdates } from './useChannelUpstreamUpdates';
 import { parseUpstreamUpdateMeta } from './upstreamUpdateUtils';
-import { Modal, Button } from '@douyinfe/semi-ui';
+import { confirm, alertInfo } from '../../lib/confirm';
+import { Button } from '../../components/ui/button';
 import { openCodexUsageModal } from '../../components/table/channels/modals/CodexUsageModal';
 
 export const useChannelsData = () => {
@@ -823,28 +824,9 @@ export const useChannelsData = () => {
           }
         };
 
-        Modal.info({
+        alertInfo({
           title: t('Ollama 版本信息'),
           content: infoMessage,
-          centered: true,
-          footer: (
-            <div className='flex justify-end gap-2'>
-              <Button type='tertiary' onClick={handleCopyVersion}>
-                {t('复制版本号')}
-              </Button>
-              <Button
-                type='primary'
-                theme='solid'
-                onClick={() => Modal.destroyAll()}
-              >
-                {t('关闭')}
-              </Button>
-            </div>
-          ),
-          hasCancel: false,
-          hasOk: false,
-          closable: true,
-          maskClosable: true,
         });
       } else {
         showError(message || t('获取 Ollama 版本失败'));

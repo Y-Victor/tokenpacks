@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useRef, useEffect, useCallback } from 'react';
-import { Toast } from '@douyinfe/semi-ui';
+import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { usePlayground } from '../../contexts/PlaygroundContext';
 
@@ -45,7 +45,7 @@ const CustomInputRender = (props) => {
           if (file) {
             try {
               if (!imageEnabled) {
-                Toast.warning({
+                toast.warning({
                   content: t('请先在设置中启用图片功能'),
                   duration: 3,
                 });
@@ -58,12 +58,12 @@ const CustomInputRender = (props) => {
 
                 if (onPasteImage) {
                   onPasteImage(base64);
-                  Toast.success({
+                  toast.success({
                     content: t('图片已添加'),
                     duration: 2,
                   });
                 } else {
-                  Toast.error({
+                  toast.error({
                     content: t('无法添加图片'),
                     duration: 2,
                   });
@@ -71,7 +71,7 @@ const CustomInputRender = (props) => {
               };
               reader.onerror = () => {
                 console.error('Failed to read image file:', reader.error);
-                Toast.error({
+                toast.error({
                   content: t('粘贴图片失败'),
                   duration: 2,
                 });
@@ -79,7 +79,7 @@ const CustomInputRender = (props) => {
               reader.readAsDataURL(file);
             } catch (error) {
               console.error('Failed to paste image:', error);
-              Toast.error({
+              toast.error({
                 content: t('粘贴图片失败'),
                 duration: 2,
               });

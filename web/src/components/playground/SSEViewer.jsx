@@ -18,14 +18,19 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useState, useMemo, useCallback } from 'react';
+import { Button } from '../ui/button';
 import {
-  Button,
   Tooltip,
-  Toast,
-  Collapse,
-  Badge,
-  Typography,
-} from '@douyinfe/semi-ui';
+  TooltipContent,
+  TooltipTrigger,
+} from '../ui/tooltip';
+import { Badge } from '../ui/badge';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '../ui/collapsible';
+import { toast } from 'sonner';
 import {
   Copy,
   ChevronDown,
@@ -45,7 +50,7 @@ import { copy } from '../../helpers';
  */
 const SSEViewer = ({ sseData }) => {
   const { t } = useTranslation();
-  const [expandedKeys, setExpandedKeys] = useState([]);
+  const [expandedKeys, setExpandedKeys] = useState(new Set());
   const [copied, setCopied] = useState(false);
 
   const parsedSSEData = useMemo(() => {
@@ -90,13 +95,25 @@ const SSEViewer = ({ sseData }) => {
 
   const handleToggleAll = useCallback(() => {
     setExpandedKeys((prev) => {
-      if (prev.length === parsedSSEData.length) {
-        return [];
+      if (prev.size === parsedSSEData.length) {
+        return new Set();
       } else {
-        return parsedSSEData.map((item) => item.key);
+        return new Set(parsedSSEData.map((item) => item.key));
       }
     });
   }, [parsedSSEData]);
+
+  const handleToggleItem = useCallback((key) => {
+    setExpandedKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  }, []);
 
   const handleCopyAll = useCallback(async () => {
     try {
@@ -108,10 +125,10 @@ const SSEViewer = ({ sseData }) => {
 
       await copy(allData);
       setCopied(true);
-      Toast.success(t('已复制全部数据'));
+      toast.success(t('已复制全部数据'));
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      Toast.error(t('复制失败'));
+      toast.error(t('复制失败'));
       console.error('Copy failed:', err);
     }
   }, [parsedSSEData, t]);
@@ -123,9 +140,9 @@ const SSEViewer = ({ sseData }) => {
           ? JSON.stringify(item.parsed, null, 2)
           : item.raw;
         await copy(textToCopy);
-        Toast.success(t('已复制'));
+        toast.success(t('已复制'));
       } catch (err) {
-        Toast.error(t('复制失败'));
+        toast.error(t('复制失败'));
       }
     },
     [t],
@@ -136,9 +153,9 @@ const SSEViewer = ({ sseData }) => {
       return (
         <div className='flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg'>
           <CheckCircle size={16} className='text-green-600' />
-          <Typography.Text className='text-green-600 font-medium'>
+          <span className='text-green-600 font-medium'>
             {t('流式响应完成')} [DONE]
-          </Typography.Text>
+          </span>
         </div>
       );
     }
@@ -148,9 +165,9 @@ const SSEViewer = ({ sseData }) => {
         <div className='space-y-2'>
           <div className='flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg'>
             <XCircle size={16} className='text-red-600' />
-            <Typography.Text className='text-red-600'>
+            <span className='text-red-600'>
               {t('解析错误')}: {item.error}
-            </Typography.Text>
+            </span>
           </div>
           <div className='p-3 bg-gray-100 dark:bg-gray-800 rounded-lg font-mono text-xs overflow-auto'>
             <pre>{item.raw}</pre>
@@ -167,37 +184,35 @@ const SSEViewer = ({ sseData }) => {
             {JSON.stringify(item.parsed, null, 2)}
           </pre>
           <Button
-            icon={<Copy size={12} />}
-            size='small'
-            theme='borderless'
+            size='icon'
+            variant='ghost'
             onClick={() => handleCopySingle(item)}
-            className='absolute top-2 right-2 !bg-gray-800/80 !text-gray-300 hover:!bg-gray-700'
-          />
+            className='absolute top-2 right-2 !bg-gray-800/80 !text-gray-300 hover:!bg-gray-700 h-6 w-6'
+          >
+            <Copy size={12} />
+          </Button>
         </div>
 
         {/* 关键信息摘要 */}
         {item.parsed?.choices?.[0] && (
           <div className='flex flex-wrap gap-2 text-xs'>
             {item.parsed.choices[0].delta?.content && (
-              <Badge
-                count={`${t('内容')}: "${String(item.parsed.choices[0].delta.content).substring(0, 20)}..."`}
-                type='primary'
-              />
+              <Badge variant='default'>
+                {t('内容')}: &quot;{String(item.parsed.choices[0].delta.content).substring(0, 20)}...&quot;
+              </Badge>
             )}
             {item.parsed.choices[0].delta?.reasoning_content && (
-              <Badge count={t('有 Reasoning')} type='warning' />
+              <Badge variant='warning'>{t('有 Reasoning')}</Badge>
             )}
             {item.parsed.choices[0].finish_reason && (
-              <Badge
-                count={`${t('完成')}: ${item.parsed.choices[0].finish_reason}`}
-                type='success'
-              />
+              <Badge variant='success'>
+                {t('完成')}: {item.parsed.choices[0].finish_reason}
+              </Badge>
             )}
             {item.parsed.usage && (
-              <Badge
-                count={`${t('令牌')}: ${item.parsed.usage.prompt_tokens || 0}/${item.parsed.usage.completion_tokens || 0}`}
-                type='tertiary'
-              />
+              <Badge variant='secondary'>
+                {t('令牌')}: {item.parsed.usage.prompt_tokens || 0}/{item.parsed.usage.completion_tokens || 0}
+              </Badge>
             )}
           </div>
         )}
@@ -219,93 +234,92 @@ const SSEViewer = ({ sseData }) => {
       <div className='flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0'>
         <div className='flex items-center gap-3'>
           <Zap size={16} className='text-blue-500' />
-          <Typography.Text strong>{t('SSE数据流')}</Typography.Text>
-          <Badge count={stats.total} type='primary' />
+          <span className='font-semibold'>{t('SSE数据流')}</span>
+          <Badge variant='default'>{stats.total}</Badge>
           {stats.errors > 0 && (
-            <Badge count={`${stats.errors} ${t('错误')}`} type='danger' />
+            <Badge variant='destructive'>{stats.errors} {t('错误')}</Badge>
           )}
         </div>
 
         <div className='flex items-center gap-2'>
-          <Tooltip content={t('复制全部')}>
-            <Button
-              icon={<Copy size={14} />}
-              size='small'
-              onClick={handleCopyAll}
-              theme='borderless'
-            >
-              {copied ? t('已复制') : t('复制全部')}
-            </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size='sm'
+                variant='ghost'
+                onClick={handleCopyAll}
+              >
+                <Copy size={14} className='mr-1' />
+                {copied ? t('已复制') : t('复制全部')}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{t('复制全部')}</TooltipContent>
           </Tooltip>
-          <Tooltip
-            content={
-              expandedKeys.length === parsedSSEData.length
-                ? t('全部收起')
-                : t('全部展开')
-            }
-          >
-            <Button
-              icon={
-                expandedKeys.length === parsedSSEData.length ? (
-                  <ChevronUp size={14} />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size='sm'
+                variant='ghost'
+                onClick={handleToggleAll}
+              >
+                {expandedKeys.size === parsedSSEData.length ? (
+                  <ChevronUp size={14} className='mr-1' />
                 ) : (
-                  <ChevronDown size={14} />
-                )
-              }
-              size='small'
-              onClick={handleToggleAll}
-              theme='borderless'
-            >
-              {expandedKeys.length === parsedSSEData.length
-                ? t('收起')
-                : t('展开')}
-            </Button>
+                  <ChevronDown size={14} className='mr-1' />
+                )}
+                {expandedKeys.size === parsedSSEData.length
+                  ? t('收起')
+                  : t('展开')}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {expandedKeys.size === parsedSSEData.length
+                ? t('全部收起')
+                : t('全部展开')}
+            </TooltipContent>
           </Tooltip>
         </div>
       </div>
 
       {/* SSE 数据列表 */}
       <div className='flex-1 overflow-auto p-4'>
-        <Collapse
-          activeKey={expandedKeys}
-          onChange={setExpandedKeys}
-          accordion={false}
-          className='bg-white dark:bg-gray-800 rounded-lg'
-        >
+        <div className='bg-white dark:bg-gray-800 rounded-lg'>
           {parsedSSEData.map((item) => (
-            <Collapse.Panel
+            <Collapsible
               key={item.key}
-              header={
-                <div className='flex items-center gap-2'>
-                  <Badge count={`#${item.index + 1}`} type='tertiary' />
-                  {item.isDone ? (
-                    <span className='text-green-600 font-medium'>[DONE]</span>
-                  ) : item.error ? (
-                    <span className='text-red-600'>{t('解析错误')}</span>
-                  ) : (
-                    <>
-                      <span className='text-gray-600'>
-                        {item.parsed?.id ||
-                          item.parsed?.object ||
-                          t('SSE 事件')}
-                      </span>
-                      {item.parsed?.choices?.[0]?.delta && (
-                        <span className='text-xs text-gray-400'>
-                          •{' '}
-                          {Object.keys(item.parsed.choices[0].delta)
-                            .filter((k) => item.parsed.choices[0].delta[k])
-                            .join(', ')}
-                        </span>
-                      )}
-                    </>
-                  )}
-                </div>
-              }
+              open={expandedKeys.has(item.key)}
+              onOpenChange={() => handleToggleItem(item.key)}
             >
-              {renderSSEItem(item)}
-            </Collapse.Panel>
+              <CollapsibleTrigger className='flex items-center gap-2 w-full p-3 hover:bg-gray-50 dark:hover:bg-gray-700 text-left border-b border-gray-100 dark:border-gray-700'>
+                <Badge variant='secondary'>#{item.index + 1}</Badge>
+                {item.isDone ? (
+                  <span className='text-green-600 font-medium'>[DONE]</span>
+                ) : item.error ? (
+                  <span className='text-red-600'>{t('解析错误')}</span>
+                ) : (
+                  <>
+                    <span className='text-gray-600'>
+                      {item.parsed?.id ||
+                        item.parsed?.object ||
+                        t('SSE 事件')}
+                    </span>
+                    {item.parsed?.choices?.[0]?.delta && (
+                      <span className='text-xs text-gray-400'>
+                        •{' '}
+                        {Object.keys(item.parsed.choices[0].delta)
+                          .filter((k) => item.parsed.choices[0].delta[k])
+                          .join(', ')}
+                      </span>
+                    )}
+                  </>
+                )}
+              </CollapsibleTrigger>
+              <CollapsibleContent className='p-3'>
+                {renderSSEItem(item)}
+              </CollapsibleContent>
+            </Collapsible>
           ))}
-        </Collapse>
+        </div>
       </div>
     </div>
   );

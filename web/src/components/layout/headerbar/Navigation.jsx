@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import SkeletonWrapper from '../components/SkeletonWrapper';
 
 const Navigation = ({
@@ -29,13 +29,6 @@ const Navigation = ({
   pricingRequireAuth,
 }) => {
   const renderNavLinks = () => {
-    const baseClasses =
-      'flex-shrink-0 flex items-center gap-1 font-semibold rounded-md transition-all duration-200 ease-in-out';
-    const hoverClasses = 'hover:text-semi-color-primary';
-    const spacingClasses = isMobile ? 'p-1' : 'p-2';
-
-    const commonLinkClasses = `${baseClasses} ${spacingClasses} ${hoverClasses}`;
-
     return mainNavLinks.map((link) => {
       const linkContent = <span>{link.text}</span>;
 
@@ -46,7 +39,7 @@ const Navigation = ({
             href={link.externalLink}
             target='_blank'
             rel='noopener noreferrer'
-            className={commonLinkClasses}
+            className='header-nav-link header-nav-link-external'
           >
             {linkContent}
           </a>
@@ -62,15 +55,21 @@ const Navigation = ({
       }
 
       return (
-        <Link key={link.itemKey} to={targetPath} className={commonLinkClasses}>
+        <NavLink
+          key={link.itemKey}
+          to={targetPath}
+          className={({ isActive }) =>
+            `header-nav-link ${isActive ? 'header-nav-link-active' : ''}`
+          }
+        >
           {linkContent}
-        </Link>
+        </NavLink>
       );
     });
   };
 
   return (
-    <nav className='flex flex-1 items-center gap-1 lg:gap-2 mx-2 md:mx-4 overflow-x-auto whitespace-nowrap scrollbar-hide'>
+    <nav className='header-nav-shell mx-2 flex flex-1 items-center gap-1 overflow-x-auto whitespace-nowrap scrollbar-hide md:mx-4 lg:gap-2'>
       <SkeletonWrapper
         loading={isLoading}
         type='navigation'

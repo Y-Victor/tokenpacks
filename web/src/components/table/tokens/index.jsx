@@ -18,14 +18,15 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
+import { Button } from '../../ui/button';
 import {
-  Notification,
-  Button,
-  Space,
-  Toast,
-  Typography,
   Select,
-} from '@douyinfe/semi-ui';
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../ui/select';
 import {
   API,
   showError,
@@ -123,72 +124,25 @@ function TokensPage() {
     const { t } = latestRef.current;
     const SUPPRESS_KEY = 'fluent_notify_suppressed';
     if (modelOptions.length === 0) {
-      // fire-and-forget; a later effect will refresh the notice content
       loadModels();
     }
     if (!key && localStorage.getItem(SUPPRESS_KEY) === '1') return;
     const container = document.getElementById('fluent-new-api-container');
     if (!container) {
-      Toast.warning(t('未检测到 FluentRead（流畅阅读），请确认扩展已启用'));
+      toast.warning(t('未检测到 FluentRead（流畅阅读），请确认扩展已启用'));
       return;
     }
     setPrefillKey(key || '');
     setFluentNoticeOpen(true);
-    Notification.info({
+    // Use toast for notification instead of Semi Notification
+    toast.info(t('检测到 FluentRead（流畅阅读）'), {
       id: 'fluent-detected',
-      title: t('检测到 FluentRead（流畅阅读）'),
-      content: (
-        <div>
-          <div style={{ marginBottom: 8 }}>
-            {key
-              ? t('请选择模型。')
-              : t('选择模型后可一键填充当前选中令牌（或本页第一个令牌）。')}
-          </div>
-          <div style={{ marginBottom: 8 }}>
-            <Select
-              placeholder={t('请选择模型')}
-              optionList={modelOptions}
-              onChange={setSelectedModel}
-              filter={selectFilter}
-              style={{ width: 320 }}
-              showClear
-              searchable
-              emptyContent={t('暂无数据')}
-            />
-          </div>
-          <Space>
-            <Button
-              theme='solid'
-              type='primary'
-              onClick={handlePrefillToFluent}
-            >
-              {t('一键填充到 FluentRead')}
-            </Button>
-            {!key && (
-              <Button
-                type='warning'
-                onClick={() => {
-                  localStorage.setItem(SUPPRESS_KEY, '1');
-                  Notification.close('fluent-detected');
-                  Toast.info(t('已关闭后续提醒'));
-                }}
-              >
-                {t('不再提醒')}
-              </Button>
-            )}
-            <Button
-              type='tertiary'
-              onClick={() => Notification.close('fluent-detected')}
-            >
-              {t('关闭')}
-            </Button>
-          </Space>
-        </div>
-      ),
-      duration: 0,
+      duration: Infinity,
+      description: key
+        ? t('请选择模型。')
+        : t('选择模型后可一键填充当前选中令牌（或本页第一个令牌）。'),
     });
   }
-  // assign after definition so hook callback can call it safely
   openFluentNotificationRef.current = openFluentNotification;
 
   function openCCSwitchModal(key) {
@@ -212,12 +166,12 @@ function TokensPage() {
     } = latestRef.current;
     const container = document.getElementById('fluent-new-api-container');
     if (!container) {
-      Toast.error(t('未检测到 Fluent 容器'));
+      toast.error(t('未检测到 Fluent 容器'));
       return;
     }
 
     if (!chosenModel) {
-      Toast.warning(t('请选择模型'));
+      toast.warning(t('请选择模型'));
       return;
     }
 
@@ -242,7 +196,7 @@ function TokensPage() {
             ? tokens[0]
             : null;
       if (!token) {
-        Toast.warning(t('没有可用令牌用于填充'));
+        toast.warning(t('没有可用令牌用于填充'));
         return;
       }
       try {
@@ -262,8 +216,8 @@ function TokensPage() {
     container.dispatchEvent(
       new CustomEvent('fluent:prefill', { detail: payload }),
     );
-    Toast.success(t('已发送到 Fluent'));
-    Notification.close('fluent-detected');
+    toast.success(t('已发送到 Fluent'));
+    toast.dismiss('fluent-detected');
   };
 
   // Show notification when Fluent container is available
@@ -273,7 +227,7 @@ function TokensPage() {
     };
     const onRemoved = () => {
       setFluentNoticeOpen(false);
-      Notification.close('fluent-detected');
+      toast.dismiss('fluent-detected');
     };
 
     window.addEventListener('fluent-container:appeared', onAppeared);
@@ -315,7 +269,6 @@ function TokensPage() {
 
     const observer = new MutationObserver((mutations) => {
       for (const m of mutations) {
-        // appeared
         for (const added of m.addedNodes) {
           if (isOrContainsTarget(added)) {
             const el = document.querySelector(selector);
@@ -328,7 +281,6 @@ function TokensPage() {
             break;
           }
         }
-        // removed
         for (const removed of m.removedNodes) {
           if (isOrContainsTarget(removed)) {
             const elNow = document.querySelector(selector);
@@ -347,31 +299,22 @@ function TokensPage() {
   }, []);
 
   const {
-    // Edit state
     showEdit,
     editingToken,
     closeEdit,
     refresh,
-
-    // Actions state
     selectedKeys,
     setEditingToken,
     setShowEdit,
     batchCopyTokens,
     batchDeleteTokens,
-
-    // Filters state
     formInitValues,
     setFormApi,
     searchTokens,
     loading,
     searching,
-
-    // Description state
     compactMode,
     setCompactMode,
-
-    // Translation
     t,
   } = tokensData;
 

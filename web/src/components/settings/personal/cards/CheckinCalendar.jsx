@@ -28,7 +28,7 @@ import {
   Tooltip,
   Collapsible,
   Modal,
-} from '@douyinfe/semi-ui';
+} from '../../../ui/semi-compat';
 import {
   CalendarCheck,
   Gift,

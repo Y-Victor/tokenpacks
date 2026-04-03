@@ -19,22 +19,19 @@ For commercial licensing, please contact support@quantumnous.com
 
 import React, { useEffect, useState } from 'react';
 import {
-  Modal,
-  Table,
-  Spin,
-  Button,
-  Typography,
-  Empty,
-  Input,
-} from '@douyinfe/semi-ui';
-import {
-  IllustrationNoResult,
-  IllustrationNoResultDark,
-} from '@douyinfe/semi-illustrations';
-import { IconSearch } from '@douyinfe/semi-icons';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '../../../ui/dialog';
+import { Button } from '../../../ui/button';
+import { Input } from '../../../ui/input';
+import { EmptyState } from '../../../ui/empty-state';
+import { Search } from 'lucide-react';
 import { API, showError } from '../../../../helpers';
 import { MODEL_TABLE_PAGE_SIZE } from '../../../../constants';
 import { useIsMobile } from '../../../../hooks/common/useIsMobile';
+import CardTable from '../../../common/ui/CardTable';
 
 const MissingModelsModal = ({ visible, onClose, onConfigureModel, t }) => {
   const [loading, setLoading] = useState(false);
@@ -68,7 +65,6 @@ const MissingModelsModal = ({ visible, onClose, onConfigureModel, t }) => {
     }
   }, [visible]);
 
-  // 过滤和分页逻辑
   const filteredModels = missingModels.filter((model) =>
     model.toLowerCase().includes(searchKeyword.toLowerCase()),
   );
@@ -88,7 +84,7 @@ const MissingModelsModal = ({ visible, onClose, onConfigureModel, t }) => {
       dataIndex: 'model',
       render: (text) => (
         <div className='flex items-center'>
-          <Typography.Text strong>{text}</Typography.Text>
+          <span className='font-semibold'>{text}</span>
         </div>
       ),
     },
@@ -99,8 +95,7 @@ const MissingModelsModal = ({ visible, onClose, onConfigureModel, t }) => {
       width: 120,
       render: (text, record) => (
         <Button
-          type='primary'
-          size='small'
+          size='sm'
           onClick={() => onConfigureModel(record.model)}
         >
           {t('配置')}
@@ -110,58 +105,48 @@ const MissingModelsModal = ({ visible, onClose, onConfigureModel, t }) => {
   ];
 
   return (
-    <Modal
-      title={
-        <div className='flex flex-col gap-2 w-full'>
-          <div className='flex items-center gap-2'>
-            <Typography.Text
-              strong
-              className='!text-[var(--semi-color-text-0)] !text-base'
-            >
-              {t('未配置的模型列表')}
-            </Typography.Text>
-            <Typography.Text type='tertiary' size='small'>
-              {t('共')} {missingModels.length} {t('个未配置模型')}
-            </Typography.Text>
+    <Dialog open={visible} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className={isMobile ? 'w-full max-w-full' : 'max-w-[600px]'}>
+        <DialogHeader>
+          <DialogTitle>
+            <div className='flex flex-col gap-2 w-full'>
+              <div className='flex items-center gap-2'>
+                <span className='font-semibold text-base'>
+                  {t('未配置的模型列表')}
+                </span>
+                <span className='text-sm text-muted-foreground'>
+                  {t('共')} {missingModels.length} {t('个未配置模型')}
+                </span>
+              </div>
+            </div>
+          </DialogTitle>
+        </DialogHeader>
+
+        {loading ? (
+          <div className='flex items-center justify-center py-8'>
+            <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-primary' />
           </div>
-        </div>
-      }
-      visible={visible}
-      onCancel={onClose}
-      footer={null}
-      size={isMobile ? 'full-width' : 'medium'}
-      className='!rounded-lg'
-    >
-      <Spin spinning={loading}>
-        {missingModels.length === 0 && !loading ? (
-          <Empty
-            image={<IllustrationNoResult style={{ width: 150, height: 150 }} />}
-            darkModeImage={
-              <IllustrationNoResultDark style={{ width: 150, height: 150 }} />
-            }
-            description={t('暂无缺失模型')}
-            style={{ padding: 30 }}
-          />
+        ) : missingModels.length === 0 && !loading ? (
+          <EmptyState title={t('暂无缺失模型')} />
         ) : (
           <div className='missing-models-content'>
-            {/* 搜索框 */}
             <div className='flex items-center justify-end gap-2 w-full mb-4'>
-              <Input
-                placeholder={t('搜索模型...')}
-                value={searchKeyword}
-                onChange={(v) => {
-                  setSearchKeyword(v);
-                  setCurrentPage(1);
-                }}
-                className='!w-full'
-                prefix={<IconSearch />}
-                showClear
-              />
+              <div className='relative w-full'>
+                <Search className='absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
+                <Input
+                  placeholder={t('搜索模型...')}
+                  value={searchKeyword}
+                  onChange={(e) => {
+                    setSearchKeyword(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className='pl-8'
+                />
+              </div>
             </div>
 
-            {/* 表格 */}
             {filteredModels.length > 0 ? (
-              <Table
+              <CardTable
                 columns={columns}
                 dataSource={dataSource}
                 pagination={{
@@ -173,25 +158,14 @@ const MissingModelsModal = ({ visible, onClose, onConfigureModel, t }) => {
                 }}
               />
             ) : (
-              <Empty
-                image={
-                  <IllustrationNoResult style={{ width: 100, height: 100 }} />
-                }
-                darkModeImage={
-                  <IllustrationNoResultDark
-                    style={{ width: 100, height: 100 }}
-                  />
-                }
-                description={
-                  searchKeyword ? t('未找到匹配的模型') : t('暂无缺失模型')
-                }
-                style={{ padding: 20 }}
+              <EmptyState
+                title={searchKeyword ? t('未找到匹配的模型') : t('暂无缺失模型')}
               />
             )}
           </div>
         )}
-      </Spin>
-    </Modal>
+      </DialogContent>
+    </Dialog>
   );
 };
 

@@ -18,7 +18,6 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Button, Col, Form, Row, Spin, Typography } from '@douyinfe/semi-ui';
 import {
   compareObjects,
   API,
@@ -27,6 +26,8 @@ import {
   showWarning,
 } from '../../../helpers';
 import { useTranslation } from 'react-i18next';
+import { Form, Row, Col, Spin } from '../../../components/ui/form-compat';
+import { Button } from '../../../components/ui/button';
 
 export default function SettingsCheckin(props) {
   const { t } = useTranslation();
@@ -98,15 +99,11 @@ export default function SettingsCheckin(props) {
         <Form
           values={inputs}
           getFormApi={(formAPI) => (refForm.current = formAPI)}
-          style={{ marginBottom: 15 }}
         >
           <Form.Section text={t('签到设置')}>
-            <Typography.Text
-              type='tertiary'
-              style={{ marginBottom: 16, display: 'block' }}
-            >
+            <span>
               {t('签到功能允许用户每日签到获取随机额度奖励')}
-            </Typography.Text>
+            </span>
             <Row gutter={16}>
               <Col xs={24} sm={12} md={8} lg={8} xl={8}>
                 <Form.Switch

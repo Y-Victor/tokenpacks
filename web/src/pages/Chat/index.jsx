@@ -19,7 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 
 import React from 'react';
 import { useTokenKeys } from '../../hooks/chat/useTokenKeys';
-import { Spin } from '@douyinfe/semi-ui';
+import { Loader2 } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -68,7 +68,7 @@ const ChatPage = () => {
   ) : (
     <div className='fixed inset-0 w-screen h-screen flex items-center justify-center bg-white/80 z-[1000] mt-[60px]'>
       <div className='flex flex-col items-center'>
-        <Spin size='large' spinning={true} tip={null} />
+        <Loader2 className="h-8 w-8 animate-spin" />
         <span
           className='whitespace-nowrap mt-2 text-center'
           style={{ color: 'var(--semi-color-primary)' }}

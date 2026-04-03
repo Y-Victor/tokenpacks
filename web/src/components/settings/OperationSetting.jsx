@@ -18,7 +18,8 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useEffect, useState } from 'react';
-import { Card, Spin } from '@douyinfe/semi-ui';
+import { Card } from '../ui/semi-compat';
+import { Loader2 } from 'lucide-react';
 import SettingsGeneral from '../../pages/Setting/Operation/SettingsGeneral';
 import SettingsHeaderNavModules from '../../pages/Setting/Operation/SettingsHeaderNavModules';
 import SettingsSidebarModulesAdmin from '../../pages/Setting/Operation/SettingsSidebarModulesAdmin';
@@ -121,40 +122,45 @@ const OperationSetting = () => {
 
   return (
     <>
-      <Spin spinning={loading} size='large'>
+      <div className="settings-panel-stack relative">
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        )}
         {/* 通用设置 */}
-        <Card style={{ marginTop: '10px' }}>
+        <Card className="settings-panel-card">
           <SettingsGeneral options={inputs} refresh={onRefresh} />
         </Card>
         {/* 顶栏模块管理 */}
-        <div style={{ marginTop: '10px' }}>
+        <div className="settings-panel-block">
           <SettingsHeaderNavModules options={inputs} refresh={onRefresh} />
         </div>
         {/* 左侧边栏模块管理（管理员） */}
-        <div style={{ marginTop: '10px' }}>
+        <div className="settings-panel-block">
           <SettingsSidebarModulesAdmin options={inputs} refresh={onRefresh} />
         </div>
         {/* 屏蔽词过滤设置 */}
-        <Card style={{ marginTop: '10px' }}>
+        <Card className="settings-panel-card">
           <SettingsSensitiveWords options={inputs} refresh={onRefresh} />
         </Card>
         {/* 日志设置 */}
-        <Card style={{ marginTop: '10px' }}>
+        <Card className="settings-panel-card">
           <SettingsLog options={inputs} refresh={onRefresh} />
         </Card>
         {/* 监控设置 */}
-        <Card style={{ marginTop: '10px' }}>
+        <Card className="settings-panel-card">
           <SettingsMonitoring options={inputs} refresh={onRefresh} />
         </Card>
         {/* 额度设置 */}
-        <Card style={{ marginTop: '10px' }}>
+        <Card className="settings-panel-card">
           <SettingsCreditLimit options={inputs} refresh={onRefresh} />
         </Card>
         {/* 签到设置 */}
-        <Card style={{ marginTop: '10px' }}>
+        <Card className="settings-panel-card">
           <SettingsCheckin options={inputs} refresh={onRefresh} />
         </Card>
-      </Spin>
+      </div>
     </>
   );
 };

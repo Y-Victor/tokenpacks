@@ -18,7 +18,6 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Button, Col, Form, Row, Spin } from '@douyinfe/semi-ui';
 import { useTranslation } from 'react-i18next';
 import {
   compareObjects,
@@ -27,6 +26,8 @@ import {
   showSuccess,
   showWarning,
 } from '../../../helpers';
+import { Form, Row, Col, Spin } from '../../../components/ui/form-compat';
+import { Button } from '../../../components/ui/button';
 
 export default function SettingsCreditLimit(props) {
   const { t } = useTranslation();
@@ -93,7 +94,6 @@ export default function SettingsCreditLimit(props) {
         <Form
           values={inputs}
           getFormApi={(formAPI) => (refForm.current = formAPI)}
-          style={{ marginBottom: 15 }}
         >
           <Form.Section text={t('额度设置')}>
             <Row gutter={16}>

@@ -17,16 +17,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import React, { useEffect } from 'react';
-import { Notification, Button, Space, Typography } from '@douyinfe/semi-ui';
+import React, { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
+import { Button } from '../../../ui/button';
 
-// 固定通知 ID，保持同一个实例即可避免闪烁
+// Fixed notification ID to maintain single instance and avoid flicker
 const NOTICE_ID = 'models-batch-actions';
 
 /**
- * SelectionNotification 选择通知组件
- * 1. 当 selectedKeys.length > 0 时，使用固定 id 创建/更新通知
- * 2. 当 selectedKeys 清空时关闭通知
+ * SelectionNotification component
+ * Shows a fixed toast notification when models are selected for batch operations.
  */
 const SelectionNotification = ({
   selectedKeys = [],
@@ -36,65 +36,60 @@ const SelectionNotification = ({
   onClear,
   onCopy,
 }) => {
-  // 根据选中数量决定显示/隐藏或更新通知
+  const toastRef = useRef(null);
+
   useEffect(() => {
     const selectedCount = selectedKeys.length;
 
     if (selectedCount > 0) {
-      const titleNode = (
-        <Space wrap>
-          <span>{t('批量操作')}</span>
-          <Typography.Text type='tertiary' size='small'>
-            {t('已选择 {{count}} 个模型', { count: selectedCount })}
-          </Typography.Text>
-        </Space>
-      );
+      // Dismiss any existing toast before showing updated one
+      if (toastRef.current) {
+        toast.dismiss(toastRef.current);
+      }
 
-      const content = (
-        <Space wrap>
-          <Button size='small' type='tertiary' theme='solid' onClick={onClear}>
-            {t('取消全选')}
-          </Button>
-          <Button
-            size='small'
-            type='primary'
-            theme='solid'
-            onClick={onAddPrefill}
-          >
-            {t('加入预填组')}
-          </Button>
-          <Button size='small' type='secondary' theme='solid' onClick={onCopy}>
-            {t('复制名称')}
-          </Button>
-          <Button size='small' type='danger' theme='solid' onClick={onDelete}>
-            {t('删除所选')}
-          </Button>
-        </Space>
+      toastRef.current = toast(
+        <div>
+          <div className='flex items-center gap-2 mb-2'>
+            <span className='font-medium'>{t('批量操作')}</span>
+            <span className='text-sm text-muted-foreground'>
+              {t('已选择 {{count}} 个模型', { count: selectedCount })}
+            </span>
+          </div>
+          <div className='flex items-center gap-2 flex-wrap'>
+            <Button size='sm' variant='secondary' onClick={onClear}>
+              {t('取消全选')}
+            </Button>
+            <Button size='sm' onClick={onAddPrefill}>
+              {t('加入预填组')}
+            </Button>
+            <Button size='sm' variant='outline' onClick={onCopy}>
+              {t('复制名称')}
+            </Button>
+            <Button size='sm' variant='destructive' onClick={onDelete}>
+              {t('删除所选')}
+            </Button>
+          </div>
+        </div>,
+        {
+          id: NOTICE_ID,
+          duration: Infinity,
+          position: 'bottom-center',
+        },
       );
-
-      // 使用相同 id 更新通知（若已存在则就地更新，不存在则创建）
-      Notification.info({
-        id: NOTICE_ID,
-        title: titleNode,
-        content,
-        duration: 0, // 不自动关闭
-        position: 'bottom',
-        showClose: false,
-      });
     } else {
-      // 取消全部勾选时关闭通知
-      Notification.close(NOTICE_ID);
+      toast.dismiss(NOTICE_ID);
+      toastRef.current = null;
     }
   }, [selectedKeys, t, onDelete, onAddPrefill, onClear, onCopy]);
 
-  // 卸载时确保关闭通知
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      Notification.close(NOTICE_ID);
+      toast.dismiss(NOTICE_ID);
     };
   }, []);
 
-  return null; // 该组件不渲染可见内容
+  return null;
 };
 
 export default SelectionNotification;

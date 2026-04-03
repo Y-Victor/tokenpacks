@@ -20,11 +20,7 @@ For commercial licensing, please contact support@quantumnous.com
 import React, { useEffect, useState } from 'react';
 import { API, showError } from '../../helpers';
 import { marked } from 'marked';
-import { Empty } from '@douyinfe/semi-ui';
-import {
-  IllustrationConstruction,
-  IllustrationConstructionDark,
-} from '@douyinfe/semi-illustrations';
+import { EmptyState } from '../../components/ui/empty-state';
 import { useTranslation } from 'react-i18next';
 
 const About = () => {
@@ -55,19 +51,17 @@ const About = () => {
     displayAbout().then();
   }, []);
 
-  const emptyStyle = {
-    padding: '24px',
-  };
+  const emptyStyle = {};
 
   const customDescription = (
     <div style={{ textAlign: 'center' }}>
       <p>{t('可在设置页面设置关于内容，支持 HTML & Markdown')}</p>
-      {t('New API项目仓库地址：')}
+      {t('TokenPacks项目仓库地址：')}
       <a
         href='https://github.com/QuantumNous/new-api'
         target='_blank'
         rel='noopener noreferrer'
-        className='!text-semi-color-primary'
+        className='text-primary'
       >
         https://github.com/QuantumNous/new-api
       </a>
@@ -76,16 +70,16 @@ const About = () => {
           href='https://github.com/QuantumNous/new-api'
           target='_blank'
           rel='noopener noreferrer'
-          className='!text-semi-color-primary'
+          className='text-primary'
         >
-          NewAPI
+          TokenPacks
         </a>{' '}
         {t('© {{currentYear}}', { currentYear })}{' '}
         <a
           href='https://github.com/QuantumNous'
           target='_blank'
           rel='noopener noreferrer'
-          className='!text-semi-color-primary'
+          className='text-primary'
         >
           QuantumNous
         </a>{' '}
@@ -94,7 +88,7 @@ const About = () => {
           href='https://github.com/songquanpeng/one-api/releases/tag/v0.5.4'
           target='_blank'
           rel='noopener noreferrer'
-          className='!text-semi-color-primary'
+          className='text-primary'
         >
           One API v0.5.4
         </a>{' '}
@@ -103,7 +97,7 @@ const About = () => {
           href='https://github.com/songquanpeng'
           target='_blank'
           rel='noopener noreferrer'
-          className='!text-semi-color-primary'
+          className='text-primary'
         >
           JustSong
         </a>
@@ -114,7 +108,7 @@ const About = () => {
           href='https://github.com/songquanpeng/one-api/blob/v0.5.4/LICENSE'
           target='_blank'
           rel='noopener noreferrer'
-          className='!text-semi-color-primary'
+          className='text-primary'
         >
           {t('MIT许可证')}
         </a>
@@ -123,7 +117,7 @@ const About = () => {
           href='https://www.gnu.org/licenses/agpl-3.0.html'
           target='_blank'
           rel='noopener noreferrer'
-          className='!text-semi-color-primary'
+          className='text-primary'
         >
           {t('AGPL v3.0协议')}
         </a>
@@ -133,23 +127,15 @@ const About = () => {
   );
 
   return (
-    <div className='mt-[60px] px-2'>
+    <div className='px-2'>
       {aboutLoaded && about === '' ? (
         <div className='flex justify-center items-center h-screen p-8'>
-          <Empty
-            image={
-              <IllustrationConstruction style={{ width: 150, height: 150 }} />
-            }
-            darkModeImage={
-              <IllustrationConstructionDark
-                style={{ width: 150, height: 150 }}
-              />
-            }
+          <EmptyState
+            type='construction'
             description={t('管理员暂时未设置任何关于内容')}
-            style={emptyStyle}
           >
             {customDescription}
-          </Empty>
+          </EmptyState>
         </div>
       ) : (
         <>

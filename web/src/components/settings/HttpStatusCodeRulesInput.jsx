@@ -18,10 +18,11 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Form, Tag, Typography } from '@douyinfe/semi-ui';
+import { Badge } from '../ui/badge';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
 
 export default function HttpStatusCodeRulesInput(props) {
-  const { Text } = Typography;
   const {
     label,
     field,
@@ -34,36 +35,33 @@ export default function HttpStatusCodeRulesInput(props) {
 
   return (
     <>
-      <Form.Input
-        label={label}
-        placeholder={placeholder}
-        extraText={extraText}
-        field={field}
-        onChange={onChange}
-      />
+      <div className="space-y-2">
+        {label && <Label>{label}</Label>}
+        <Input
+          placeholder={placeholder}
+          name={field}
+          onChange={(e) => onChange(e.target.value)}
+        />
+        {extraText && (
+          <div className="text-sm text-muted-foreground">{extraText}</div>
+        )}
+      </div>
       {parsed?.ok && parsed.tokens?.length > 0 && (
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 8,
-            marginTop: 8,
-          }}
-        >
+        <div className="flex flex-wrap gap-2 mt-2">
           {parsed.tokens.map((token) => (
-            <Tag key={token} size='small'>
+            <Badge key={token} variant="secondary">
               {token}
-            </Tag>
+            </Badge>
           ))}
         </div>
       )}
       {!parsed?.ok && (
-        <Text type='danger' style={{ display: 'block', marginTop: 8 }}>
+        <p className="text-sm text-destructive mt-2">
           {invalidText}
           {parsed?.invalidTokens && parsed.invalidTokens.length > 0
             ? `: ${parsed.invalidTokens.join(', ')}`
             : ''}
-        </Text>
+        </p>
       )}
     </>
   );

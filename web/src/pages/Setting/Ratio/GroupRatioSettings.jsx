@@ -18,7 +18,6 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Button, Col, Form, Row, Spin } from '@douyinfe/semi-ui';
 import {
   compareObjects,
   API,
@@ -28,6 +27,8 @@ import {
   verifyJSON,
 } from '../../../helpers';
 import { useTranslation } from 'react-i18next';
+import { Form, Row, Col, Spin } from '../../../components/ui/form-compat';
+import { Button } from '../../../components/ui/button';
 
 export default function GroupRatioSettings(props) {
   const { t } = useTranslation();
@@ -114,7 +115,6 @@ export default function GroupRatioSettings(props) {
       <Form
         values={inputs}
         getFormApi={(formAPI) => (refForm.current = formAPI)}
-        style={{ marginBottom: 15 }}
       >
         <Row gutter={16}>
           <Col xs={24} sm={16}>

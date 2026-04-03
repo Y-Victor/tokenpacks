@@ -41,13 +41,13 @@ import {
   Avatar,
   Row,
   Col,
-} from '@douyinfe/semi-ui';
+} from '../../../../components/ui/semi-compat';
 import {
   IconCreditCard,
   IconSave,
   IconClose,
   IconGift,
-} from '@douyinfe/semi-icons';
+} from '../../../../components/ui/semi-icons-compat';
 
 const { Text, Title } = Typography;
 

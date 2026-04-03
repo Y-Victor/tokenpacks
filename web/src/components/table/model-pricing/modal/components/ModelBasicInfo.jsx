@@ -18,11 +18,14 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Card, Avatar, Typography, Tag, Space } from '@douyinfe/semi-ui';
-import { IconInfoCircle } from '@douyinfe/semi-icons';
+import { Card } from '../../../../ui/card';
+import {
+  Avatar,
+  AvatarFallback,
+} from '../../../../ui/avatar';
+import { Badge } from '../../../../ui/badge';
+import { Info } from 'lucide-react';
 import { stringToColor } from '../../../../../helpers';
-
-const { Text } = Typography;
 
 const ModelBasicInfo = ({ modelData, vendorsMap = {}, t }) => {
   // 获取模型描述（使用后端真实数据）
@@ -58,13 +61,15 @@ const ModelBasicInfo = ({ modelData, vendorsMap = {}, t }) => {
   };
 
   return (
-    <Card className='!rounded-2xl shadow-sm border-0 mb-6'>
+    <Card className='!rounded-2xl shadow-sm border-0 mb-6 p-6'>
       <div className='flex items-center mb-4'>
-        <Avatar size='small' color='blue' className='mr-2 shadow-md'>
-          <IconInfoCircle size={16} />
+        <Avatar className='mr-2 shadow-md h-8 w-8 bg-blue-500'>
+          <AvatarFallback className='bg-blue-500 text-white'>
+            <Info size={16} />
+          </AvatarFallback>
         </Avatar>
         <div>
-          <Text className='text-lg font-medium'>{t('基本信息')}</Text>
+          <span className='text-lg font-medium'>{t('基本信息')}</span>
           <div className='text-xs text-gray-600'>
             {t('模型的详细描述和基本特性')}
           </div>
@@ -73,13 +78,18 @@ const ModelBasicInfo = ({ modelData, vendorsMap = {}, t }) => {
       <div className='text-gray-600'>
         <p className='mb-4'>{getModelDescription()}</p>
         {getModelTags().length > 0 && (
-          <Space wrap>
+          <div className='flex flex-wrap items-center gap-2'>
             {getModelTags().map((tag, index) => (
-              <Tag key={index} color={tag.color} shape='circle' size='small'>
+              <Badge
+                key={index}
+                variant='secondary'
+                className='rounded-full'
+                style={{ backgroundColor: tag.color, color: '#fff' }}
+              >
                 {tag.text}
-              </Tag>
+              </Badge>
             ))}
-          </Space>
+          </div>
         )}
       </div>
     </Card>

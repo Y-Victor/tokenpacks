@@ -19,22 +19,6 @@ For commercial licensing, please contact support@quantumnous.com
 
 import React, { useEffect, useState, useRef } from 'react';
 import {
-  Banner,
-  Button,
-  Col,
-  Form,
-  InputNumber,
-  Row,
-  Spin,
-  Progress,
-  Descriptions,
-  Tag,
-  Popconfirm,
-  RadioGroup,
-  Radio,
-  Typography,
-} from '@douyinfe/semi-ui';
-import {
   compareObjects,
   API,
   showError,
@@ -42,8 +26,18 @@ import {
   showWarning,
 } from '../../../helpers';
 import { useTranslation } from 'react-i18next';
-
-const { Text } = Typography;
+import { Form, Row, Col, Spin } from '../../../components/ui/form-compat';
+import {
+  Banner,
+  Button,
+  Descriptions,
+  InputNumber,
+  Popconfirm,
+  Progress,
+  Radio,
+  RadioGroup,
+  Tag,
+} from '../../../components/ui/semi-compat';
 
 // 格式化字节大小
 function formatBytes(bytes, decimals = 2) {
@@ -252,7 +246,6 @@ export default function SettingsPerformance(props) {
         <Form
           values={inputs}
           getFormApi={(formAPI) => (refForm.current = formAPI)}
-          style={{ marginBottom: 15 }}
         >
           <Form.Section text={t('磁盘缓存设置（磁盘换内存）')}>
             <Banner
@@ -435,9 +428,9 @@ export default function SettingsPerformance(props) {
             <Row gutter={16} style={{ marginBottom: 16 }}>
               <Col xs={24} sm={12} md={8}>
                 <div style={{ marginBottom: 12 }}>
-                  <Text strong style={{ display: 'block', marginBottom: 8 }}>
+                  <span className='block font-semibold' style={{ marginBottom: 8 }}>
                     {t('清理方式')}
-                  </Text>
+                  </span>
                   <RadioGroup
                     value={logCleanupMode}
                     onChange={(e) => setLogCleanupMode(e.target.value)}
@@ -449,11 +442,11 @@ export default function SettingsPerformance(props) {
               </Col>
               <Col xs={24} sm={12} md={8}>
                 <div style={{ marginBottom: 12 }}>
-                  <Text strong style={{ display: 'block', marginBottom: 8 }}>
+                  <span className='block font-semibold' style={{ marginBottom: 8 }}>
                     {logCleanupMode === 'by_count'
                       ? t('保留文件数')
                       : t('保留天数')}
-                  </Text>
+                  </span>
                   <InputNumber
                     value={logCleanupValue}
                     min={1}
@@ -465,16 +458,15 @@ export default function SettingsPerformance(props) {
               </Col>
               <Col xs={24} sm={12} md={8}>
                 <div style={{ marginBottom: 12 }}>
-                  <Text
-                    strong
+                  <span
+                    className='block font-semibold'
                     style={{
-                      display: 'block',
                       marginBottom: 8,
                       visibility: 'hidden',
                     }}
                   >
                     &nbsp;
-                  </Text>
+                  </span>
                 <Popconfirm
                   title={t('确认清理日志文件？')}
                   content={
@@ -547,9 +539,9 @@ export default function SettingsPerformance(props) {
                       flexDirection: 'column',
                     }}
                   >
-                    <Text strong style={{ marginBottom: 8, display: 'block' }}>
+                    <span className='block font-semibold' style={{ marginBottom: 8 }}>
                       {t('请求体磁盘缓存')}
-                    </Text>
+                    </span>
                     <Progress
                       percent={parseFloat(diskCacheUsagePercent)}
                       showInfo
@@ -567,15 +559,15 @@ export default function SettingsPerformance(props) {
                         marginBottom: 8,
                       }}
                     >
-                      <Text type='tertiary'>
+                      <span className='text-sm text-muted-foreground'>
                         {formatBytes(
                           stats.cache_stats.current_disk_usage_bytes,
                         )}{' '}
                         / {formatBytes(stats.cache_stats.disk_cache_max_bytes)}
-                      </Text>
-                      <Text type='tertiary'>
+                      </span>
+                      <span className='text-sm text-muted-foreground'>
                         {t('活跃文件')}: {stats.cache_stats.active_disk_files}
-                      </Text>
+                      </span>
                     </div>
                     <div style={{ marginTop: 'auto' }}>
                       <Tag color='blue'>
@@ -595,9 +587,9 @@ export default function SettingsPerformance(props) {
                       flexDirection: 'column',
                     }}
                   >
-                    <Text strong style={{ marginBottom: 8, display: 'block' }}>
+                    <span className='block font-semibold' style={{ marginBottom: 8 }}>
                       {t('请求体内存缓存')}
-                    </Text>
+                    </span>
                     <div
                       style={{
                         display: 'flex',
@@ -605,16 +597,16 @@ export default function SettingsPerformance(props) {
                         marginBottom: 8,
                       }}
                     >
-                      <Text>
+                      <span>
                         {t('当前缓存大小')}:{' '}
                         {formatBytes(
                           stats.cache_stats.current_memory_usage_bytes,
                         )}
-                      </Text>
-                      <Text>
+                      </span>
+                      <span>
                         {t('活跃缓存数')}:{' '}
                         {stats.cache_stats.active_memory_buffers}
-                      </Text>
+                      </span>
                     </div>
                     <div style={{ marginTop: 'auto' }}>
                       <Tag color='green'>
@@ -636,12 +628,12 @@ export default function SettingsPerformance(props) {
                         borderRadius: 8,
                       }}
                     >
-                      <Text
-                        strong
-                        style={{ marginBottom: 8, display: 'block' }}
+                      <span
+                        className='block font-semibold'
+                        style={{ marginBottom: 8 }}
                       >
                         {t('缓存目录磁盘空间')}
-                      </Text>
+                      </span>
                       <Progress
                         percent={parseFloat(
                           stats.disk_space_info.used_percent.toFixed(1),
@@ -664,16 +656,16 @@ export default function SettingsPerformance(props) {
                           gap: 8,
                         }}
                       >
-                        <Text type='tertiary'>
+                        <span className='text-sm text-muted-foreground'>
                           {t('已用')}: {formatBytes(stats.disk_space_info.used)}
-                        </Text>
-                        <Text type='tertiary'>
+                        </span>
+                        <span className='text-sm text-muted-foreground'>
                           {t('可用')}: {formatBytes(stats.disk_space_info.free)}
-                        </Text>
-                        <Text type='tertiary'>
+                        </span>
+                        <span className='text-sm text-muted-foreground'>
                           {t('总计')}:{' '}
                           {formatBytes(stats.disk_space_info.total)}
-                        </Text>
+                        </span>
                       </div>
                       {stats.disk_space_info.free <
                         inputs['performance_setting.disk_cache_max_size_mb'] *

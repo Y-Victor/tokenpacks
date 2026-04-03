@@ -21,18 +21,20 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useIsMobile } from '../../../../hooks/common/useIsMobile';
 import {
-  Collapse,
-  Empty,
-  Input,
-  Modal,
-  Radio,
-  Typography,
-} from '@douyinfe/semi-ui';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../../../ui/dialog';
+import { Button } from '../../../ui/button';
+import { Input } from '../../../ui/input';
 import {
-  IllustrationNoResult,
-  IllustrationNoResultDark,
-} from '@douyinfe/semi-illustrations';
-import { IconSearch } from '@douyinfe/semi-icons';
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '../../../ui/collapsible';
+import { Search, ChevronDown } from 'lucide-react';
 import { getModelCategories } from '../../../../helpers/render';
 
 const SingleModelSelectModal = ({
@@ -110,85 +112,67 @@ const SingleModelSelectModal = ({
   );
 
   return (
-    <Modal
-      header={
-        <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 py-4'>
-          <Typography.Title heading={5} className='m-0'>
-            {t('选择模型')}
-          </Typography.Title>
-        </div>
-      }
-      visible={visible}
-      onOk={() => onConfirm?.(selectedModel)}
-      onCancel={onCancel}
-      okText={t('确定')}
-      cancelText={t('取消')}
-      okButtonProps={{ disabled: !selectedModel }}
-      size={isMobile ? 'full-width' : 'large'}
-      closeOnEsc
-      maskClosable
-      centered
-    >
-      <Input
-        prefix={<IconSearch size={14} />}
-        placeholder={t('搜索模型')}
-        value={keyword}
-        onChange={(v) => setKeyword(v)}
-        showClear
-      />
-
-      <div style={{ maxHeight: 400, overflowY: 'auto', paddingRight: 8 }}>
-        {filteredModels.length === 0 ? (
-          <Empty
-            image={<IllustrationNoResult style={{ width: 150, height: 150 }} />}
-            darkModeImage={
-              <IllustrationNoResultDark style={{ width: 150, height: 150 }} />
-            }
-            description={t('暂无匹配模型')}
-            style={{ padding: 30 }}
+    <Dialog open={visible} onOpenChange={(open) => !open && onCancel?.()}>
+      <DialogContent className={isMobile ? 'max-w-full' : 'max-w-3xl'}>
+        <DialogHeader>
+          <DialogTitle>{t('选择模型')}</DialogTitle>
+        </DialogHeader>
+        <div className='relative'>
+          <Search className='absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
+          <Input
+            className='pl-8'
+            placeholder={t('搜索模型')}
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
           />
-        ) : (
-          <Radio.Group
-            className='w-full'
-            style={{ width: '100%' }}
-            value={selectedModel}
-            onChange={(val) => {
-              const next = val && val.target ? val.target.value : val;
-              setSelectedModel(next);
-            }}
-          >
-            <Collapse
-              className='w-full'
-              style={{ width: '100%' }}
-              defaultActiveKey={[]}
-            >
+        </div>
+
+        <div style={{ maxHeight: 400, overflowY: 'auto', paddingRight: 8 }}>
+          {filteredModels.length === 0 ? (
+            <div className='flex flex-col items-center justify-center py-8 text-muted-foreground'>
+              <p>{t('暂无匹配模型')}</p>
+            </div>
+          ) : (
+            <div className='w-full'>
               {categoryEntries.map(([key, categoryData], index) => (
-                <Collapse.Panel
-                  key={`${key}_${index}`}
-                  itemKey={`${key}_${index}`}
-                  header={
-                    <span className='flex items-center gap-2'>
-                      {categoryData.icon}
-                      <span>
-                        {categoryData.label} ({categoryData.models.length})
-                      </span>
+                <Collapsible key={`${key}_${index}`}>
+                  <CollapsibleTrigger className='flex items-center gap-2 w-full p-2 hover:bg-muted/50 rounded'>
+                    <ChevronDown className='h-4 w-4' />
+                    {categoryData.icon}
+                    <span>
+                      {categoryData.label} ({categoryData.models.length})
                     </span>
-                  }
-                >
-                  <div className='grid grid-cols-2 gap-x-4'>
-                    {categoryData.models.map((model) => (
-                      <Radio key={model} value={model} className='my-1'>
-                        {model}
-                      </Radio>
-                    ))}
-                  </div>
-                </Collapse.Panel>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className='grid grid-cols-2 gap-x-4 pl-6'>
+                      {categoryData.models.map((model) => (
+                        <label key={model} className='flex items-center gap-2 my-1 cursor-pointer'>
+                          <input
+                            type='radio'
+                            name='single-model-select'
+                            value={model}
+                            checked={selectedModel === model}
+                            onChange={() => setSelectedModel(model)}
+                            className='accent-primary'
+                          />
+                          <span className='text-sm'>{model}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
               ))}
-            </Collapse>
-          </Radio.Group>
-        )}
-      </div>
-    </Modal>
+            </div>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant='outline' onClick={onCancel}>{t('取消')}</Button>
+          <Button onClick={() => onConfirm?.(selectedModel)} disabled={!selectedModel}>
+            {t('确定')}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

@@ -19,7 +19,6 @@ For commercial licensing, please contact support@quantumnous.com
 
 import React, { useEffect, useState, useMemo, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Typography } from '@douyinfe/semi-ui';
 import { getFooterHTML, getLogo, getSystemName } from '../../helpers';
 import { StatusContext } from '../../context/Status';
 
@@ -42,9 +41,9 @@ const FooterBar = () => {
 
   const customFooter = useMemo(
     () => (
-      <footer className='relative h-auto py-16 px-6 md:px-24 w-full flex flex-col items-center justify-between overflow-hidden'>
-        <div className='absolute hidden md:block top-[204px] left-[-100px] w-[151px] h-[151px] rounded-full bg-[#FFD166]'></div>
-        <div className='absolute md:hidden bottom-[20px] left-[-50px] w-[80px] h-[80px] rounded-full bg-[#FFD166] opacity-60'></div>
+      <footer className='relative w-full overflow-hidden rounded-[28px] border border-white/60 bg-white/85 px-6 py-10 shadow-[0_24px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl md:px-10'>
+        <div className='absolute -left-8 top-8 hidden h-28 w-28 rounded-full bg-primary/10 blur-3xl md:block'></div>
+        <div className='absolute -right-10 bottom-6 h-24 w-24 rounded-full bg-sky-200/40 blur-3xl'></div>
 
         {isDemoSiteMode && (
           <div className='flex flex-col md:flex-row justify-between w-full max-w-[1110px] mb-10 gap-8'>
@@ -58,7 +57,7 @@ const FooterBar = () => {
 
             <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 w-full'>
               <div className='text-left'>
-                <p className='!text-semi-color-text-0 font-semibold mb-5'>
+                <p className='mb-5 font-semibold text-slate-900 dark:text-slate-100'>
                   {t('关于我们')}
                 </p>
                 <div className='flex flex-col gap-4'>
@@ -66,7 +65,7 @@ const FooterBar = () => {
                     href='https://docs.newapi.pro/wiki/project-introduction/'
                     target='_blank'
                     rel='noopener noreferrer'
-                    className='!text-semi-color-text-1'
+                    className='text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'
                   >
                     {t('关于项目')}
                   </a>
@@ -74,7 +73,7 @@ const FooterBar = () => {
                     href='https://docs.newapi.pro/support/community-interaction/'
                     target='_blank'
                     rel='noopener noreferrer'
-                    className='!text-semi-color-text-1'
+                    className='text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'
                   >
                     {t('联系我们')}
                   </a>
@@ -82,7 +81,7 @@ const FooterBar = () => {
                     href='https://docs.newapi.pro/wiki/features-introduction/'
                     target='_blank'
                     rel='noopener noreferrer'
-                    className='!text-semi-color-text-1'
+                    className='text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'
                   >
                     {t('功能特性')}
                   </a>
@@ -90,7 +89,7 @@ const FooterBar = () => {
               </div>
 
               <div className='text-left'>
-                <p className='!text-semi-color-text-0 font-semibold mb-5'>
+                <p className='mb-5 font-semibold text-slate-900 dark:text-slate-100'>
                   {t('文档')}
                 </p>
                 <div className='flex flex-col gap-4'>
@@ -98,7 +97,7 @@ const FooterBar = () => {
                     href='https://docs.newapi.pro/getting-started/'
                     target='_blank'
                     rel='noopener noreferrer'
-                    className='!text-semi-color-text-1'
+                    className='text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'
                   >
                     {t('快速开始')}
                   </a>
@@ -106,7 +105,7 @@ const FooterBar = () => {
                     href='https://docs.newapi.pro/installation/'
                     target='_blank'
                     rel='noopener noreferrer'
-                    className='!text-semi-color-text-1'
+                    className='text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'
                   >
                     {t('安装指南')}
                   </a>
@@ -114,7 +113,7 @@ const FooterBar = () => {
                     href='https://docs.newapi.pro/api/'
                     target='_blank'
                     rel='noopener noreferrer'
-                    className='!text-semi-color-text-1'
+                    className='text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'
                   >
                     {t('API 文档')}
                   </a>
@@ -122,7 +121,7 @@ const FooterBar = () => {
               </div>
 
               <div className='text-left'>
-                <p className='!text-semi-color-text-0 font-semibold mb-5'>
+                <p className='mb-5 font-semibold text-slate-900 dark:text-slate-100'>
                   {t('相关项目')}
                 </p>
                 <div className='flex flex-col gap-4'>
@@ -130,7 +129,7 @@ const FooterBar = () => {
                     href='https://github.com/songquanpeng/one-api'
                     target='_blank'
                     rel='noopener noreferrer'
-                    className='!text-semi-color-text-1'
+                    className='text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'
                   >
                     One API
                   </a>
@@ -138,7 +137,7 @@ const FooterBar = () => {
                     href='https://github.com/novicezk/midjourney-proxy'
                     target='_blank'
                     rel='noopener noreferrer'
-                    className='!text-semi-color-text-1'
+                    className='text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'
                   >
                     Midjourney-Proxy
                   </a>
@@ -146,7 +145,7 @@ const FooterBar = () => {
                     href='https://github.com/Calcium-Ion/neko-api-key-tool'
                     target='_blank'
                     rel='noopener noreferrer'
-                    className='!text-semi-color-text-1'
+                    className='text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'
                   >
                     neko-api-key-tool
                   </a>
@@ -154,7 +153,7 @@ const FooterBar = () => {
               </div>
 
               <div className='text-left'>
-                <p className='!text-semi-color-text-0 font-semibold mb-5'>
+                <p className='mb-5 font-semibold text-slate-900 dark:text-slate-100'>
                   {t('友情链接')}
                 </p>
                 <div className='flex flex-col gap-4'>
@@ -162,7 +161,7 @@ const FooterBar = () => {
                     href='https://github.com/Calcium-Ion/new-api-horizon'
                     target='_blank'
                     rel='noopener noreferrer'
-                    className='!text-semi-color-text-1'
+                    className='text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'
                   >
                     new-api-horizon
                   </a>
@@ -170,7 +169,7 @@ const FooterBar = () => {
                     href='https://github.com/coaidev/coai'
                     target='_blank'
                     rel='noopener noreferrer'
-                    className='!text-semi-color-text-1'
+                    className='text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'
                   >
                     CoAI
                   </a>
@@ -178,7 +177,7 @@ const FooterBar = () => {
                     href='https://www.gpt-load.com/'
                     target='_blank'
                     rel='noopener noreferrer'
-                    className='!text-semi-color-text-1'
+                    className='text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'
                   >
                     GPT-Load
                   </a>
@@ -190,22 +189,22 @@ const FooterBar = () => {
 
         <div className='flex flex-col md:flex-row items-center justify-between w-full max-w-[1110px] gap-6'>
           <div className='flex flex-wrap items-center gap-2'>
-            <Typography.Text className='text-sm !text-semi-color-text-1'>
-              © {currentYear} {systemName}. {t('版权所有')}
-            </Typography.Text>
+            <span className='text-sm text-slate-500 dark:text-slate-400'>
+              &copy; {currentYear} {systemName}. {t('版权所有')}
+            </span>
           </div>
 
           <div className='text-sm'>
-            <span className='!text-semi-color-text-1'>
+            <span className='text-slate-500 dark:text-slate-400'>
               {t('设计与开发由')}{' '}
             </span>
             <a
               href='https://github.com/QuantumNous/new-api'
               target='_blank'
               rel='noopener noreferrer'
-              className='!text-semi-color-primary font-medium'
+              className='font-medium text-primary'
             >
-              New API
+              TokenPacks
             </a>
           </div>
         </div>
@@ -219,9 +218,9 @@ const FooterBar = () => {
   }, []);
 
   return (
-    <div className='w-full'>
+    <div className='app-footer-panel w-full'>
       {footer ? (
-        <div className='relative'>
+        <div className='custom-footer-shell relative'>
           <div
             className='custom-footer'
             dangerouslySetInnerHTML={{ __html: footer }}
@@ -232,9 +231,9 @@ const FooterBar = () => {
               href='https://github.com/QuantumNous/new-api'
               target='_blank'
               rel='noopener noreferrer'
-              className='!text-semi-color-primary font-medium'
+              className='font-medium text-primary'
             >
-              New API
+              TokenPacks
             </a>
           </div>
         </div>

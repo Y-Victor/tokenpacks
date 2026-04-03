@@ -34,7 +34,7 @@ import {
   Tooltip,
   Tabs,
   TabPane,
-} from '@douyinfe/semi-ui';
+} from '../ui/semi-compat';
 import { SiAlipay, SiWechat, SiStripe } from 'react-icons/si';
 import {
   CreditCard,
@@ -45,7 +45,7 @@ import {
   Receipt,
   Sparkles,
 } from 'lucide-react';
-import { IconGift } from '@douyinfe/semi-icons';
+import { IconGift } from '../ui/semi-icons-compat';
 import { useMinimumLoadingTime } from '../../hooks/common/useMinimumLoadingTime';
 import { getCurrencyConfig } from '../../helpers/render';
 import SubscriptionPlansCard from './SubscriptionPlansCard';

@@ -18,13 +18,10 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useState, useEffect } from 'react';
-import {
-  TextArea,
-  Typography,
-  Button,
-  Switch,
-  Banner,
-} from '@douyinfe/semi-ui';
+import { Textarea } from '../ui/textarea';
+import { Button } from '../ui/button';
+import { Switch } from '../ui/switch';
+import { Alert, AlertDescription } from '../ui/alert';
 import { Code, Edit, Check, X, AlertTriangle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -87,7 +84,8 @@ const CustomRequestEditor = ({
     }
   };
 
-  const handleValueChange = (value) => {
+  const handleValueChange = (e) => {
+    const value = e.target.value;
     setLocalValue(value);
     validateJson(value);
     // 始终保存用户输入，让预览逻辑处理JSON解析错误
@@ -122,73 +120,68 @@ const CustomRequestEditor = ({
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-2'>
           <Code size={16} className='text-gray-500' />
-          <Typography.Text strong className='text-sm'>
+          <span className='text-sm font-semibold'>
             {t('自定义请求体模式')}
-          </Typography.Text>
+          </span>
         </div>
         <Switch
           checked={customRequestMode}
-          onChange={handleModeToggle}
-          checkedText={t('开')}
-          uncheckedText={t('关')}
-          size='small'
+          onCheckedChange={handleModeToggle}
         />
       </div>
 
       {customRequestMode && (
         <>
           {/* 提示信息 */}
-          <Banner
-            type='warning'
-            description={t(
-              '启用此模式后，将使用您自定义的请求体发送API请求，模型配置面板的参数设置将被忽略。',
-            )}
-            icon={<AlertTriangle size={16} />}
-            className='!rounded-lg'
-            closeIcon={null}
-          />
+          <Alert variant='warning' className='!rounded-lg'>
+            <AlertTriangle size={16} />
+            <AlertDescription>
+              {t(
+                '启用此模式后，将使用您自定义的请求体发送API请求，模型配置面板的参数设置将被忽略。',
+              )}
+            </AlertDescription>
+          </Alert>
 
           {/* JSON编辑器 */}
           <div>
             <div className='flex items-center justify-between mb-2'>
-              <Typography.Text strong className='text-sm'>
+              <span className='text-sm font-semibold'>
                 {t('请求体 JSON')}
-              </Typography.Text>
+              </span>
               <div className='flex items-center gap-2'>
                 {isValid ? (
                   <div className='flex items-center gap-1 text-green-600'>
                     <Check size={14} />
-                    <Typography.Text className='text-xs'>
+                    <span className='text-xs'>
                       {t('格式正确')}
-                    </Typography.Text>
+                    </span>
                   </div>
                 ) : (
                   <div className='flex items-center gap-1 text-red-600'>
                     <X size={14} />
-                    <Typography.Text className='text-xs'>
+                    <span className='text-xs'>
                       {t('格式错误')}
-                    </Typography.Text>
+                    </span>
                   </div>
                 )}
                 <Button
-                  theme='borderless'
-                  type='tertiary'
-                  size='small'
-                  icon={<Edit size={14} />}
+                  variant='ghost'
+                  size='sm'
                   onClick={formatJson}
                   disabled={!isValid}
                   className='!rounded-lg'
                 >
+                  <Edit size={14} className='mr-1' />
                   {t('格式化')}
                 </Button>
               </div>
             </div>
 
-            <TextArea
+            <Textarea
               value={localValue}
               onChange={handleValueChange}
               placeholder='{"model": "gpt-4o", "messages": [...], ...}'
-              autosize={{ minRows: 8, maxRows: 20 }}
+              rows={8}
               className={`custom-request-textarea !rounded-lg font-mono text-sm ${!isValid ? '!border-red-500' : ''}`}
               style={{
                 fontFamily: 'Consolas, Monaco, "Courier New", monospace',
@@ -197,16 +190,16 @@ const CustomRequestEditor = ({
             />
 
             {!isValid && errorMessage && (
-              <Typography.Text type='danger' className='text-xs mt-1 block'>
+              <span className='text-xs text-red-500 mt-1 block'>
                 {errorMessage}
-              </Typography.Text>
+              </span>
             )}
 
-            <Typography.Text className='text-xs text-gray-500 mt-2 block'>
+            <span className='text-xs text-gray-500 mt-2 block'>
               {t(
                 '请输入有效的JSON格式的请求体。您可以参考预览面板中的默认请求体格式。',
               )}
-            </Typography.Text>
+            </span>
           </div>
         </>
       )}

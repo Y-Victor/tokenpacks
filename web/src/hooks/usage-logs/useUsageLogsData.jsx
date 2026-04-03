@@ -17,9 +17,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Modal } from '@douyinfe/semi-ui';
+import { alertError } from '../../lib/confirm';
 import {
   API,
   getTodayStartTimestamp,
@@ -90,7 +90,14 @@ export const useLogsData = () => {
   });
 
   // Form state
+  const formApiRef = useRef(null);
   const [formApi, setFormApi] = useState(null);
+  const stableSetFormApi = useCallback((api) => {
+    if (!formApiRef.current) {
+      formApiRef.current = api;
+      setFormApi(api);
+    }
+  }, []);
   let now = new Date();
   const formInitValues = {
     username: '',
@@ -767,7 +774,7 @@ export const useLogsData = () => {
     if (await copy(text)) {
       showSuccess('已复制：' + text);
     } else {
-      Modal.error({ title: t('无法复制到剪贴板，请手动复制'), content: text });
+      alertError({ title: t('无法复制到剪贴板，请手动复制'), content: text });
     }
   };
 
@@ -813,7 +820,7 @@ export const useLogsData = () => {
 
     // Form state
     formApi,
-    setFormApi,
+    setFormApi: stableSetFormApi,
     formInitValues,
     getFormValues,
 

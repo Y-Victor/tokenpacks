@@ -18,7 +18,14 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Modal } from '@douyinfe/semi-ui';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../../../ui/dialog';
+import { Button } from '../../../ui/button';
 
 const DeleteTokensModal = ({
   visible,
@@ -28,19 +35,22 @@ const DeleteTokensModal = ({
   t,
 }) => {
   return (
-    <Modal
-      title={t('批量删除令牌')}
-      visible={visible}
-      onCancel={onCancel}
-      onOk={onConfirm}
-      type='warning'
-    >
-      <div>
-        {t('确定要删除所选的 {{count}} 个令牌吗？', {
-          count: selectedKeys.length,
-        })}
-      </div>
-    </Modal>
+    <Dialog open={visible} onOpenChange={(open) => !open && onCancel()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t('批量删除令牌')}</DialogTitle>
+        </DialogHeader>
+        <div className='py-4'>
+          {t('确定要删除所选的 {{count}} 个令牌吗？', {
+            count: selectedKeys.length,
+          })}
+        </div>
+        <DialogFooter>
+          <Button variant='outline' onClick={onCancel}>{t('取消')}</Button>
+          <Button variant='destructive' onClick={onConfirm}>{t('确定')}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

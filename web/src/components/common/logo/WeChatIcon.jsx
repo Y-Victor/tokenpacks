@@ -18,11 +18,10 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Icon } from '@douyinfe/semi-ui';
 
 const WeChatIcon = () => {
-  function CustomIcon() {
-    return (
+  return (
+    <div className='inline-flex items-center justify-center'>
       <svg
         t='1709714447384'
         className='icon'
@@ -42,12 +41,6 @@ const WeChatIcon = () => {
           p-id='5093'
         ></path>
       </svg>
-    );
-  }
-
-  return (
-    <div>
-      <Icon svg={<CustomIcon />} />
     </div>
   );
 };

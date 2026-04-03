@@ -18,8 +18,8 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Tag, Button, Space, Popover, Dropdown } from '@douyinfe/semi-ui';
-import { IconMore } from '@douyinfe/semi-icons';
+import { Tag, Button, Space, Popover, Dropdown } from '../../../components/ui/semi-compat';
+import { IconMore } from '../../../components/ui/semi-icons-compat';
 import { renderQuota, timestamp2string } from '../../../helpers';
 import {
   REDEMPTION_STATUS,

@@ -18,7 +18,13 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Modal } from '@douyinfe/semi-ui';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../../../ui/dialog';
 import { resetPricingFilters } from '../../../../helpers/utils';
 import FilterModalContent from './components/FilterModalContent';
 import FilterModalFooter from './components/FilterModalFooter';
@@ -40,27 +46,29 @@ const PricingFilterModal = ({ visible, onClose, sidebarProps, t }) => {
       setTokenUnit: sidebarProps.setTokenUnit,
     });
 
-  const footer = (
-    <FilterModalFooter onReset={handleResetFilters} onConfirm={onClose} t={t} />
-  );
-
   return (
-    <Modal
-      title={t('筛选')}
-      visible={visible}
-      onCancel={onClose}
-      footer={footer}
-      style={{ width: '100%', height: '100%', margin: 0 }}
-      bodyStyle={{
-        padding: 0,
-        height: 'calc(100vh - 160px)',
-        overflowY: 'auto',
-        scrollbarWidth: 'none',
-        msOverflowStyle: 'none',
-      }}
-    >
-      <FilterModalContent sidebarProps={sidebarProps} t={t} />
-    </Modal>
+    <Dialog open={visible} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent
+        className='w-full h-full max-w-full max-h-full m-0 rounded-none sm:rounded-lg sm:w-[90%] sm:h-auto sm:max-h-[90vh]'
+      >
+        <DialogHeader>
+          <DialogTitle>{t('筛选')}</DialogTitle>
+        </DialogHeader>
+        <div
+          className='overflow-y-auto'
+          style={{
+            height: 'calc(100vh - 160px)',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+          }}
+        >
+          <FilterModalContent sidebarProps={sidebarProps} t={t} />
+        </div>
+        <DialogFooter>
+          <FilterModalFooter onReset={handleResetFilters} onConfirm={onClose} t={t} />
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

@@ -33,8 +33,8 @@ import {
   Tag,
   TextArea,
   Typography,
-} from '@douyinfe/semi-ui';
-import { IconDelete, IconMenu, IconPlus } from '@douyinfe/semi-icons';
+} from '../../../../components/ui/semi-compat';
+import { IconDelete, IconMenu, IconPlus } from '../../../../components/ui/semi-icons-compat';
 import { copy, showError, showSuccess, verifyJSON } from '../../../../helpers';
 import {
   CLAUDE_CLI_HEADER_PASSTHROUGH_TEMPLATE,

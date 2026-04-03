@@ -33,7 +33,7 @@ import {
   Col,
   Divider,
   Tag,
-} from '@douyinfe/semi-ui';
+} from '../../../../components/ui/semi-compat';
 import { Save, X, Server } from 'lucide-react';
 import { API, showError, showSuccess } from '../../../../helpers';
 import { useTranslation } from 'react-i18next';

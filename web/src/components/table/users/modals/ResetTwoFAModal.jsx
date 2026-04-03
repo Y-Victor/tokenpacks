@@ -18,24 +18,40 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Modal } from '@douyinfe/semi-ui';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../../../ui/dialog';
+import { Button } from '../../../ui/button';
 
 const ResetTwoFAModal = ({ visible, onCancel, onConfirm, user, t }) => {
   return (
-    <Modal
-      title={t('确认重置两步验证')}
-      visible={visible}
-      onCancel={onCancel}
-      onOk={onConfirm}
-      type='warning'
-    >
-      {t(
-        '此操作将禁用该用户当前的两步验证配置，下次登录将不再强制输入验证码，直到用户重新启用。',
-      )}{' '}
-      {user?.username
-        ? t('目标用户：{{username}}', { username: user.username })
-        : ''}
-    </Modal>
+    <Dialog open={visible} onOpenChange={(open) => !open && onCancel()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t('确认重置两步验证')}</DialogTitle>
+        </DialogHeader>
+        <div>
+          {t(
+            '此操作将禁用该用户当前的两步验证配置，下次登录将不再强制输入验证码，直到用户重新启用。',
+          )}{' '}
+          {user?.username
+            ? t('目标用户：{{username}}', { username: user.username })
+            : ''}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onCancel}>
+            {t('取消')}
+          </Button>
+          <Button onClick={onConfirm}>
+            {t('确定')}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

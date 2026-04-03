@@ -18,7 +18,8 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useEffect, useState } from 'react';
-import { Card, Spin } from '@douyinfe/semi-ui';
+import { Card } from '../ui/semi-compat';
+import { Loader2 } from 'lucide-react';
 import SettingsPerformance from '../../pages/Setting/Performance/SettingsPerformance';
 import { API, showError, toBoolean } from '../../helpers';
 
@@ -67,12 +68,17 @@ const PerformanceSetting = () => {
 
   return (
     <>
-      <Spin spinning={loading} size='large'>
+      <div className="settings-panel-stack relative">
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        )}
         {/* 性能设置 */}
-        <Card style={{ marginTop: '10px' }}>
+        <Card className="settings-panel-card">
           <SettingsPerformance options={inputs} refresh={onRefresh} />
         </Card>
-      </Spin>
+      </div>
     </>
   );
 };

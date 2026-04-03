@@ -27,12 +27,12 @@ import {
   Modal,
   Space,
   Card,
-} from '@douyinfe/semi-ui';
+  Text,
+} from '../ui/semi-compat';
 import { API, showError, showSuccess, timestamp2string } from '../../helpers';
 import { marked } from 'marked';
 import { useTranslation } from 'react-i18next';
 import { StatusContext } from '../../context/Status';
-import Text from '@douyinfe/semi-ui/lib/es/typography/text';
 
 const LEGAL_USER_AGREEMENT_KEY = 'legal.user_agreement';
 const LEGAL_PRIVACY_POLICY_KEY = 'legal.privacy_policy';
@@ -317,16 +317,11 @@ const OtherSetting = () => {
     <Row>
       <Col
         span={24}
-        style={{
-          marginTop: '10px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '10px',
-        }}
+        className='settings-panel-stack'
       >
         {/* 版本信息 */}
         <Form>
-          <Card>
+          <Card className='settings-panel-card'>
             <Form.Section text={t('系统信息')}>
               <Row>
                 <Col span={16}>
@@ -360,7 +355,7 @@ const OtherSetting = () => {
           values={inputs}
           getFormApi={(formAPI) => (formAPISettingGeneral.current = formAPI)}
         >
-          <Card>
+          <Card className='settings-panel-card'>
             <Form.Section text={t('通用设置')}>
               <Form.TextArea
                 label={t('公告')}
@@ -421,7 +416,7 @@ const OtherSetting = () => {
           values={inputs}
           getFormApi={(formAPI) => (formAPIPersonalization.current = formAPI)}
         >
-          <Card>
+          <Card className='settings-panel-card'>
             <Form.Section text={t('个性化设置')}>
               <Form.Input
                 label={t('系统名称')}

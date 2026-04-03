@@ -18,7 +18,15 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Modal, Input, Typography } from '@douyinfe/semi-ui';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../../../ui/dialog';
+import { Button } from '../../../ui/button';
+import { Input } from '../../../ui/input';
 
 const BatchTagModal = ({
   showBatchSetTag,
@@ -30,33 +38,37 @@ const BatchTagModal = ({
   t,
 }) => {
   return (
-    <Modal
-      title={t('批量设置标签')}
-      visible={showBatchSetTag}
-      onOk={batchSetChannelTag}
-      onCancel={() => setShowBatchSetTag(false)}
-      maskClosable={false}
-      centered={true}
-      size='small'
-      className='!rounded-lg'
-    >
-      <div className='mb-5'>
-        <Typography.Text>{t('请输入要设置的标签名称')}</Typography.Text>
-      </div>
-      <Input
-        placeholder={t('请输入标签名称')}
-        value={batchSetTagValue}
-        onChange={(v) => setBatchSetTagValue(v)}
-      />
-      <div className='mt-4'>
-        <Typography.Text type='secondary'>
-          {t('已选择 ${count} 个渠道').replace(
-            '${count}',
-            selectedChannels.length,
-          )}
-        </Typography.Text>
-      </div>
-    </Modal>
+    <Dialog open={showBatchSetTag} onOpenChange={(open) => !open && setShowBatchSetTag(false)}>
+      <DialogContent className='!rounded-lg'>
+        <DialogHeader>
+          <DialogTitle>{t('批量设置标签')}</DialogTitle>
+        </DialogHeader>
+        <div className='mb-5'>
+          <p>{t('请输入要设置的标签名称')}</p>
+        </div>
+        <Input
+          placeholder={t('请输入标签名称')}
+          value={batchSetTagValue}
+          onChange={(e) => setBatchSetTagValue(e.target.value)}
+        />
+        <div className='mt-4'>
+          <p className='text-sm text-muted-foreground'>
+            {t('已选择 ${count} 个渠道').replace(
+              '${count}',
+              selectedChannels.length,
+            )}
+          </p>
+        </div>
+        <DialogFooter>
+          <Button variant='outline' onClick={() => setShowBatchSetTag(false)}>
+            {t('取消')}
+          </Button>
+          <Button onClick={batchSetChannelTag}>
+            {t('确定')}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

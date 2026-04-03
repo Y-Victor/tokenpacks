@@ -20,17 +20,18 @@ For commercial licensing, please contact support@quantumnous.com
 import React, { useState, useRef, useEffect } from 'react';
 import { useMinimumLoadingTime } from '../../../hooks/common/useMinimumLoadingTime';
 import { useContainerWidth } from '../../../hooks/common/useContainerWidth';
+import { cn } from '../../../lib/utils';
+import { Separator } from '../../ui/separator';
+import { Button, buttonVariants } from '../../ui/button';
+import { Checkbox } from '../../ui/checkbox';
+import { Skeleton } from '../../ui/skeleton';
 import {
-  Divider,
-  Button,
-  Row,
-  Col,
-  Collapsible,
-  Checkbox,
-  Skeleton,
   Tooltip,
-} from '@douyinfe/semi-ui';
-import { IconChevronDown, IconChevronUp } from '@douyinfe/semi-icons';
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '../../ui/tooltip';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 /**
  * 通用可选择按钮组组件
@@ -81,7 +82,12 @@ const SelectableButtonGroup = ({
     );
 
     return isOverflowing ? (
-      <Tooltip content={text}>{textElement}</Tooltip>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>{textElement}</TooltipTrigger>
+          <TooltipContent>{text}</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     ) : (
       textElement
     );
@@ -103,9 +109,9 @@ const SelectableButtonGroup = ({
   // 统一使用紧凑的网格间距
   const gutterSize = [4, 4];
 
-  // 计算 Semi UI Col 的 span 值
-  const getColSpan = () => {
-    return Math.floor(24 / perRow);
+  // 计算grid模板列
+  const getGridCols = () => {
+    return `repeat(${perRow}, minmax(0, 1fr))`;
   };
 
   const maskStyle = isOpen
@@ -136,48 +142,42 @@ const SelectableButtonGroup = ({
   };
 
   const renderSkeletonButtons = () => {
-    const placeholder = (
-      <Row gutter={gutterSize} style={{ lineHeight: '32px', ...style }}>
-        {Array.from({ length: skeletonCount }).map((_, index) => (
-          <Col span={getColSpan()} key={index}>
-            <div
-              style={{
-                width: '100%',
-                height: '32px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-                border: '1px solid var(--semi-color-border)',
-                borderRadius: 'var(--semi-border-radius-medium)',
-                padding: '0 12px',
-                gap: '6px',
-              }}
-            >
-              {withCheckbox && (
-                <Skeleton.Title active style={{ width: 14, height: 14 }} />
-              )}
-              <Skeleton.Title
-                active
-                style={{
-                  width: `${60 + (index % 3) * 20}px`,
-                  height: 14,
-                }}
-              />
-            </div>
-          </Col>
-        ))}
-      </Row>
-    );
-
     return (
-      <Skeleton loading={true} active placeholder={placeholder}></Skeleton>
+      <div className='grid gap-1' style={{ gridTemplateColumns: getGridCols(), lineHeight: '32px', ...style }}>
+        {Array.from({ length: skeletonCount }).map((_, index) => (
+          <div
+            key={index}
+            style={{
+              width: '100%',
+              height: '32px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              border: '1px solid hsl(var(--border))',
+              borderRadius: '6px',
+              padding: '0 12px',
+              gap: '6px',
+            }}
+          >
+            {withCheckbox && (
+              <Skeleton className='w-[14px] h-[14px]' />
+            )}
+            <Skeleton
+              className='h-[14px]'
+              style={{
+                width: `${60 + (index % 3) * 20}px`,
+              }}
+            />
+          </div>
+        ))}
+      </div>
     );
   };
 
   const contentElement = showSkeleton ? (
     renderSkeletonButtons()
   ) : (
-    <Row gutter={gutterSize} style={{ lineHeight: '32px', ...style }}>
+    <div className='grid gap-1' style={{ gridTemplateColumns: getGridCols(), lineHeight: '32px', ...style }}>
       {items.map((item) => {
         const isActive = Array.isArray(activeValue)
           ? activeValue.includes(item.value)
@@ -185,24 +185,31 @@ const SelectableButtonGroup = ({
 
         if (withCheckbox) {
           return (
-            <Col span={getColSpan()} key={item.value}>
-              <Button
-                onClick={() => {
-                  /* disabled */
+            <div key={item.value}>
+              <div
+                role='button'
+                tabIndex={0}
+                onClick={() => onChange(item.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    onChange(item.value);
+                  }
                 }}
-                theme={isActive ? 'light' : 'outline'}
-                type={isActive ? 'primary' : 'tertiary'}
-                className='sbg-button'
-                icon={
-                  <Checkbox
-                    checked={isActive}
-                    onChange={() => onChange(item.value)}
-                    style={{ pointerEvents: 'auto' }}
-                  />
-                }
-                style={{ width: '100%', cursor: 'default' }}
+                className={cn(
+                  buttonVariants({
+                    variant: isActive ? 'secondary' : 'outline',
+                  }),
+                  'sbg-button w-full cursor-pointer',
+                )}
               >
                 <div className='sbg-content'>
+                  <Checkbox
+                    checked={isActive}
+                    onCheckedChange={() => onChange(item.value)}
+                    onClick={(event) => event.stopPropagation()}
+                    className='pointer-events-auto'
+                  />
                   {item.icon && <span className='sbg-icon'>{item.icon}</span>}
                   <ConditionalTooltipText text={item.label} />
                   {item.tagCount !== undefined && shouldShowTags && (
@@ -211,19 +218,17 @@ const SelectableButtonGroup = ({
                     </span>
                   )}
                 </div>
-              </Button>
-            </Col>
+              </div>
+            </div>
           );
         }
 
         return (
-          <Col span={getColSpan()} key={item.value}>
+          <div key={item.value}>
             <Button
               onClick={() => onChange(item.value)}
-              theme={isActive ? 'light' : 'outline'}
-              type={isActive ? 'primary' : 'tertiary'}
-              className='sbg-button'
-              style={{ width: '100%' }}
+              variant={isActive ? 'secondary' : 'outline'}
+              className='sbg-button w-full'
             >
               <div className='sbg-content'>
                 {item.icon && <span className='sbg-icon'>{item.icon}</span>}
@@ -235,10 +240,10 @@ const SelectableButtonGroup = ({
                 )}
               </div>
             </Button>
-          </Col>
+          </div>
         );
       })}
-    </Row>
+    </div>
   );
 
   return (
@@ -247,26 +252,33 @@ const SelectableButtonGroup = ({
       ref={containerRef}
     >
       {title && (
-        <Divider margin='12px' align='left'>
-          {showSkeleton ? (
-            <Skeleton.Title active style={{ width: 80, height: 14 }} />
-          ) : (
-            title
-          )}
-        </Divider>
+        <div className='flex items-center gap-3 my-3'>
+          <Separator className='flex-1' />
+          <span className='text-sm text-muted-foreground whitespace-nowrap'>
+            {showSkeleton ? (
+              <Skeleton className='w-[80px] h-[14px]' />
+            ) : (
+              title
+            )}
+          </span>
+          <Separator className='flex-1' />
+        </div>
       )}
       {needCollapse && !showSkeleton ? (
         <div style={{ position: 'relative' }}>
-          <Collapsible
-            isOpen={isOpen}
-            collapseHeight={collapseHeight}
-            style={{ ...maskStyle }}
+          <div
+            style={{
+              maxHeight: isOpen ? 'none' : `${collapseHeight}px`,
+              overflow: 'hidden',
+              transition: 'max-height 0.3s ease',
+              ...maskStyle,
+            }}
           >
             {contentElement}
-          </Collapsible>
+          </div>
           {isOpen ? null : (
             <div onClick={toggle} style={{ ...linkStyle }}>
-              <IconChevronDown size='small' />
+              <ChevronDown className='h-3 w-3' />
               <span>{t('展开更多')}</span>
             </div>
           )}
@@ -280,7 +292,7 @@ const SelectableButtonGroup = ({
                 bottom: 'auto',
               }}
             >
-              <IconChevronUp size='small' />
+              <ChevronUp className='h-3 w-3' />
               <span>{t('收起')}</span>
             </div>
           )}

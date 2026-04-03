@@ -18,8 +18,9 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Input, Typography, Button, Switch } from '@douyinfe/semi-ui';
-import { IconFile } from '@douyinfe/semi-icons';
+import { Input } from '../ui/input';
+import { Button } from '../ui/button';
+import { Switch } from '../ui/switch';
 import { FileText, Plus, X, Image } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -57,54 +58,49 @@ const ImageUrlInput = ({
               imageEnabled && !disabled ? 'text-blue-500' : 'text-gray-400'
             }
           />
-          <Typography.Text strong className='text-sm'>
+          <span className='text-sm font-semibold'>
             {t('图片地址')}
-          </Typography.Text>
+          </span>
           {disabled && (
-            <Typography.Text className='text-xs text-orange-600'>
+            <span className='text-xs text-orange-600'>
               ({t('已在自定义模式中忽略')})
-            </Typography.Text>
+            </span>
           )}
         </div>
         <div className='flex items-center gap-2'>
           <Switch
             checked={imageEnabled}
-            onChange={onImageEnabledChange}
-            checkedText={t('启用')}
-            uncheckedText={t('停用')}
-            size='small'
-            className='flex-shrink-0'
+            onCheckedChange={onImageEnabledChange}
             disabled={disabled}
           />
           <Button
-            icon={<Plus size={14} />}
-            size='small'
-            theme='solid'
-            type='primary'
+            size='icon'
             onClick={handleAddImageUrl}
             className='!rounded-full !w-4 !h-4 !p-0 !min-w-0'
             disabled={!imageEnabled || disabled}
-          />
+          >
+            <Plus size={14} />
+          </Button>
         </div>
       </div>
 
       {!imageEnabled ? (
-        <Typography.Text className='text-xs text-gray-500 mb-2 block'>
+        <span className='text-xs text-gray-500 mb-2 block'>
           {disabled
             ? t('图片功能在自定义请求体模式下不可用')
             : t('启用后可添加图片URL进行多模态对话')}
-        </Typography.Text>
+        </span>
       ) : imageUrls.length === 0 ? (
-        <Typography.Text className='text-xs text-gray-500 mb-2 block'>
+        <span className='text-xs text-gray-500 mb-2 block'>
           {disabled
             ? t('图片功能在自定义请求体模式下不可用')
             : t('点击 + 按钮添加图片URL进行多模态对话')}
-        </Typography.Text>
+        </span>
       ) : (
-        <Typography.Text className='text-xs text-gray-500 mb-2 block'>
+        <span className='text-xs text-gray-500 mb-2 block'>
           {t('已添加')} {imageUrls.length} {t('张图片')}
           {disabled ? ` (${t('自定义模式下不可用')})` : ''}
-        </Typography.Text>
+        </span>
       )}
 
       <div
@@ -116,22 +112,20 @@ const ImageUrlInput = ({
               <Input
                 placeholder={`https://example.com/image${index + 1}.jpg`}
                 value={url}
-                onChange={(value) => handleUpdateImageUrl(index, value)}
-                className='!rounded-lg'
-                size='small'
-                prefix={<IconFile size='small' />}
+                onChange={(e) => handleUpdateImageUrl(index, e.target.value)}
+                className='!rounded-lg h-8 text-sm'
                 disabled={!imageEnabled || disabled}
               />
             </div>
             <Button
-              icon={<X size={12} />}
-              size='small'
-              theme='borderless'
-              type='danger'
+              size='icon'
+              variant='ghost'
               onClick={() => handleRemoveImageUrl(index)}
               className='!rounded-full !w-6 !h-6 !p-0 !min-w-0 !text-red-500 hover:!bg-red-50 flex-shrink-0'
               disabled={!imageEnabled || disabled}
-            />
+            >
+              <X size={12} />
+            </Button>
           </div>
         ))}
       </div>

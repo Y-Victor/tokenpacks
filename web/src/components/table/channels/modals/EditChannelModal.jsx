@@ -49,7 +49,7 @@ import {
   Tooltip,
   Collapse,
   Dropdown,
-} from '@douyinfe/semi-ui';
+} from '../../../../components/ui/semi-compat';
 import {
   getChannelModels,
   copy,
@@ -83,7 +83,7 @@ import {
   IconBolt,
   IconSearch,
   IconChevronDown,
-} from '@douyinfe/semi-icons';
+} from '../../../../components/ui/semi-icons-compat';
 
 const { Text, Title } = Typography;
 
@@ -2041,8 +2041,8 @@ const EditChannelModal = (props) => {
       <div
         style={style}
         className={optionClassName}
-        onClick={() => !disabled && onClick()}
-        onMouseEnter={(e) => onMouseEnter()}
+        onClick={() => !disabled && onClick?.()}
+        onMouseEnter={() => onMouseEnter?.()}
       >
         <div className='flex items-center gap-3 w-full'>
           <div className='flex-shrink-0 w-5 h-5 flex items-center justify-center'>

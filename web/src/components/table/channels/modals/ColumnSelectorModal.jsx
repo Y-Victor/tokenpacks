@@ -18,7 +18,15 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Modal, Button, Checkbox } from '@douyinfe/semi-ui';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../../../ui/dialog';
+import { Button } from '../../../ui/button';
+import { Checkbox } from '../../../ui/checkbox';
 import { getChannelsColumns } from '../ChannelsColumnDefs';
 
 const ColumnSelectorModal = ({
@@ -69,59 +77,55 @@ const ColumnSelectorModal = ({
   });
 
   return (
-    <Modal
-      title={t('列设置')}
-      visible={showColumnSelector}
-      onCancel={() => setShowColumnSelector(false)}
-      footer={
-        <div className='flex justify-end'>
-          <Button onClick={() => initDefaultColumns()}>{t('重置')}</Button>
-          <Button onClick={() => setShowColumnSelector(false)}>
+    <Dialog open={showColumnSelector} onOpenChange={(open) => !open && setShowColumnSelector(false)}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t('列设置')}</DialogTitle>
+        </DialogHeader>
+        <div style={{ marginBottom: 20 }}>
+          <div className='flex items-center gap-2'>
+            <Checkbox
+              checked={Object.values(visibleColumns).every((v) => v === true)}
+              ref={undefined}
+              onCheckedChange={(checked) => handleSelectAll(!!checked)}
+            />
+            <span>{t('全选')}</span>
+          </div>
+        </div>
+        <div
+          className='flex flex-wrap max-h-96 overflow-y-auto rounded-lg p-4 border'
+        >
+          {allColumns.map((column) => {
+            if (!column.title) {
+              return null;
+            }
+
+            return (
+              <div key={column.key} className='w-1/2 mb-4 pr-2'>
+                <div className='flex items-center gap-2'>
+                  <Checkbox
+                    checked={!!visibleColumns[column.key]}
+                    onCheckedChange={(checked) =>
+                      handleColumnVisibilityChange(column.key, !!checked)
+                    }
+                  />
+                  <span>{column.title}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <DialogFooter>
+          <Button variant='outline' onClick={() => initDefaultColumns()}>{t('重置')}</Button>
+          <Button variant='outline' onClick={() => setShowColumnSelector(false)}>
             {t('取消')}
           </Button>
           <Button onClick={() => setShowColumnSelector(false)}>
             {t('确定')}
           </Button>
-        </div>
-      }
-    >
-      <div style={{ marginBottom: 20 }}>
-        <Checkbox
-          checked={Object.values(visibleColumns).every((v) => v === true)}
-          indeterminate={
-            Object.values(visibleColumns).some((v) => v === true) &&
-            !Object.values(visibleColumns).every((v) => v === true)
-          }
-          onChange={(e) => handleSelectAll(e.target.checked)}
-        >
-          {t('全选')}
-        </Checkbox>
-      </div>
-      <div
-        className='flex flex-wrap max-h-96 overflow-y-auto rounded-lg p-4'
-        style={{ border: '1px solid var(--semi-color-border)' }}
-      >
-        {allColumns.map((column) => {
-          // Skip columns without title
-          if (!column.title) {
-            return null;
-          }
-
-          return (
-            <div key={column.key} className='w-1/2 mb-4 pr-2'>
-              <Checkbox
-                checked={!!visibleColumns[column.key]}
-                onChange={(e) =>
-                  handleColumnVisibilityChange(column.key, e.target.checked)
-                }
-              >
-                {column.title}
-              </Checkbox>
-            </div>
-          );
-        })}
-      </div>
-    </Modal>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

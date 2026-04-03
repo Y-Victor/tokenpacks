@@ -31,8 +31,8 @@ import {
   Switch,
   Row,
   Col,
-} from '@douyinfe/semi-ui';
-import { IconMail, IconKey, IconBell, IconLink } from '@douyinfe/semi-icons';
+} from '../../../ui/semi-compat';
+import { IconMail, IconKey, IconBell, IconLink } from '../../../ui/semi-icons-compat';
 import { ShieldCheck, Bell, DollarSign, Settings } from 'lucide-react';
 import {
   renderQuotaWithPrompt,

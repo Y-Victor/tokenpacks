@@ -18,11 +18,10 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import HeaderBar from './headerbar';
-import { Layout } from '@douyinfe/semi-ui';
 import SiderBar from './SiderBar';
 import App from '../../App';
 import FooterBar from './Footer';
-import { ToastContainer } from 'react-toastify';
+import { Toaster } from '../ui/sonner';
 import React, { useContext, useEffect, useState } from 'react';
 import { useIsMobile } from '../../hooks/common/useIsMobile';
 import { useSidebarCollapsed } from '../../hooks/common/useSidebarCollapsed';
@@ -38,7 +37,7 @@ import { UserContext } from '../../context/User';
 import { StatusContext } from '../../context/Status';
 import { useLocation } from 'react-router-dom';
 import { normalizeLanguage } from '../../i18n/language';
-const { Sider, Content, Header } = Layout;
+import { cn } from '../../lib/utils';
 
 const PageLayout = () => {
   const [userState, userDispatch] = useContext(UserContext);
@@ -144,7 +143,7 @@ const PageLayout = () => {
   }, [i18n, userState?.user?.setting]);
 
   return (
-    <Layout
+    <div
       className='app-layout'
       style={{
         display: 'flex',
@@ -152,37 +151,50 @@ const PageLayout = () => {
         overflow: isMobile ? 'visible' : 'hidden',
       }}
     >
-      <Header
+      <header
+        className='app-header-shell'
         style={{
-          padding: 0,
+          padding: isMobile ? '0 12px' : '0 16px',
           height: 'auto',
           lineHeight: 'normal',
           position: 'fixed',
           width: '100%',
-          top: 0,
-          zIndex: 100,
+          top: isMobile ? '10px' : '14px',
+          left: 0,
+          zIndex: 'var(--z-shell-header)',
+          boxSizing: 'border-box',
         }}
       >
         <HeaderBar
           onMobileMenuToggle={() => setDrawerOpen((prev) => !prev)}
           drawerOpen={drawerOpen}
         />
-      </Header>
-      <Layout
+      </header>
+      {isMobile && showSider && (
+        <button
+          type='button'
+          aria-label='Close sidebar overlay'
+          className='app-mobile-backdrop'
+          onClick={() => setDrawerOpen(false)}
+        />
+      )}
+      <div
+        className='app-body-shell'
         style={{
           overflow: isMobile ? 'visible' : 'auto',
           display: 'flex',
           flexDirection: 'column',
+          flex: '1 1 auto',
         }}
       >
         {showSider && (
-          <Sider
+          <aside
             className='app-sider'
             style={{
               position: 'fixed',
-              left: 0,
-              top: '64px',
-              zIndex: 99,
+              left: isMobile ? '12px' : '16px',
+              top: isMobile ? '88px' : '100px',
+              zIndex: 'var(--z-shell-sidebar)',
               border: 'none',
               paddingRight: '0',
               width: 'var(--sidebar-current-width)',
@@ -193,45 +205,58 @@ const PageLayout = () => {
                 if (isMobile) setDrawerOpen(false);
               }}
             />
-          </Sider>
+          </aside>
         )}
-        <Layout
+        <div
+          className='app-main-shell'
           style={{
             marginLeft: isMobile
               ? '0'
               : showSider
-                ? 'var(--sidebar-current-width)'
+                ? 'calc(var(--sidebar-current-width) + 24px)'
                 : '0',
             flex: '1 1 auto',
             display: 'flex',
             flexDirection: 'column',
           }}
         >
-          <Content
+          <main
+            className={cn(
+              'app-main',
+              isConsoleRoute && 'app-main-console',
+              shouldInnerPadding
+                ? 'app-content-surface app-content-surface-padded'
+                : 'app-content-surface app-content-surface-flush',
+            )}
             style={{
               flex: '1 0 auto',
               overflowY: isMobile ? 'visible' : 'hidden',
               WebkitOverflowScrolling: 'touch',
-              padding: shouldInnerPadding ? (isMobile ? '5px' : '24px') : '0',
+              padding: shouldInnerPadding
+                ? isMobile
+                  ? '8px'
+                  : '10px 14px 14px'
+                : '0',
               position: 'relative',
             }}
           >
             <App />
-          </Content>
+          </main>
           {!shouldHideFooter && (
-            <Layout.Footer
+            <footer
+              className='app-footer-shell'
               style={{
                 flex: '0 0 auto',
                 width: '100%',
               }}
             >
               <FooterBar />
-            </Layout.Footer>
+            </footer>
           )}
-        </Layout>
-      </Layout>
-      <ToastContainer />
-    </Layout>
+        </div>
+      </div>
+      <Toaster richColors position='top-center' />
+    </div>
   );
 };
 

@@ -28,7 +28,7 @@ import {
   Divider,
   Badge,
   Tooltip,
-} from '@douyinfe/semi-ui';
+} from '../../../components/ui/semi-compat';
 import { renderQuota } from '../../../helpers';
 import { convertUSDToCurrency } from '../../../helpers/render';
 

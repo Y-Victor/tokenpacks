@@ -18,10 +18,12 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Card, Avatar, Typography, Badge } from '@douyinfe/semi-ui';
-import { IconLink } from '@douyinfe/semi-icons';
-
-const { Text } = Typography;
+import { Card } from '../../../../ui/card';
+import {
+  Avatar,
+  AvatarFallback,
+} from '../../../../ui/avatar';
+import { Link } from 'lucide-react';
 
 const ModelEndpoints = ({ modelData, endpointMap = {}, t }) => {
   const renderAPIEndpoints = () => {
@@ -42,11 +44,10 @@ const ModelEndpoints = ({ modelData, endpointMap = {}, t }) => {
       return (
         <div
           key={type}
-          className='flex justify-between border-b border-dashed last:border-0 py-2 last:pb-0'
-          style={{ borderColor: 'var(--semi-color-border)' }}
+          className='flex justify-between border-b border-dashed last:border-0 py-2 last:pb-0 border-border'
         >
           <span className='flex items-center pr-5'>
-            <Badge dot type='success' className='mr-2' />
+            <span className='mr-2 h-2 w-2 rounded-full bg-green-500 inline-block' />
             {type}
             {path && '：'}
             {path && (
@@ -62,13 +63,15 @@ const ModelEndpoints = ({ modelData, endpointMap = {}, t }) => {
   };
 
   return (
-    <Card className='!rounded-2xl shadow-sm border-0 mb-6'>
+    <Card className='!rounded-2xl shadow-sm border-0 mb-6 p-6'>
       <div className='flex items-center mb-4'>
-        <Avatar size='small' color='purple' className='mr-2 shadow-md'>
-          <IconLink size={16} />
+        <Avatar className='mr-2 shadow-md h-8 w-8 bg-purple-500'>
+          <AvatarFallback className='bg-purple-500 text-white'>
+            <Link size={16} />
+          </AvatarFallback>
         </Avatar>
         <div>
-          <Text className='text-lg font-medium'>{t('API端点')}</Text>
+          <span className='text-lg font-medium'>{t('API端点')}</span>
           <div className='text-xs text-gray-600'>
             {t('模型支持的接口端点信息')}
           </div>

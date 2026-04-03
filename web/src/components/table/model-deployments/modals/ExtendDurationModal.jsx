@@ -30,7 +30,7 @@ import {
   Tag,
   Banner,
   Spin,
-} from '@douyinfe/semi-ui';
+} from '../../../../components/ui/semi-compat';
 import {
   FaClock,
   FaCalculator,

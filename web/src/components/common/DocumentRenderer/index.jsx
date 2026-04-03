@@ -19,12 +19,9 @@ For commercial licensing, please contact support@quantumnous.com
 
 import React, { useEffect, useState } from 'react';
 import { API, showError } from '../../../helpers';
-import { Empty, Card, Spin, Typography } from '@douyinfe/semi-ui';
-const { Title } = Typography;
-import {
-  IllustrationConstruction,
-  IllustrationConstructionDark,
-} from '@douyinfe/semi-illustrations';
+import { Card, CardContent } from '../../ui/card';
+import { EmptyState } from '../../ui/empty-state';
+import { Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import MarkdownRenderer from '../markdown/MarkdownRenderer';
 
@@ -154,7 +151,7 @@ const DocumentRenderer = ({ apiEndpoint, title, cacheKey, emptyMessage }) => {
   if (loading) {
     return (
       <div className='flex justify-center items-center min-h-screen'>
-        <Spin size='large' />
+        <Loader2 className='h-12 w-12 animate-spin text-muted-foreground' />
       </div>
     );
   }
@@ -163,14 +160,9 @@ const DocumentRenderer = ({ apiEndpoint, title, cacheKey, emptyMessage }) => {
   if (!content || content.trim() === '') {
     return (
       <div className='flex justify-center items-center min-h-screen bg-gray-50'>
-        <Empty
+        <EmptyState
+          type='construction'
           title={t('管理员未设置' + title + '内容')}
-          image={
-            <IllustrationConstruction style={{ width: 150, height: 150 }} />
-          }
-          darkModeImage={
-            <IllustrationConstructionDark style={{ width: 150, height: 150 }} />
-          }
           className='p-8'
         />
       </div>
@@ -182,24 +174,26 @@ const DocumentRenderer = ({ apiEndpoint, title, cacheKey, emptyMessage }) => {
     return (
       <div className='flex justify-center items-center min-h-screen bg-gray-50 p-4'>
         <Card className='max-w-md w-full'>
-          <div className='text-center'>
-            <Title heading={4} className='mb-4'>
-              {title}
-            </Title>
-            <p className='text-gray-600 mb-4'>
-              {t('管理员设置了外部链接，点击下方按钮访问')}
-            </p>
-            <a
-              href={content.trim()}
-              target='_blank'
-              rel='noopener noreferrer'
-              title={content.trim()}
-              aria-label={`${t('访问' + title)}: ${content.trim()}`}
-              className='inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors'
-            >
-              {t('访问' + title)}
-            </a>
-          </div>
+          <CardContent className='p-6'>
+            <div className='text-center'>
+              <h4 className='text-lg font-semibold mb-4'>
+                {title}
+              </h4>
+              <p className='text-gray-600 mb-4'>
+                {t('管理员设置了外部链接，点击下方按钮访问')}
+              </p>
+              <a
+                href={content.trim()}
+                target='_blank'
+                rel='noopener noreferrer'
+                title={content.trim()}
+                aria-label={`${t('访问' + title)}: ${content.trim()}`}
+                className='inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors'
+              >
+                {t('访问' + title)}
+              </a>
+            </div>
+          </CardContent>
         </Card>
       </div>
     );
@@ -220,9 +214,9 @@ const DocumentRenderer = ({ apiEndpoint, title, cacheKey, emptyMessage }) => {
       <div className='min-h-screen bg-gray-50'>
         <div className='max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8'>
           <div className='bg-white rounded-lg shadow-sm p-8'>
-            <Title heading={2} className='text-center mb-8'>
+            <h2 className='text-2xl font-semibold text-center mb-8'>
               {title}
-            </Title>
+            </h2>
             <div
               className='prose prose-lg max-w-none'
               dangerouslySetInnerHTML={{ __html: htmlContent }}

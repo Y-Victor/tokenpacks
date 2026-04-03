@@ -29,7 +29,8 @@ import {
   copy,
   getQuotaPerUnit,
 } from '../../helpers';
-import { Modal, Toast } from '@douyinfe/semi-ui';
+import { Modal } from '../ui/semi-compat';
+import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { UserContext } from '../../context/User';
 import { StatusContext } from '../../context/Status';
@@ -629,7 +630,7 @@ const TopUp = () => {
           setAmount(parseFloat(data));
         } else {
           setAmount(0);
-          Toast.error({ content: '错误：' + data, id: 'getAmount' });
+          toast.error({ content: '错误：' + data, id: 'getAmount' });
         }
       } else {
         showError(res);
@@ -655,7 +656,7 @@ const TopUp = () => {
           setAmount(parseFloat(data));
         } else {
           setAmount(0);
-          Toast.error({ content: '错误：' + data, id: 'getAmount' });
+          toast.error({ content: '错误：' + data, id: 'getAmount' });
         }
       } else {
         showError(res);
@@ -713,7 +714,7 @@ const TopUp = () => {
   };
 
   return (
-    <div className='w-full max-w-7xl mx-auto relative min-h-screen lg:min-h-0 mt-[60px] px-2'>
+    <div className='w-full max-w-7xl mx-auto relative min-h-screen lg:min-h-0 px-2'>
       {/* 划转模态框 */}
       <TransferModal
         t={t}

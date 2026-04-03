@@ -18,7 +18,8 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Tabs, TabPane, Tag } from '@douyinfe/semi-ui';
+import { Tabs, TabsList, TabsTrigger } from '../../ui/tabs';
+import { Badge } from '../../ui/badge';
 import { CHANNEL_OPTIONS } from '../../../constants';
 import { getChannelIcon } from '../../../helpers';
 
@@ -45,51 +46,44 @@ const ChannelsTabs = ({
 
   return (
     <Tabs
-      activeKey={activeTypeKey}
-      type='card'
-      collapsible
-      onChange={handleTabChange}
+      value={activeTypeKey}
+      onValueChange={handleTabChange}
       className='mb-2'
     >
-      <TabPane
-        itemKey='all'
-        tab={
+      <TabsList className='flex flex-wrap h-auto'>
+        <TabsTrigger value='all'>
           <span className='flex items-center gap-2'>
             {t('全部')}
-            <Tag
-              color={activeTypeKey === 'all' ? 'red' : 'grey'}
-              shape='circle'
+            <Badge
+              variant={activeTypeKey === 'all' ? 'destructive' : 'secondary'}
+              className='rounded-full'
             >
               {channelTypeCounts['all'] || 0}
-            </Tag>
+            </Badge>
           </span>
-        }
-      />
+        </TabsTrigger>
 
-      {CHANNEL_OPTIONS.filter((opt) =>
-        availableTypeKeys.includes(String(opt.value)),
-      ).map((option) => {
-        const key = String(option.value);
-        const count = channelTypeCounts[option.value] || 0;
-        return (
-          <TabPane
-            key={key}
-            itemKey={key}
-            tab={
+        {CHANNEL_OPTIONS.filter((opt) =>
+          availableTypeKeys.includes(String(opt.value)),
+        ).map((option) => {
+          const key = String(option.value);
+          const count = channelTypeCounts[option.value] || 0;
+          return (
+            <TabsTrigger key={key} value={key}>
               <span className='flex items-center gap-2'>
                 {getChannelIcon(option.value)}
                 {option.label}
-                <Tag
-                  color={activeTypeKey === key ? 'red' : 'grey'}
-                  shape='circle'
+                <Badge
+                  variant={activeTypeKey === key ? 'destructive' : 'secondary'}
+                  className='rounded-full'
                 >
                   {count}
-                </Tag>
+                </Badge>
               </span>
-            }
-          />
-        );
-      })}
+            </TabsTrigger>
+          );
+        })}
+      </TabsList>
     </Tabs>
   );
 };

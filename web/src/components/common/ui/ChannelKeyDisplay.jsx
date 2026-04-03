@@ -19,7 +19,9 @@ For commercial licensing, please contact support@quantumnous.com
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, Button, Typography, Tag } from '@douyinfe/semi-ui';
+import { Card, CardContent } from '../../ui/card';
+import { Button } from '../../ui/button';
+import { Badge } from '../../ui/badge';
 import { copy, showSuccess } from '../../../helpers';
 
 /**
@@ -121,27 +123,26 @@ const ChannelKeyDisplay = ({
               clipRule='evenodd'
             />
           </svg>
-          <Typography.Text strong className='text-green-700'>
+          <span className='font-semibold text-green-700'>
             {successText || t('验证成功')}
-          </Typography.Text>
+          </span>
         </div>
       )}
 
       {/* 密钥内容 */}
       <div className='space-y-3'>
         <div className='flex items-center justify-between'>
-          <Typography.Text strong>
+          <span className='font-semibold text-sm'>
             {isMultipleKeys ? t('渠道密钥列表') : t('渠道密钥')}
-          </Typography.Text>
+          </span>
           {isMultipleKeys && (
             <div className='flex items-center gap-2'>
-              <Typography.Text type='tertiary' size='small'>
+              <span className='text-xs text-muted-foreground'>
                 {t('共 {{count}} 个密钥', { count: parsedKeys.length })}
-              </Typography.Text>
+              </span>
               <Button
-                size='small'
-                type='primary'
-                theme='outline'
+                size='sm'
+                variant='outline'
                 onClick={handleCopyAll}
               >
                 {t('复制全部')}
@@ -156,72 +157,56 @@ const ChannelKeyDisplay = ({
               key={keyItem.id}
               className='!rounded-lg !border !border-gray-200 dark:!border-gray-700'
             >
-              <div className='space-y-2'>
-                <div className='flex items-center justify-between'>
-                  <Typography.Text
-                    strong
-                    size='small'
-                    className='text-gray-700 dark:text-gray-300'
-                  >
-                    {keyItem.label}
-                  </Typography.Text>
-                  <div className='flex items-center gap-2'>
-                    {keyItem.type === 'json' && (
-                      <Tag size='small' color='blue'>
-                        {t('JSON')}
-                      </Tag>
-                    )}
-                    <Button
-                      size='small'
-                      type='primary'
-                      theme='outline'
-                      icon={
+              <CardContent className='p-4'>
+                <div className='space-y-2'>
+                  <div className='flex items-center justify-between'>
+                    <span className='font-semibold text-sm text-gray-700 dark:text-gray-300'>
+                      {keyItem.label}
+                    </span>
+                    <div className='flex items-center gap-2'>
+                      {keyItem.type === 'json' && (
+                        <Badge variant='default'>
+                          {t('JSON')}
+                        </Badge>
+                      )}
+                      <Button
+                        size='sm'
+                        variant='outline'
+                        onClick={() => handleCopyKey(keyItem.content)}
+                      >
                         <svg
-                          className='w-3 h-3'
+                          className='w-3 h-3 mr-1'
                           fill='currentColor'
                           viewBox='0 0 20 20'
                         >
                           <path d='M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z' />
                           <path d='M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z' />
                         </svg>
-                      }
-                      onClick={() => handleCopyKey(keyItem.content)}
-                    >
-                      {t('复制')}
-                    </Button>
+                        {t('复制')}
+                      </Button>
+                    </div>
                   </div>
-                </div>
 
-                <div className='bg-gray-50 dark:bg-gray-800 rounded-lg p-3 max-h-40 overflow-auto'>
-                  <Typography.Text
-                    code
-                    className='text-xs font-mono break-all whitespace-pre-wrap text-gray-800 dark:text-gray-200'
-                  >
-                    {keyItem.content}
-                  </Typography.Text>
-                </div>
+                  <div className='bg-gray-50 dark:bg-gray-800 rounded-lg p-3 max-h-40 overflow-auto'>
+                    <code className='text-xs font-mono break-all whitespace-pre-wrap text-gray-800 dark:text-gray-200'>
+                      {keyItem.content}
+                    </code>
+                  </div>
 
-                {keyItem.type === 'json' && (
-                  <Typography.Text
-                    type='tertiary'
-                    size='small'
-                    className='block'
-                  >
-                    {t('JSON格式密钥，请确保格式正确')}
-                  </Typography.Text>
-                )}
-              </div>
+                  {keyItem.type === 'json' && (
+                    <span className='block text-xs text-muted-foreground'>
+                      {t('JSON格式密钥，请确保格式正确')}
+                    </span>
+                  )}
+                </div>
+              </CardContent>
             </Card>
           ))}
         </div>
 
         {isMultipleKeys && (
           <div className='bg-blue-50 dark:bg-blue-900 rounded-lg p-3'>
-            <Typography.Text
-              type='tertiary'
-              size='small'
-              className='text-blue-700 dark:text-blue-300'
-            >
+            <span className='text-xs text-blue-700 dark:text-blue-300'>
               <svg
                 className='w-4 h-4 inline mr-1'
                 fill='currentColor'
@@ -236,7 +221,7 @@ const ChannelKeyDisplay = ({
               {t(
                 '检测到多个密钥，您可以单独复制每个密钥，或点击复制全部获取完整内容。',
               )}
-            </Typography.Text>
+            </span>
           </div>
         )}
       </div>
@@ -257,18 +242,15 @@ const ChannelKeyDisplay = ({
               />
             </svg>
             <div>
-              <Typography.Text
-                strong
-                className='text-yellow-800 dark:text-yellow-200'
-              >
+              <span className='font-semibold text-sm text-yellow-800 dark:text-yellow-200'>
                 {t('安全提醒')}
-              </Typography.Text>
-              <Typography.Text className='block text-yellow-700 dark:text-yellow-300 text-sm mt-1'>
+              </span>
+              <span className='block text-sm mt-1 text-yellow-700 dark:text-yellow-300'>
                 {warningText ||
                   t(
                     '请妥善保管密钥信息，不要泄露给他人。如有安全疑虑，请及时更换密钥。',
                   )}
-              </Typography.Text>
+              </span>
             </div>
           </div>
         </div>

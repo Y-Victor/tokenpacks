@@ -18,7 +18,10 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Input, Slider, Typography, Button, Tag } from '@douyinfe/semi-ui';
+import { Input } from '../ui/input';
+import { Badge } from '../ui/badge';
+import { Slider } from '../ui/slider';
+import { Button } from '../ui/button';
 import { useTranslation } from 'react-i18next';
 import {
   Hash,
@@ -49,38 +52,36 @@ const ParameterControl = ({
         <div className='flex items-center justify-between mb-2'>
           <div className='flex items-center gap-2'>
             <Thermometer size={16} className='text-gray-500' />
-            <Typography.Text strong className='text-sm'>
+            <span className='text-sm font-semibold'>
               Temperature
-            </Typography.Text>
-            <Tag size='small' shape='circle'>
+            </span>
+            <Badge variant='secondary' className='text-xs'>
               {inputs.temperature}
-            </Tag>
+            </Badge>
           </div>
           <Button
-            theme={parameterEnabled.temperature ? 'solid' : 'borderless'}
-            type={parameterEnabled.temperature ? 'primary' : 'tertiary'}
-            size='small'
-            icon={
-              parameterEnabled.temperature ? (
-                <Check size={10} />
-              ) : (
-                <X size={10} />
-              )
-            }
+            variant={parameterEnabled.temperature ? 'default' : 'ghost'}
+            size='icon'
             onClick={() => onParameterToggle('temperature')}
             className='!rounded-full !w-4 !h-4 !p-0 !min-w-0'
             disabled={disabled}
-          />
+          >
+            {parameterEnabled.temperature ? (
+              <Check size={10} />
+            ) : (
+              <X size={10} />
+            )}
+          </Button>
         </div>
-        <Typography.Text className='text-xs text-gray-500 mb-2'>
+        <span className='text-xs text-gray-500 mb-2'>
           {t('控制输出的随机性和创造性')}
-        </Typography.Text>
+        </span>
         <Slider
           step={0.1}
           min={0.1}
           max={1}
-          value={inputs.temperature}
-          onChange={(value) => onInputChange('temperature', value)}
+          value={[inputs.temperature]}
+          onValueChange={(value) => onInputChange('temperature', value[0])}
           className='mt-2'
           disabled={!parameterEnabled.temperature || disabled}
         />
@@ -93,34 +94,32 @@ const ParameterControl = ({
         <div className='flex items-center justify-between mb-2'>
           <div className='flex items-center gap-2'>
             <Target size={16} className='text-gray-500' />
-            <Typography.Text strong className='text-sm'>
+            <span className='text-sm font-semibold'>
               Top P
-            </Typography.Text>
-            <Tag size='small' shape='circle'>
+            </span>
+            <Badge variant='secondary' className='text-xs'>
               {inputs.top_p}
-            </Tag>
+            </Badge>
           </div>
           <Button
-            theme={parameterEnabled.top_p ? 'solid' : 'borderless'}
-            type={parameterEnabled.top_p ? 'primary' : 'tertiary'}
-            size='small'
-            icon={
-              parameterEnabled.top_p ? <Check size={10} /> : <X size={10} />
-            }
+            variant={parameterEnabled.top_p ? 'default' : 'ghost'}
+            size='icon'
             onClick={() => onParameterToggle('top_p')}
             className='!rounded-full !w-4 !h-4 !p-0 !min-w-0'
             disabled={disabled}
-          />
+          >
+            {parameterEnabled.top_p ? <Check size={10} /> : <X size={10} />}
+          </Button>
         </div>
-        <Typography.Text className='text-xs text-gray-500 mb-2'>
+        <span className='text-xs text-gray-500 mb-2'>
           {t('核采样，控制词汇选择的多样性')}
-        </Typography.Text>
+        </span>
         <Slider
           step={0.1}
           min={0.1}
           max={1}
-          value={inputs.top_p}
-          onChange={(value) => onInputChange('top_p', value)}
+          value={[inputs.top_p]}
+          onValueChange={(value) => onInputChange('top_p', value[0])}
           className='mt-2'
           disabled={!parameterEnabled.top_p || disabled}
         />
@@ -133,38 +132,36 @@ const ParameterControl = ({
         <div className='flex items-center justify-between mb-2'>
           <div className='flex items-center gap-2'>
             <Repeat size={16} className='text-gray-500' />
-            <Typography.Text strong className='text-sm'>
+            <span className='text-sm font-semibold'>
               Frequency Penalty
-            </Typography.Text>
-            <Tag size='small' shape='circle'>
+            </span>
+            <Badge variant='secondary' className='text-xs'>
               {inputs.frequency_penalty}
-            </Tag>
+            </Badge>
           </div>
           <Button
-            theme={parameterEnabled.frequency_penalty ? 'solid' : 'borderless'}
-            type={parameterEnabled.frequency_penalty ? 'primary' : 'tertiary'}
-            size='small'
-            icon={
-              parameterEnabled.frequency_penalty ? (
-                <Check size={10} />
-              ) : (
-                <X size={10} />
-              )
-            }
+            variant={parameterEnabled.frequency_penalty ? 'default' : 'ghost'}
+            size='icon'
             onClick={() => onParameterToggle('frequency_penalty')}
             className='!rounded-full !w-4 !h-4 !p-0 !min-w-0'
             disabled={disabled}
-          />
+          >
+            {parameterEnabled.frequency_penalty ? (
+              <Check size={10} />
+            ) : (
+              <X size={10} />
+            )}
+          </Button>
         </div>
-        <Typography.Text className='text-xs text-gray-500 mb-2'>
+        <span className='text-xs text-gray-500 mb-2'>
           {t('频率惩罚，减少重复词汇的出现')}
-        </Typography.Text>
+        </span>
         <Slider
           step={0.1}
           min={-2}
           max={2}
-          value={inputs.frequency_penalty}
-          onChange={(value) => onInputChange('frequency_penalty', value)}
+          value={[inputs.frequency_penalty]}
+          onValueChange={(value) => onInputChange('frequency_penalty', value[0])}
           className='mt-2'
           disabled={!parameterEnabled.frequency_penalty || disabled}
         />
@@ -177,38 +174,36 @@ const ParameterControl = ({
         <div className='flex items-center justify-between mb-2'>
           <div className='flex items-center gap-2'>
             <Ban size={16} className='text-gray-500' />
-            <Typography.Text strong className='text-sm'>
+            <span className='text-sm font-semibold'>
               Presence Penalty
-            </Typography.Text>
-            <Tag size='small' shape='circle'>
+            </span>
+            <Badge variant='secondary' className='text-xs'>
               {inputs.presence_penalty}
-            </Tag>
+            </Badge>
           </div>
           <Button
-            theme={parameterEnabled.presence_penalty ? 'solid' : 'borderless'}
-            type={parameterEnabled.presence_penalty ? 'primary' : 'tertiary'}
-            size='small'
-            icon={
-              parameterEnabled.presence_penalty ? (
-                <Check size={10} />
-              ) : (
-                <X size={10} />
-              )
-            }
+            variant={parameterEnabled.presence_penalty ? 'default' : 'ghost'}
+            size='icon'
             onClick={() => onParameterToggle('presence_penalty')}
             className='!rounded-full !w-4 !h-4 !p-0 !min-w-0'
             disabled={disabled}
-          />
+          >
+            {parameterEnabled.presence_penalty ? (
+              <Check size={10} />
+            ) : (
+              <X size={10} />
+            )}
+          </Button>
         </div>
-        <Typography.Text className='text-xs text-gray-500 mb-2'>
+        <span className='text-xs text-gray-500 mb-2'>
           {t('存在惩罚，鼓励讨论新话题')}
-        </Typography.Text>
+        </span>
         <Slider
           step={0.1}
           min={-2}
           max={2}
-          value={inputs.presence_penalty}
-          onChange={(value) => onInputChange('presence_penalty', value)}
+          value={[inputs.presence_penalty]}
+          onValueChange={(value) => onInputChange('presence_penalty', value[0])}
           className='mt-2'
           disabled={!parameterEnabled.presence_penalty || disabled}
         />
@@ -221,34 +216,31 @@ const ParameterControl = ({
         <div className='flex items-center justify-between mb-2'>
           <div className='flex items-center gap-2'>
             <Hash size={16} className='text-gray-500' />
-            <Typography.Text strong className='text-sm'>
+            <span className='text-sm font-semibold'>
               Max Tokens
-            </Typography.Text>
+            </span>
           </div>
           <Button
-            theme={parameterEnabled.max_tokens ? 'solid' : 'borderless'}
-            type={parameterEnabled.max_tokens ? 'primary' : 'tertiary'}
-            size='small'
-            icon={
-              parameterEnabled.max_tokens ? (
-                <Check size={10} />
-              ) : (
-                <X size={10} />
-              )
-            }
+            variant={parameterEnabled.max_tokens ? 'default' : 'ghost'}
+            size='icon'
             onClick={() => onParameterToggle('max_tokens')}
             className='!rounded-full !w-4 !h-4 !p-0 !min-w-0'
             disabled={disabled}
-          />
+          >
+            {parameterEnabled.max_tokens ? (
+              <Check size={10} />
+            ) : (
+              <X size={10} />
+            )}
+          </Button>
         </div>
         <Input
           placeholder='MaxTokens'
           name='max_tokens'
           required
           autoComplete='new-password'
-          defaultValue={0}
           value={inputs.max_tokens}
-          onChange={(value) => onInputChange('max_tokens', value)}
+          onChange={(e) => onInputChange('max_tokens', e.target.value)}
           className='!rounded-lg'
           disabled={!parameterEnabled.max_tokens || disabled}
         />
@@ -261,30 +253,30 @@ const ParameterControl = ({
         <div className='flex items-center justify-between mb-2'>
           <div className='flex items-center gap-2'>
             <Shuffle size={16} className='text-gray-500' />
-            <Typography.Text strong className='text-sm'>
+            <span className='text-sm font-semibold'>
               Seed
-            </Typography.Text>
-            <Typography.Text className='text-xs text-gray-400'>
+            </span>
+            <span className='text-xs text-gray-400'>
               ({t('可选，用于复现结果')})
-            </Typography.Text>
+            </span>
           </div>
           <Button
-            theme={parameterEnabled.seed ? 'solid' : 'borderless'}
-            type={parameterEnabled.seed ? 'primary' : 'tertiary'}
-            size='small'
-            icon={parameterEnabled.seed ? <Check size={10} /> : <X size={10} />}
+            variant={parameterEnabled.seed ? 'default' : 'ghost'}
+            size='icon'
             onClick={() => onParameterToggle('seed')}
             className='!rounded-full !w-4 !h-4 !p-0 !min-w-0'
             disabled={disabled}
-          />
+          >
+            {parameterEnabled.seed ? <Check size={10} /> : <X size={10} />}
+          </Button>
         </div>
         <Input
           placeholder={t('随机种子 (留空为随机)')}
           name='seed'
           autoComplete='new-password'
           value={inputs.seed || ''}
-          onChange={(value) =>
-            onInputChange('seed', value === '' ? null : value)
+          onChange={(e) =>
+            onInputChange('seed', e.target.value === '' ? null : e.target.value)
           }
           className='!rounded-lg'
           disabled={!parameterEnabled.seed || disabled}

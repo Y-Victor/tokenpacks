@@ -33,7 +33,7 @@ import {
   Divider,
   Tooltip,
   Radio,
-} from '@douyinfe/semi-ui';
+} from '../../../../components/ui/semi-compat';
 import {
   FaCopy,
   FaSearch,
@@ -43,7 +43,7 @@ import {
   FaInfoCircle,
   FaLink,
 } from 'react-icons/fa';
-import { IconRefresh, IconDownload } from '@douyinfe/semi-icons';
+import { IconRefresh, IconDownload } from '../../../../components/ui/semi-icons-compat';
 import {
   API,
   showError,

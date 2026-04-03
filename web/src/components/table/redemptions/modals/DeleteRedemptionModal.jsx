@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Modal } from '@douyinfe/semi-ui';
+import { Modal } from '../../../../components/ui/semi-compat';
 import { REDEMPTION_ACTIONS } from '../../../../constants/redemption.constants';
 
 const DeleteRedemptionModal = ({

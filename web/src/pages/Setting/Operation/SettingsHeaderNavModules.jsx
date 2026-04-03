@@ -18,20 +18,12 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useEffect, useState, useContext } from 'react';
-import {
-  Button,
-  Card,
-  Col,
-  Form,
-  Row,
-  Switch,
-  Typography,
-} from '@douyinfe/semi-ui';
 import { API, showError, showSuccess } from '../../../helpers';
 import { useTranslation } from 'react-i18next';
 import { StatusContext } from '../../../context/Status';
-
-const { Text } = Typography;
+import { Button } from '../../../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
+import { Switch } from '../../../components/ui/switch';
 
 export default function SettingsHeaderNavModules(props) {
   const { t } = useTranslation();
@@ -192,65 +184,35 @@ export default function SettingsHeaderNavModules(props) {
 
   return (
     <Card>
-      <Form.Section
-        text={t('顶栏管理')}
-        extraText={t('控制顶栏模块显示状态，全局生效')}
-      >
-        <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+      <CardContent>
+        <div className='mb-4'>
+          <h4 className='text-base font-semibold'>{t('顶栏管理')}</h4>
+          <p className='text-sm text-muted-foreground'>{t('控制顶栏模块显示状态，全局生效')}</p>
+        </div>
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6'>
           {moduleConfigs.map((module) => (
-            <Col key={module.key} xs={24} sm={12} md={6} lg={6} xl={6}>
-              <Card
-                style={{
-                  borderRadius: '8px',
-                  border: '1px solid var(--semi-color-border)',
-                  transition: 'all 0.2s ease',
-                  background: 'var(--semi-color-bg-1)',
-                  minHeight: '80px',
-                }}
-                bodyStyle={{ padding: '16px' }}
-                hoverable
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    height: '100%',
-                  }}
-                >
-                  <div style={{ flex: 1, textAlign: 'left' }}>
-                    <div
-                      style={{
-                        fontWeight: '600',
-                        fontSize: '14px',
-                        color: 'var(--semi-color-text-0)',
-                        marginBottom: '4px',
-                      }}
-                    >
+            <Card
+              key={module.key}
+              className='min-h-[80px] hover:shadow-sm transition-all'
+            >
+              <CardContent className='p-4'>
+                <div className='flex justify-between items-center h-full'>
+                  <div className='flex-1 text-left'>
+                    <div className='font-semibold text-sm mb-1'>
                       {module.title}
                     </div>
-                    <Text
-                      type='secondary'
-                      size='small'
-                      style={{
-                        fontSize: '12px',
-                        color: 'var(--semi-color-text-2)',
-                        lineHeight: '1.4',
-                        display: 'block',
-                      }}
-                    >
+                    <span className='text-xs text-muted-foreground block leading-snug'>
                       {module.description}
-                    </Text>
+                    </span>
                   </div>
-                  <div style={{ marginLeft: '16px' }}>
+                  <div className='ml-4'>
                     <Switch
                       checked={
                         module.key === 'pricing'
                           ? headerNavModules[module.key]?.enabled
                           : headerNavModules[module.key]
                       }
-                      onChange={handleHeaderNavModuleChange(module.key)}
-                      size='default'
+                      onCheckedChange={handleHeaderNavModuleChange(module.key)}
                     />
                   </div>
                 </div>
@@ -260,97 +222,41 @@ export default function SettingsHeaderNavModules(props) {
                   (module.key === 'pricing'
                     ? headerNavModules[module.key]?.enabled
                     : headerNavModules[module.key]) && (
-                    <div
-                      style={{
-                        borderTop: '1px solid var(--semi-color-border)',
-                        marginTop: '12px',
-                        paddingTop: '12px',
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                        }}
-                      >
-                        <div style={{ flex: 1, textAlign: 'left' }}>
-                          <div
-                            style={{
-                              fontWeight: '500',
-                              fontSize: '12px',
-                              color: 'var(--semi-color-text-1)',
-                              marginBottom: '2px',
-                            }}
-                          >
+                    <div className='border-t mt-3 pt-3'>
+                      <div className='flex justify-between items-center'>
+                        <div className='flex-1 text-left'>
+                          <div className='font-medium text-xs mb-0.5'>
                             {t('需要登录访问')}
                           </div>
-                          <Text
-                            type='secondary'
-                            size='small'
-                            style={{
-                              fontSize: '11px',
-                              color: 'var(--semi-color-text-2)',
-                              lineHeight: '1.4',
-                              display: 'block',
-                            }}
-                          >
+                          <span className='text-[11px] text-muted-foreground block leading-snug'>
                             {t('开启后未登录用户无法访问模型广场')}
-                          </Text>
+                          </span>
                         </div>
-                        <div style={{ marginLeft: '16px' }}>
+                        <div className='ml-4'>
                           <Switch
                             checked={
                               headerNavModules.pricing?.requireAuth || false
                             }
-                            onChange={handlePricingAuthChange}
-                            size='default'
+                            onCheckedChange={handlePricingAuthChange}
                           />
                         </div>
                       </div>
                     </div>
                   )}
-              </Card>
-            </Col>
+              </CardContent>
+            </Card>
           ))}
-        </Row>
+        </div>
 
-        <div
-          style={{
-            display: 'flex',
-            gap: '12px',
-            justifyContent: 'flex-start',
-            alignItems: 'center',
-            paddingTop: '8px',
-            borderTop: '1px solid var(--semi-color-border)',
-          }}
-        >
-          <Button
-            size='default'
-            type='tertiary'
-            onClick={resetHeaderNavModules}
-            style={{
-              borderRadius: '6px',
-              fontWeight: '500',
-            }}
-          >
+        <div className='flex gap-3 items-center pt-2 border-t'>
+          <Button variant='outline' onClick={resetHeaderNavModules}>
             {t('重置为默认')}
           </Button>
-          <Button
-            size='default'
-            type='primary'
-            onClick={onSubmit}
-            loading={loading}
-            style={{
-              borderRadius: '6px',
-              fontWeight: '500',
-              minWidth: '100px',
-            }}
-          >
+          <Button onClick={onSubmit} disabled={loading}>
             {t('保存设置')}
           </Button>
         </div>
-      </Form.Section>
+      </CardContent>
     </Card>
   );
 }

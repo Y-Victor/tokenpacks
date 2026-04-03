@@ -17,29 +17,40 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import JSONEditor from '../../../common/ui/JSONEditor';
+import { Button } from '../../../ui/button';
+import { Input } from '../../../ui/input';
+import { Textarea } from '../../../ui/textarea';
+import { Card } from '../../../ui/card';
+import { Badge } from '../../../ui/badge';
+import { Switch } from '../../../ui/switch';
+import { Alert, AlertDescription } from '../../../ui/alert';
 import {
-  Banner,
-  SideSheet,
-  Form,
-  Button,
-  Space,
-  Spin,
-  Typography,
-  Card,
-  Tag,
-  Avatar,
-  Col,
-  Row,
-} from '@douyinfe/semi-ui';
-import { Save, X, FileText } from 'lucide-react';
-import { IconAlertTriangle, IconLink } from '@douyinfe/semi-icons';
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../../ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../../ui/select';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+} from '../../../ui/sheet';
+import { Save, X, FileText, AlertTriangle, Link } from 'lucide-react';
 import { API, showError, showSuccess } from '../../../../helpers';
 import { useTranslation } from 'react-i18next';
 import { useIsMobile } from '../../../../hooks/common/useIsMobile';
-
-const { Text, Title } = Typography;
 
 // Example endpoint template for quick fill
 const ENDPOINT_TEMPLATE = {
@@ -63,21 +74,40 @@ const EditModelModal = (props) => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const isMobile = useIsMobile();
-  const formApiRef = useRef(null);
   const isEdit = props.editingModel && props.editingModel.id !== undefined;
   const placement = useMemo(() => (isEdit ? 'right' : 'left'), [isEdit]);
 
-  // 供应商列表
+  // Vendor list
   const [vendors, setVendors] = useState([]);
 
-  // 预填组（标签、端点）
+  // Prefill groups (tags, endpoints)
   const [tagGroups, setTagGroups] = useState([]);
   const [endpointGroups, setEndpointGroups] = useState([]);
 
-  // 获取供应商列表
+  // Form state
+  const [formValues, setFormValues] = useState({});
+
+  const getInitValues = () => ({
+    model_name: props.editingModel?.model_name || '',
+    description: '',
+    icon: '',
+    tags: '',
+    vendor_id: undefined,
+    vendor: '',
+    vendor_icon: '',
+    endpoints: '',
+    name_rule: props.editingModel?.model_name ? 0 : undefined,
+    status: true,
+    sync_official: true,
+  });
+
+  const updateField = (field, value) => {
+    setFormValues((prev) => ({ ...prev, [field]: value }));
+  };
+
   const fetchVendors = async () => {
     try {
-      const res = await API.get('/api/vendors/?page_size=1000'); // 获取全部供应商
+      const res = await API.get('/api/vendors/?page_size=1000');
       if (res.data.success) {
         const items = res.data.data.items || res.data.data || [];
         setVendors(Array.isArray(items) ? items : []);
@@ -87,7 +117,6 @@ const EditModelModal = (props) => {
     }
   };
 
-  // 获取预填组（标签、端点）
   const fetchPrefillGroups = async () => {
     try {
       const [tagRes, endpointRes] = await Promise.all([
@@ -112,20 +141,6 @@ const EditModelModal = (props) => {
     }
   }, [props.visiable]);
 
-  const getInitValues = () => ({
-    model_name: props.editingModel?.model_name || '',
-    description: '',
-    icon: '',
-    tags: [],
-    vendor_id: undefined,
-    vendor: '',
-    vendor_icon: '',
-    endpoints: '',
-    name_rule: props.editingModel?.model_name ? 0 : undefined, // 通过未配置模型过来的固定为精确匹配
-    status: true,
-    sync_official: true,
-  });
-
   const handleCancel = () => {
     props.handleClose();
   };
@@ -138,22 +153,17 @@ const EditModelModal = (props) => {
       const res = await API.get(`/api/models/${props.editingModel.id}`);
       const { success, message, data } = res.data;
       if (success) {
-        // 处理tags
         if (data.tags) {
-          data.tags = data.tags.split(',').filter(Boolean);
+          data.tags = data.tags; // Keep as comma-separated string
         } else {
-          data.tags = [];
+          data.tags = '';
         }
-        // endpoints 保持原始 JSON 字符串，若为空设为空串
         if (!data.endpoints) {
           data.endpoints = '';
         }
-        // 处理status/sync_official，将数字转为布尔值
         data.status = data.status === 1;
         data.sync_official = (data.sync_official ?? 1) === 1;
-        if (formApiRef.current) {
-          formApiRef.current.setValues({ ...getInitValues(), ...data });
-        }
+        setFormValues({ ...getInitValues(), ...data });
       } else {
         showError(message);
       }
@@ -164,13 +174,11 @@ const EditModelModal = (props) => {
   };
 
   useEffect(() => {
-    if (formApiRef.current) {
-      if (!isEdit) {
-        formApiRef.current.setValues({
-          ...getInitValues(),
-          model_name: props.editingModel?.model_name || '',
-        });
-      }
+    if (!isEdit) {
+      setFormValues({
+        ...getInitValues(),
+        model_name: props.editingModel?.model_name || '',
+      });
     }
   }, [props.editingModel?.id, props.editingModel?.model_name]);
 
@@ -179,25 +187,34 @@ const EditModelModal = (props) => {
       if (isEdit) {
         loadModel();
       } else {
-        formApiRef.current?.setValues({
+        setFormValues({
           ...getInitValues(),
           model_name: props.editingModel?.model_name || '',
         });
       }
     } else {
-      formApiRef.current?.reset();
+      setFormValues(getInitValues());
     }
   }, [props.visiable, props.editingModel?.id, props.editingModel?.model_name]);
 
-  const submit = async (values) => {
+  const submit = async () => {
+    if (!formValues.model_name) {
+      showError(t('请输入模型名称'));
+      return;
+    }
+    if (formValues.name_rule === undefined || formValues.name_rule === null) {
+      showError(t('请选择名称匹配类型'));
+      return;
+    }
+
     setLoading(true);
     try {
       const submitData = {
-        ...values,
-        tags: Array.isArray(values.tags) ? values.tags.join(',') : values.tags,
-        endpoints: values.endpoints || '',
-        status: values.status ? 1 : 0,
-        sync_official: values.sync_official ? 1 : 0,
+        ...formValues,
+        tags: formValues.tags || '',
+        endpoints: formValues.endpoints || '',
+        status: formValues.status ? 1 : 0,
+        sync_official: formValues.sync_official ? 1 : 0,
       };
 
       if (isEdit) {
@@ -226,328 +243,352 @@ const EditModelModal = (props) => {
       showError(error.response?.data?.message || t('操作失败'));
     }
     setLoading(false);
-    formApiRef.current?.setValues(getInitValues());
+    setFormValues(getInitValues());
   };
 
-  return (
-    <SideSheet
-      placement={placement}
-      title={
-        <Space>
-          {isEdit ? (
-            <Tag color='blue' shape='circle'>
-              {t('更新')}
-            </Tag>
-          ) : (
-            <Tag color='green' shape='circle'>
-              {t('新建')}
-            </Tag>
-          )}
-          <Title heading={4} className='m-0'>
-            {isEdit ? t('更新模型信息') : t('创建新的模型')}
-          </Title>
-        </Space>
-      }
-      bodyStyle={{ padding: '0' }}
-      visible={props.visiable}
-      width={isMobile ? '100%' : 600}
-      footer={
-        <div className='flex justify-end bg-white'>
-          <Space>
-            <Button
-              theme='solid'
-              className='!rounded-lg'
-              onClick={() => formApiRef.current?.submitForm()}
-              icon={<Save size={16} />}
-              loading={loading}
-            >
-              {t('提交')}
-            </Button>
-            <Button
-              theme='light'
-              className='!rounded-lg'
-              type='primary'
-              onClick={handleCancel}
-              icon={<X size={16} />}
-            >
-              {t('取消')}
-            </Button>
-          </Space>
+  const titleNode = (
+    <div className='flex items-center gap-2'>
+      {isEdit ? (
+        <Badge variant='outline' className='text-blue-600 border-blue-300'>
+          {t('更新')}
+        </Badge>
+      ) : (
+        <Badge variant='outline' className='text-green-600 border-green-300'>
+          {t('新建')}
+        </Badge>
+      )}
+      <span>{isEdit ? t('更新模型信息') : t('创建新的模型')}</span>
+    </div>
+  );
+
+  const formContent = (
+    <div className='min-h-0 flex-1 overflow-y-auto'>
+      {loading ? (
+        <div className='flex items-center justify-center py-8'>
+          <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-primary' />
         </div>
-      }
-      closeIcon={null}
-      onCancel={() => handleCancel()}
-    >
-      <Spin spinning={loading}>
-        <Form
-          key={isEdit ? 'edit' : 'new'}
-          initValues={getInitValues()}
-          getFormApi={(api) => (formApiRef.current = api)}
-          onSubmit={submit}
-        >
-          {({ values }) => (
-            <div className='p-2'>
-              {/* 基本信息 */}
-              <Card className='!rounded-2xl shadow-sm border-0'>
-                <div className='flex items-center mb-2'>
-                  <Avatar size='small' color='green' className='mr-2 shadow-md'>
-                    <FileText size={16} />
-                  </Avatar>
-                  <div>
-                    <Text className='text-lg font-medium'>{t('基本信息')}</Text>
-                    <div className='text-xs text-gray-600'>
-                      {t('设置模型的基本信息')}
-                    </div>
+      ) : (
+        <div className='p-2'>
+          <Card className='rounded-2xl shadow-sm border-0'>
+            <div className='p-4'>
+              <div className='flex items-center mb-2'>
+                <div className='w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-2 shadow-md'>
+                  <FileText className='h-4 w-4 text-green-600' />
+                </div>
+                <div>
+                  <span className='text-lg font-medium'>{t('基本信息')}</span>
+                  <div className='text-xs text-gray-600'>
+                    {t('设置模型的基本信息')}
                   </div>
                 </div>
-                <Row gutter={12}>
-                  <Col span={24}>
-                    <Form.Input
-                      field='model_name'
-                      label={t('模型名称')}
-                      placeholder={t('请输入模型名称，如：gpt-4')}
-                      rules={[{ required: true, message: t('请输入模型名称') }]}
-                      showClear
-                    />
-                  </Col>
+              </div>
+              <div className='space-y-4'>
+                <div>
+                  <label className='text-sm font-medium mb-1 block'>
+                    {t('模型名称')} *
+                  </label>
+                  <Input
+                    value={formValues.model_name || ''}
+                    onChange={(e) => updateField('model_name', e.target.value)}
+                    placeholder={t('请输入模型名称，如：gpt-4')}
+                  />
+                </div>
 
-                  <Col span={24}>
-                    <Form.Select
-                      field='name_rule'
-                      label={t('名称匹配类型')}
-                      placeholder={t('请选择名称匹配类型')}
-                      optionList={nameRuleOptions.map((o) => ({
-                        label: t(o.label),
-                        value: o.value,
-                      }))}
-                      rules={[
-                        { required: true, message: t('请选择名称匹配类型') },
-                      ]}
-                      extraText={t(
-                        '根据模型名称和匹配规则查找模型元数据，优先级：精确 > 前缀 > 后缀 > 包含',
-                      )}
-                      style={{ width: '100%' }}
-                    />
-                  </Col>
+                <div>
+                  <label className='text-sm font-medium mb-1 block'>
+                    {t('名称匹配类型')} *
+                  </label>
+                  <Select
+                    value={
+                      formValues.name_rule !== undefined &&
+                      formValues.name_rule !== null
+                        ? String(formValues.name_rule)
+                        : undefined
+                    }
+                    onValueChange={(val) =>
+                      updateField('name_rule', parseInt(val))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('请选择名称匹配类型')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {nameRuleOptions.map((o) => (
+                        <SelectItem key={o.value} value={String(o.value)}>
+                          {t(o.label)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className='text-xs text-muted-foreground mt-1'>
+                    {t(
+                      '根据模型名称和匹配规则查找模型元数据，优先级：精确 > 前缀 > 后缀 > 包含',
+                    )}
+                  </p>
+                </div>
 
-                  <Col span={24}>
-                    <Form.Input
-                      field='icon'
-                      label={t('模型图标')}
-                      placeholder={t('请输入图标名称')}
-                      extraText={
-                        <span>
-                          {t(
-                            "图标使用@lobehub/icons库，如：OpenAI、Claude.Color，支持链式参数：OpenAI.Avatar.type={'platform'}、OpenRouter.Avatar.shape={'square'}，查询所有可用图标请 ",
-                          )}
-                          <Typography.Text
-                            link={{
-                              href: 'https://icons.lobehub.com/components/lobe-hub',
-                              target: '_blank',
-                            }}
-                            icon={<IconLink />}
-                            underline
-                          >
-                            {t('请点击我')}
-                          </Typography.Text>
-                        </span>
+                <div>
+                  <label className='text-sm font-medium mb-1 block'>
+                    {t('模型图标')}
+                  </label>
+                  <Input
+                    value={formValues.icon || ''}
+                    onChange={(e) => updateField('icon', e.target.value)}
+                    placeholder={t('请输入图标名称')}
+                  />
+                  <p className='text-xs text-muted-foreground mt-1'>
+                    {t(
+                      "图标使用@lobehub/icons库，如：OpenAI、Claude.Color，支持链式参数：OpenAI.Avatar.type={'platform'}、OpenRouter.Avatar.shape={'square'}，查询所有可用图标请 ",
+                    )}
+                    <a
+                      href='https://icons.lobehub.com/components/lobe-hub'
+                      target='_blank'
+                      rel='noreferrer'
+                      className='text-blue-600 underline inline-flex items-center gap-1'
+                    >
+                      <Link className='h-3 w-3' />
+                      {t('请点击我')}
+                    </a>
+                  </p>
+                </div>
+
+                <div>
+                  <label className='text-sm font-medium mb-1 block'>
+                    {t('描述')}
+                  </label>
+                  <Textarea
+                    value={formValues.description || ''}
+                    onChange={(e) => updateField('description', e.target.value)}
+                    placeholder={t('请输入模型描述')}
+                    rows={3}
+                  />
+                </div>
+
+                <div>
+                  <label className='text-sm font-medium mb-1 block'>
+                    {t('标签')}
+                  </label>
+                  <Input
+                    value={formValues.tags || ''}
+                    onChange={(e) => updateField('tags', e.target.value)}
+                    placeholder={t('输入标签或使用","分隔多个标签')}
+                  />
+                  {tagGroups.length > 0 && (
+                    <div className='flex items-center gap-1 flex-wrap mt-2'>
+                      {tagGroups.map((group) => (
+                        <Button
+                          key={group.id}
+                          size='sm'
+                          variant='outline'
+                          onClick={() => {
+                            const currentTags = (formValues.tags || '')
+                              .split(',')
+                              .map((s) => s.trim())
+                              .filter(Boolean);
+                            const newTags = [
+                              ...currentTags,
+                              ...(group.items || []),
+                            ];
+                            const uniqueTags = [...new Set(newTags)];
+                            updateField('tags', uniqueTags.join(','));
+                          }}
+                        >
+                          {group.name}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className='text-sm font-medium mb-1 block'>
+                    {t('供应商')}
+                  </label>
+                  <Select
+                    value={
+                      formValues.vendor_id !== undefined
+                        ? String(formValues.vendor_id)
+                        : undefined
+                    }
+                    onValueChange={(value) => {
+                      const vid = parseInt(value);
+                      updateField('vendor_id', vid);
+                      const vendorInfo = vendors.find((v) => v.id === vid);
+                      if (vendorInfo) {
+                        updateField('vendor', vendorInfo.name);
                       }
-                      showClear
-                    />
-                  </Col>
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('选择模型供应商')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {vendors.map((v) => (
+                        <SelectItem key={v.id} value={String(v.id)}>
+                          {v.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                  <Col span={24}>
-                    <Form.TextArea
-                      field='description'
-                      label={t('描述')}
-                      placeholder={t('请输入模型描述')}
-                      rows={3}
-                      showClear
-                    />
-                  </Col>
-                  <Col span={24}>
-                    <Form.TagInput
-                      field='tags'
-                      label={t('标签')}
-                      placeholder={t('输入标签或使用","分隔多个标签')}
-                      addOnBlur
-                      showClear
-                      onChange={(newTags) => {
-                        if (!formApiRef.current) return;
-                        const normalize = (tags) => {
-                          if (!Array.isArray(tags)) return [];
-                          return [
-                            ...new Set(
-                              tags.flatMap((tag) =>
-                                tag
-                                  .split(',')
-                                  .map((t) => t.trim())
-                                  .filter(Boolean),
-                              ),
-                            ),
-                          ];
-                        };
-                        const normalized = normalize(newTags);
-                        formApiRef.current.setValue('tags', normalized);
-                      }}
-                      style={{ width: '100%' }}
-                      {...(tagGroups.length > 0 && {
-                        extraText: (
-                          <Space wrap>
-                            {tagGroups.map((group) => (
-                              <Button
-                                key={group.id}
-                                size='small'
-                                type='primary'
-                                onClick={() => {
-                                  if (formApiRef.current) {
-                                    const currentTags =
-                                      formApiRef.current.getValue('tags') || [];
-                                    const newTags = [
-                                      ...currentTags,
-                                      ...(group.items || []),
-                                    ];
-                                    const uniqueTags = [...new Set(newTags)];
-                                    formApiRef.current.setValue(
-                                      'tags',
-                                      uniqueTags,
-                                    );
-                                  }
-                                }}
-                              >
-                                {group.name}
-                              </Button>
-                            ))}
-                          </Space>
-                        ),
-                      })}
-                    />
-                  </Col>
-                  <Col span={24}>
-                    <Form.Select
-                      field='vendor_id'
-                      label={t('供应商')}
-                      placeholder={t('选择模型供应商')}
-                      optionList={vendors.map((v) => ({
-                        label: v.name,
-                        value: v.id,
-                      }))}
-                      filter
-                      showClear
-                      onChange={(value) => {
-                        const vendorInfo = vendors.find((v) => v.id === value);
-                        if (vendorInfo && formApiRef.current) {
-                          formApiRef.current.setValue(
-                            'vendor',
-                            vendorInfo.name,
-                          );
-                        }
-                      }}
-                      style={{ width: '100%' }}
-                    />
-                  </Col>
-                  <Col span={24}>
-                    <Banner
-                      type='warning'
-                      closeIcon={null}
-                      icon={
-                        <IconAlertTriangle
-                          size='large'
-                          style={{ color: 'var(--semi-color-warning)' }}
-                        />
-                      }
-                      description={t(
+                <div>
+                  <Alert
+                    variant='default'
+                    className='border-yellow-300 bg-yellow-50 dark:bg-yellow-950 mb-3'
+                  >
+                    <AlertTriangle className='h-4 w-4 text-yellow-600' />
+                    <AlertDescription>
+                      {t(
                         '提示：此处配置仅用于控制「模型广场」对用户的展示效果，不会影响模型的实际调用与路由。若需配置真实调用行为，请前往「渠道管理」进行设置。',
                       )}
-                      style={{ marginBottom: 12 }}
-                    />
-                    <JSONEditor
-                      field='endpoints'
-                      label={t('在模型广场向用户展示的端点')}
-                      placeholder={
-                        '{\n  "openai": {"path": "/v1/chat/completions", "method": "POST"}\n}'
-                      }
-                      value={values.endpoints}
-                      onChange={(val) =>
-                        formApiRef.current?.setValue('endpoints', val)
-                      }
-                      formApi={formApiRef.current}
-                      editorType='object'
-                      template={ENDPOINT_TEMPLATE}
-                      templateLabel={t('填入模板')}
-                      extraText={t('留空则使用默认端点；支持 {path, method}')}
-                      extraFooter={
-                        endpointGroups.length > 0 && (
-                          <Space wrap>
-                            {endpointGroups.map((group) => (
-                              <Button
-                                key={group.id}
-                                size='small'
-                                type='primary'
-                                onClick={() => {
+                    </AlertDescription>
+                  </Alert>
+                  <JSONEditor
+                    field='endpoints'
+                    label={t('在模型广场向用户展示的端点')}
+                    placeholder={
+                      '{\n  "openai": {"path": "/v1/chat/completions", "method": "POST"}\n}'
+                    }
+                    value={formValues.endpoints || ''}
+                    onChange={(val) => updateField('endpoints', val)}
+                    editorType='object'
+                    template={ENDPOINT_TEMPLATE}
+                    templateLabel={t('填入模板')}
+                    extraText={t('留空则使用默认端点；支持 {path, method}')}
+                    extraFooter={
+                      endpointGroups.length > 0 && (
+                        <div className='flex items-center gap-1 flex-wrap'>
+                          {endpointGroups.map((group) => (
+                            <Button
+                              key={group.id}
+                              size='sm'
+                              variant='outline'
+                              onClick={() => {
+                                try {
+                                  const current = formValues.endpoints || '';
+                                  let base = {};
+                                  if (current && current.trim()) {
+                                    base = JSON.parse(current);
+                                  }
+                                  const groupObj =
+                                    typeof group.items === 'string'
+                                      ? JSON.parse(group.items || '{}')
+                                      : group.items || {};
+                                  const merged = { ...base, ...groupObj };
+                                  updateField(
+                                    'endpoints',
+                                    JSON.stringify(merged, null, 2),
+                                  );
+                                } catch (e) {
                                   try {
-                                    const current =
-                                      formApiRef.current?.getValue(
-                                        'endpoints',
-                                      ) || '';
-                                    let base = {};
-                                    if (current && current.trim())
-                                      base = JSON.parse(current);
                                     const groupObj =
                                       typeof group.items === 'string'
                                         ? JSON.parse(group.items || '{}')
                                         : group.items || {};
-                                    const merged = { ...base, ...groupObj };
-                                    formApiRef.current?.setValue(
+                                    updateField(
                                       'endpoints',
-                                      JSON.stringify(merged, null, 2),
+                                      JSON.stringify(groupObj, null, 2),
                                     );
-                                  } catch (e) {
-                                    try {
-                                      const groupObj =
-                                        typeof group.items === 'string'
-                                          ? JSON.parse(group.items || '{}')
-                                          : group.items || {};
-                                      formApiRef.current?.setValue(
-                                        'endpoints',
-                                        JSON.stringify(groupObj, null, 2),
-                                      );
-                                    } catch {}
-                                  }
-                                }}
-                              >
-                                {group.name}
-                              </Button>
-                            ))}
-                          </Space>
-                        )
-                      }
-                    />
-                  </Col>
-                  <Col span={24}>
-                    <Form.Switch
-                      field='sync_official'
-                      label={t('参与官方同步')}
-                      extraText={t(
-                        '关闭后，此模型将不会被“同步官方”自动覆盖或创建',
-                      )}
-                      size='large'
-                    />
-                  </Col>
-                  <Col span={24}>
-                    <Form.Switch
-                      field='status'
-                      label={t('状态')}
-                      size='large'
-                    />
-                  </Col>
-                </Row>
-              </Card>
+                                  } catch {}
+                                }
+                              }}
+                            >
+                              {group.name}
+                            </Button>
+                          ))}
+                        </div>
+                      )
+                    }
+                  />
+                </div>
+
+                <div className='flex items-center gap-3'>
+                  <label className='text-sm font-medium'>
+                    {t('参与官方同步')}
+                  </label>
+                  <Switch
+                    checked={formValues.sync_official ?? true}
+                    onCheckedChange={(checked) =>
+                      updateField('sync_official', checked)
+                    }
+                  />
+                  <span className='text-xs text-muted-foreground'>
+                    {t('关闭后，此模型将不会被"同步官方"自动覆盖或创建')}
+                  </span>
+                </div>
+
+                <div className='flex items-center gap-3'>
+                  <label className='text-sm font-medium'>{t('状态')}</label>
+                  <Switch
+                    checked={formValues.status ?? true}
+                    onCheckedChange={(checked) =>
+                      updateField('status', checked)
+                    }
+                  />
+                </div>
+              </div>
             </div>
-          )}
-        </Form>
-      </Spin>
-    </SideSheet>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+
+  const actionButtons = (
+    <div className='flex justify-end gap-2'>
+      <Button onClick={submit} disabled={loading}>
+        <Save className='h-4 w-4 mr-1' />
+        {t('提交')}
+      </Button>
+      <Button variant='outline' onClick={handleCancel}>
+        <X className='h-4 w-4 mr-1' />
+        {t('取消')}
+      </Button>
+    </div>
+  );
+
+  if (!isEdit) {
+    return (
+      <Dialog
+        open={props.visiable}
+        onOpenChange={(open) => !open && handleCancel()}
+      >
+        <DialogContent
+          className={
+            isMobile
+              ? 'flex h-full max-h-screen w-full max-w-full flex-col overflow-hidden rounded-none p-0'
+              : 'flex max-h-[90vh] max-w-[760px] flex-col overflow-hidden p-0'
+          }
+        >
+          <DialogHeader className='shrink-0 px-6 pt-6'>
+            <DialogTitle>{titleNode}</DialogTitle>
+          </DialogHeader>
+          {formContent}
+          <DialogFooter className='shrink-0 border-t px-6 py-4'>
+            {actionButtons}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  return (
+    <Sheet
+      open={props.visiable}
+      onOpenChange={(open) => !open && handleCancel()}
+    >
+      <SheetContent
+        side={placement}
+        className={isMobile ? 'w-full' : 'w-[600px] sm:max-w-[600px]'}
+      >
+        <SheetHeader>
+          <SheetTitle>{titleNode}</SheetTitle>
+        </SheetHeader>
+        {formContent}
+        <SheetFooter>{actionButtons}</SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 };
 

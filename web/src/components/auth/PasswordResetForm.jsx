@@ -27,12 +27,13 @@ import {
   getSystemName,
 } from '../../helpers';
 import Turnstile from 'react-turnstile';
-import { Button, Card, Form, Typography } from '@douyinfe/semi-ui';
-import { IconMail } from '@douyinfe/semi-icons';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Card } from '../ui/card';
+import { Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-
-const { Text, Title } = Typography;
 
 const PasswordResetForm = () => {
   const { t } = useTranslation();
@@ -75,11 +76,12 @@ const PasswordResetForm = () => {
     return () => clearInterval(countdownInterval);
   }, [disableButton, countdown]);
 
-  function handleChange(value) {
-    setInputs((inputs) => ({ ...inputs, email: value }));
+  function handleChange(e) {
+    setInputs((inputs) => ({ ...inputs, email: e.target.value }));
   }
 
   async function handleSubmit(e) {
+    e?.preventDefault?.();
     if (!email) {
       showError(t('请输入邮箱地址'));
       return;
@@ -119,48 +121,51 @@ const PasswordResetForm = () => {
           <div className='w-full max-w-md'>
             <div className='flex items-center justify-center mb-6 gap-2'>
               <img src={logo} alt='Logo' className='h-10 rounded-full' />
-              <Title heading={3} className='!text-gray-800'>
+              <h3 className='text-xl font-semibold text-gray-800'>
                 {systemName}
-              </Title>
+              </h3>
             </div>
 
-            <Card className='border-0 !rounded-2xl overflow-hidden'>
+            <Card className='border-0 rounded-2xl overflow-hidden'>
               <div className='flex justify-center pt-6 pb-2'>
-                <Title heading={3} className='text-gray-800 dark:text-gray-200'>
+                <h3 className='text-xl font-semibold text-gray-800 dark:text-gray-200'>
                   {t('密码重置')}
-                </Title>
+                </h3>
               </div>
-              <div className='px-2 py-8'>
-                <Form className='space-y-3'>
-                  <Form.Input
-                    field='email'
-                    label={t('邮箱')}
-                    placeholder={t('请输入您的邮箱地址')}
-                    name='email'
-                    value={email}
-                    onChange={handleChange}
-                    prefix={<IconMail />}
-                  />
+              <div className='px-6 py-8'>
+                <form onSubmit={handleSubmit} className='space-y-3'>
+                  <div>
+                    <Label htmlFor='email'>{t('邮箱')}</Label>
+                    <div className='relative mt-1.5'>
+                      <Mail className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
+                      <Input
+                        id='email'
+                        placeholder={t('请输入您的邮箱地址')}
+                        name='email'
+                        value={email}
+                        onChange={handleChange}
+                        className='pl-9'
+                      />
+                    </div>
+                  </div>
 
                   <div className='space-y-2 pt-2'>
                     <Button
-                      theme='solid'
-                      className='w-full !rounded-full'
-                      type='primary'
-                      htmlType='submit'
-                      onClick={handleSubmit}
-                      loading={loading}
-                      disabled={disableButton}
+                      type='submit'
+                      className='w-full rounded-full'
+                      disabled={loading || disableButton}
                     >
-                      {disableButton
-                        ? `${t('重试')} (${countdown})`
-                        : t('提交')}
+                      {loading
+                        ? '...'
+                        : disableButton
+                          ? `${t('重试')} (${countdown})`
+                          : t('提交')}
                     </Button>
                   </div>
-                </Form>
+                </form>
 
                 <div className='mt-6 text-center text-sm'>
-                  <Text>
+                  <span>
                     {t('想起来了？')}{' '}
                     <Link
                       to='/login'
@@ -168,7 +173,7 @@ const PasswordResetForm = () => {
                     >
                       {t('登录')}
                     </Link>
-                  </Text>
+                  </span>
                 </div>
               </div>
             </Card>

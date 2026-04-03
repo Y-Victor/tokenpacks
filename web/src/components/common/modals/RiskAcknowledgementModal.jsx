@@ -19,18 +19,19 @@ For commercial licensing, please contact support@quantumnous.com
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Modal,
-  Button,
-  Typography,
-  Checkbox,
-  Input,
-  Space,
-} from '@douyinfe/semi-ui';
-import { IconAlertTriangle } from '@douyinfe/semi-icons';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '../../ui/dialog';
+import { Button } from '../../ui/button';
+import { Checkbox } from '../../ui/checkbox';
+import { Input } from '../../ui/input';
+import { AlertTriangle } from 'lucide-react';
 import { useIsMobile } from '../../../hooks/common/useIsMobile';
 import MarkdownRenderer from '../markdown/MarkdownRenderer';
-
-const { Text } = Typography;
 
 const RiskMarkdownBlock = React.memo(function RiskMarkdownBlock({
   markdownContent,
@@ -101,113 +102,116 @@ const RiskAcknowledgementModal = React.memo(function RiskAcknowledgementModal({
   }, []);
 
   return (
-    <Modal
-      visible={visible}
-      title={
-        <Space align='center'>
-          <IconAlertTriangle style={{ color: 'var(--semi-color-warning)' }} />
-          <span>{title}</span>
-        </Space>
-      }
-      width={isMobile ? '100%' : 860}
-      centered
-      maskClosable={false}
-      closeOnEsc={false}
-      onCancel={onCancel}
-      bodyStyle={{
-        maxHeight: isMobile ? '70vh' : '72vh',
-        overflowY: 'auto',
-        padding: isMobile ? '12px 16px' : '18px 22px',
-      }}
-      footer={
-        <Space>
-          <Button onClick={onCancel}>{cancelText}</Button>
+    <Dialog open={visible} onOpenChange={(open) => !open && onCancel()}>
+      <DialogContent
+        className={isMobile ? 'max-w-full' : 'max-w-[860px]'}
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+      >
+        <DialogHeader>
+          <DialogTitle className='flex items-center gap-2'>
+            <AlertTriangle className='h-5 w-5' style={{ color: 'var(--semi-color-warning, #faad14)' }} />
+            <span>{title}</span>
+          </DialogTitle>
+        </DialogHeader>
+        <DialogDescription className='sr-only'>
+          {title}
+        </DialogDescription>
+        <div
+          className='flex flex-col gap-4'
+          style={{
+            maxHeight: isMobile ? '70vh' : '72vh',
+            overflowY: 'auto',
+          }}
+        >
+
+          <RiskMarkdownBlock markdownContent={markdownContent} />
+
+          {detailItems.length > 0 ? (
+            <div
+              className='flex flex-col gap-2 rounded-lg'
+              style={{
+                border: '1px solid var(--semi-color-warning-light-hover)',
+                background: 'var(--semi-color-fill-0)',
+                padding: isMobile ? '10px 12px' : '12px 14px',
+              }}
+            >
+              {detailTitle ? <span className='font-semibold text-sm'>{detailTitle}</span> : null}
+              <div className='font-mono text-xs break-all bg-orange-50 border border-orange-200 rounded-md p-2'>
+                {detailText}
+              </div>
+            </div>
+          ) : null}
+
+          {checklist.length > 0 ? (
+            <div
+              className='flex flex-col gap-2 rounded-lg'
+              style={{
+                border: '1px solid var(--semi-color-border)',
+                background: 'var(--semi-color-fill-0)',
+                padding: isMobile ? '10px 12px' : '12px 14px',
+              }}
+            >
+              {checklist.map((item, index) => (
+                <div key={`risk-check-${index}`} className='flex items-center gap-2'>
+                  <Checkbox
+                    id={`risk-check-${index}`}
+                    checked={!!checkedItems[index]}
+                    onCheckedChange={(checked) => {
+                      handleChecklistChange(index, !!checked);
+                    }}
+                  />
+                  <label htmlFor={`risk-check-${index}`} className='text-sm cursor-pointer'>
+                    {item}
+                  </label>
+                </div>
+              ))}
+            </div>
+          ) : null}
+
+          {requiredText ? (
+            <div
+              className='flex flex-col gap-2 rounded-lg'
+              style={{
+                border: '1px solid var(--semi-color-danger-light-hover)',
+                background: 'var(--semi-color-danger-light-default)',
+                padding: isMobile ? '10px 12px' : '12px 14px',
+              }}
+            >
+              {inputPrompt ? <span className='font-semibold text-sm'>{inputPrompt}</span> : null}
+              <div className='font-mono text-xs break-all rounded-md p-2 bg-gray-50 border border-gray-200'>
+                {requiredText}
+              </div>
+              <Input
+                value={typedText}
+                onChange={(e) => setTypedText(e.target.value)}
+                placeholder={inputPlaceholder}
+                autoFocus={visible}
+                onCopy={(event) => event.preventDefault()}
+                onCut={(event) => event.preventDefault()}
+                onPaste={(event) => event.preventDefault()}
+                onDrop={(event) => event.preventDefault()}
+              />
+              {!typedMatched && typedText ? (
+                <span className='text-destructive text-xs'>
+                  {mismatchText}
+                </span>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+        <DialogFooter className='gap-2'>
+          <Button variant='outline' onClick={onCancel}>{cancelText}</Button>
           <Button
-            theme='solid'
-            type='danger'
+            variant='destructive'
             disabled={!canConfirm}
             onClick={onConfirm}
           >
             {confirmText}
           </Button>
-        </Space>
-      }
-    >
-      <div className='flex flex-col gap-4'>
-
-        <RiskMarkdownBlock markdownContent={markdownContent} />
-
-        {detailItems.length > 0 ? (
-          <div
-            className='flex flex-col gap-2 rounded-lg'
-            style={{
-              border: '1px solid var(--semi-color-warning-light-hover)',
-              background: 'var(--semi-color-fill-0)',
-              padding: isMobile ? '10px 12px' : '12px 14px',
-            }}
-          >
-            {detailTitle ? <Text strong>{detailTitle}</Text> : null}
-            <div className='font-mono text-xs break-all bg-orange-50 border border-orange-200 rounded-md p-2'>
-              {detailText}
-            </div>
-          </div>
-        ) : null}
-
-        {checklist.length > 0 ? (
-          <div
-            className='flex flex-col gap-2 rounded-lg'
-            style={{
-              border: '1px solid var(--semi-color-border)',
-              background: 'var(--semi-color-fill-0)',
-              padding: isMobile ? '10px 12px' : '12px 14px',
-            }}
-          >
-            {checklist.map((item, index) => (
-              <Checkbox
-                key={`risk-check-${index}`}
-                checked={!!checkedItems[index]}
-                onChange={(event) => {
-                  handleChecklistChange(index, event.target.checked);
-                }}
-              >
-                {item}
-              </Checkbox>
-            ))}
-          </div>
-        ) : null}
-
-        {requiredText ? (
-          <div
-            className='flex flex-col gap-2 rounded-lg'
-            style={{
-              border: '1px solid var(--semi-color-danger-light-hover)',
-              background: 'var(--semi-color-danger-light-default)',
-              padding: isMobile ? '10px 12px' : '12px 14px',
-            }}
-          >
-            {inputPrompt ? <Text strong>{inputPrompt}</Text> : null}
-            <div className='font-mono text-xs break-all rounded-md p-2 bg-gray-50 border border-gray-200'>
-              {requiredText}
-            </div>
-            <Input
-              value={typedText}
-              onChange={setTypedText}
-              placeholder={inputPlaceholder}
-              autoFocus={visible}
-              onCopy={(event) => event.preventDefault()}
-              onCut={(event) => event.preventDefault()}
-              onPaste={(event) => event.preventDefault()}
-              onDrop={(event) => event.preventDefault()}
-            />
-            {!typedMatched && typedText ? (
-              <Text type='danger' size='small'>
-                {mismatchText}
-              </Text>
-            ) : null}
-          </div>
-        ) : null}
-      </div>
-    </Modal>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 });
 

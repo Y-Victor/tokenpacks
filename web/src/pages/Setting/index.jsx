@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useEffect, useState } from 'react';
-import { Layout, TabPane, Tabs } from '@douyinfe/semi-ui';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/tabs';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -193,23 +193,32 @@ const Setting = () => {
     }
   }, [location.search]);
   return (
-    <div className='mt-[60px] px-2'>
-      <Layout>
-        <Layout.Content>
-          <Tabs
-            type='card'
-            collapsible
-            activeKey={tabActiveKey}
-            onChange={(key) => onChangeTab(key)}
+    <div className='settings-page px-2'>
+      <Tabs
+        value={tabActiveKey}
+        onValueChange={(key) => onChangeTab(key)}
+      >
+        <TabsList className='settings-tabs-list flex h-auto w-full flex-wrap justify-start gap-2'>
+          {panes.map((pane) => (
+            <TabsTrigger
+              value={pane.itemKey}
+              key={pane.itemKey}
+              className='settings-tabs-trigger'
+            >
+              {pane.tab}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        {panes.map((pane) => (
+          <TabsContent
+            value={pane.itemKey}
+            key={pane.itemKey}
+            className='settings-tabs-content'
           >
-            {panes.map((pane) => (
-              <TabPane itemKey={pane.itemKey} tab={pane.tab} key={pane.itemKey}>
-                {tabActiveKey === pane.itemKey && pane.content}
-              </TabPane>
-            ))}
-          </Tabs>
-        </Layout.Content>
-      </Layout>
+            {tabActiveKey === pane.itemKey && pane.content}
+          </TabsContent>
+        ))}
+      </Tabs>
     </div>
   );
 };

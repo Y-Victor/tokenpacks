@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Banner } from '@douyinfe/semi-ui';
+import { Banner } from '../../../ui/semi-compat';
 
 /**
  * 数据库检查步骤组件

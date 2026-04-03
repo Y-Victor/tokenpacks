@@ -32,32 +32,33 @@ import {
   displayAmountToQuota,
 } from '../../../../helpers/quota';
 import { useIsMobile } from '../../../../hooks/common/useIsMobile';
+import { Button } from '../../../ui/button';
+import { Input } from '../../../ui/input';
+import { Card } from '../../../ui/card';
+import { Badge } from '../../../ui/badge';
 import {
-  Button,
-  Modal,
-  SideSheet,
-  Space,
-  Spin,
-  Typography,
-  Card,
-  Tag,
-  Form,
-  Avatar,
-  Row,
-  Col,
-  InputNumber,
-} from '@douyinfe/semi-ui';
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+} from '../../../ui/sheet';
 import {
-  IconUser,
-  IconSave,
-  IconClose,
-  IconLink,
-  IconUserGroup,
-  IconPlus,
-} from '@douyinfe/semi-icons';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../../../ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../../ui/select';
+import { User, Save, X, Link, Users, Plus } from 'lucide-react';
 import UserBindingManagementModal from './UserBindingManagementModal';
-
-const { Text, Title } = Typography;
 
 const EditUserModal = (props) => {
   const { t } = useTranslation();
@@ -69,7 +70,28 @@ const EditUserModal = (props) => {
   const isMobile = useIsMobile();
   const [groupOptions, setGroupOptions] = useState([]);
   const [bindingModalVisible, setBindingModalVisible] = useState(false);
-  const formApiRef = useRef(null);
+  const [formValues, setFormValues] = useState({});
+  const [, setForceUpdate] = useState(0);
+
+  // Create a formApi-like ref for compatibility with UserBindingManagementModal
+  const formApiRef = useRef({
+    getValue: (field) => formValues[field],
+    setValue: (field, value) => {
+      setFormValues((prev) => ({ ...prev, [field]: value }));
+    },
+    getValues: () => formValues,
+    setValues: (vals) => {
+      setFormValues(vals);
+    },
+    submitForm: () => handleSubmit(),
+    reset: () => setFormValues(getInitValues()),
+  });
+
+  // Keep ref in sync
+  useEffect(() => {
+    formApiRef.current.getValue = (field) => formValues[field];
+    formApiRef.current.getValues = () => formValues;
+  }, [formValues]);
 
   const isEdit = Boolean(userId);
 
@@ -107,7 +129,7 @@ const EditUserModal = (props) => {
     const { success, message, data } = res.data;
     if (success) {
       data.password = '';
-      formApiRef.current?.setValues({ ...getInitValues(), ...data });
+      setFormValues({ ...getInitValues(), ...data });
     } else {
       showError(message);
     }
@@ -128,10 +150,18 @@ const EditUserModal = (props) => {
     setBindingModalVisible(false);
   };
 
+  const updateField = (field, value) => {
+    setFormValues((prev) => ({ ...prev, [field]: value }));
+  };
+
   /* ----------------------- submit ----------------------- */
-  const submit = async (values) => {
+  const handleSubmit = async () => {
+    if (!formValues.username) {
+      showError(t('请输入用户名'));
+      return;
+    }
     setLoading(true);
-    let payload = { ...values };
+    let payload = { ...formValues };
     if (typeof payload.quota === 'string')
       payload.quota = parseInt(payload.quota) || 0;
     if (userId) {
@@ -152,217 +182,202 @@ const EditUserModal = (props) => {
 
   /* --------------------- quota helper -------------------- */
   const addLocalQuota = () => {
-    const current = parseInt(formApiRef.current?.getValue('quota') || 0);
+    const current = parseInt(formValues.quota || 0);
     const delta = parseInt(addQuotaLocal) || 0;
-    formApiRef.current?.setValue('quota', current + delta);
+    updateField('quota', current + delta);
   };
 
   /* --------------------------- UI --------------------------- */
   return (
     <>
-      <SideSheet
-        placement='right'
-        title={
-          <Space>
-            <Tag color='blue' shape='circle'>
-              {t(isEdit ? '编辑' : '新建')}
-            </Tag>
-            <Title heading={4} className='m-0'>
-              {isEdit ? t('编辑用户') : t('创建用户')}
-            </Title>
-          </Space>
-        }
-        bodyStyle={{ padding: 0 }}
-        visible={props.visible}
-        width={isMobile ? '100%' : 600}
-        footer={
-          <div className='flex justify-end bg-white'>
-            <Space>
-              <Button
-                theme='solid'
-                onClick={() => formApiRef.current?.submitForm()}
-                icon={<IconSave />}
-                loading={loading}
-              >
-                {t('提交')}
-              </Button>
-              <Button
-                theme='light'
-                type='primary'
-                onClick={handleCancel}
-                icon={<IconClose />}
-              >
-                {t('取消')}
-              </Button>
-            </Space>
-          </div>
-        }
-        closeIcon={null}
-        onCancel={handleCancel}
-      >
-        <Spin spinning={loading}>
-          <Form
-            initValues={getInitValues()}
-            getFormApi={(api) => (formApiRef.current = api)}
-            onSubmit={submit}
-          >
-            {({ values }) => (
+      <Sheet open={props.visible} onOpenChange={(open) => !open && handleCancel()}>
+        <SheetContent side='right' className={isMobile ? 'w-full' : 'w-[600px] sm:max-w-[600px]'}>
+          <SheetHeader>
+            <SheetTitle>
+              <div className='flex items-center gap-2'>
+                <Badge variant='outline' className='text-blue-600 border-blue-300'>
+                  {t(isEdit ? '编辑' : '新建')}
+                </Badge>
+                <span>{isEdit ? t('编辑用户') : t('创建用户')}</span>
+              </div>
+            </SheetTitle>
+          </SheetHeader>
+
+          <div className='flex-1 overflow-y-auto'>
+            {loading ? (
+              <div className='flex items-center justify-center py-8'>
+                <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-primary' />
+              </div>
+            ) : (
               <div className='p-2 space-y-3'>
-                {/* 基本信息 */}
-                <Card className='!rounded-2xl shadow-sm border-0'>
-                  <div className='flex items-center mb-2'>
-                    <Avatar
-                      size='small'
-                      color='blue'
-                      className='mr-2 shadow-md'
-                    >
-                      <IconUser size={16} />
-                    </Avatar>
-                    <div>
-                      <Text className='text-lg font-medium'>
-                        {t('基本信息')}
-                      </Text>
-                      <div className='text-xs text-gray-600'>
-                        {t('用户的基本账户信息')}
+                {/* Basic Info */}
+                <Card className='rounded-2xl shadow-sm border-0'>
+                  <div className='p-4'>
+                    <div className='flex items-center mb-2'>
+                      <div className='w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-2 shadow-md'>
+                        <User className='h-4 w-4 text-blue-600' />
+                      </div>
+                      <div>
+                        <span className='text-lg font-medium'>
+                          {t('基本信息')}
+                        </span>
+                        <div className='text-xs text-gray-600'>
+                          {t('用户的基本账户信息')}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className='space-y-4'>
+                      <div>
+                        <label className='text-sm font-medium mb-1 block'>{t('用户名')} *</label>
+                        <Input
+                          value={formValues.username || ''}
+                          onChange={(e) => updateField('username', e.target.value)}
+                          placeholder={t('请输入新的用户名')}
+                        />
+                      </div>
+                      <div>
+                        <label className='text-sm font-medium mb-1 block'>{t('密码')}</label>
+                        <Input
+                          type='password'
+                          value={formValues.password || ''}
+                          onChange={(e) => updateField('password', e.target.value)}
+                          placeholder={t('请输入新的密码，最短 8 位')}
+                        />
+                      </div>
+                      <div>
+                        <label className='text-sm font-medium mb-1 block'>{t('显示名称')}</label>
+                        <Input
+                          value={formValues.display_name || ''}
+                          onChange={(e) => updateField('display_name', e.target.value)}
+                          placeholder={t('请输入新的显示名称')}
+                        />
+                      </div>
+                      <div>
+                        <label className='text-sm font-medium mb-1 block'>{t('备注')}</label>
+                        <Input
+                          value={formValues.remark || ''}
+                          onChange={(e) => updateField('remark', e.target.value)}
+                          placeholder={t('请输入备注（仅管理员可见）')}
+                        />
                       </div>
                     </div>
                   </div>
-
-                  <Row gutter={12}>
-                    <Col span={24}>
-                      <Form.Input
-                        field='username'
-                        label={t('用户名')}
-                        placeholder={t('请输入新的用户名')}
-                        rules={[{ required: true, message: t('请输入用户名') }]}
-                        showClear
-                      />
-                    </Col>
-
-                    <Col span={24}>
-                      <Form.Input
-                        field='password'
-                        label={t('密码')}
-                        placeholder={t('请输入新的密码，最短 8 位')}
-                        mode='password'
-                        showClear
-                      />
-                    </Col>
-
-                    <Col span={24}>
-                      <Form.Input
-                        field='display_name'
-                        label={t('显示名称')}
-                        placeholder={t('请输入新的显示名称')}
-                        showClear
-                      />
-                    </Col>
-
-                    <Col span={24}>
-                      <Form.Input
-                        field='remark'
-                        label={t('备注')}
-                        placeholder={t('请输入备注（仅管理员可见）')}
-                        showClear
-                      />
-                    </Col>
-                  </Row>
                 </Card>
 
-                {/* 权限设置 */}
+                {/* Permission Settings */}
                 {userId && (
-                  <Card className='!rounded-2xl shadow-sm border-0'>
-                    <div className='flex items-center mb-2'>
-                      <Avatar
-                        size='small'
-                        color='green'
-                        className='mr-2 shadow-md'
-                      >
-                        <IconUserGroup size={16} />
-                      </Avatar>
-                      <div>
-                        <Text className='text-lg font-medium'>
-                          {t('权限设置')}
-                        </Text>
-                        <div className='text-xs text-gray-600'>
-                          {t('用户分组和额度管理')}
+                  <Card className='rounded-2xl shadow-sm border-0'>
+                    <div className='p-4'>
+                      <div className='flex items-center mb-2'>
+                        <div className='w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-2 shadow-md'>
+                          <Users className='h-4 w-4 text-green-600' />
                         </div>
-                      </div>
-                    </div>
-
-                    <Row gutter={12}>
-                      <Col span={24}>
-                        <Form.Select
-                          field='group'
-                          label={t('分组')}
-                          placeholder={t('请选择分组')}
-                          optionList={groupOptions}
-                          allowAdditions
-                          search
-                          rules={[{ required: true, message: t('请选择分组') }]}
-                        />
-                      </Col>
-
-                      <Col span={10}>
-                        <Form.InputNumber
-                          field='quota'
-                          label={t('剩余额度')}
-                          placeholder={t('请输入新的剩余额度')}
-                          step={500000}
-                          extraText={renderQuotaWithPrompt(values.quota || 0)}
-                          rules={[{ required: true, message: t('请输入额度') }]}
-                          style={{ width: '100%' }}
-                        />
-                      </Col>
-
-                      <Col span={14}>
-                        <Form.Slot label={t('添加额度')}>
-                          <Button
-                            icon={<IconPlus />}
-                            onClick={() => setIsModalOpen(true)}
-                          />
-                        </Form.Slot>
-                      </Col>
-                    </Row>
-                  </Card>
-                )}
-
-                {/* 绑定信息入口 */}
-                {userId && (
-                  <Card className='!rounded-2xl shadow-sm border-0'>
-                    <div className='flex items-center justify-between gap-3'>
-                      <div className='flex items-center min-w-0'>
-                        <Avatar
-                          size='small'
-                          color='purple'
-                          className='mr-2 shadow-md'
-                        >
-                          <IconLink size={16} />
-                        </Avatar>
-                        <div className='min-w-0'>
-                          <Text className='text-lg font-medium'>
-                            {t('绑定信息')}
-                          </Text>
+                        <div>
+                          <span className='text-lg font-medium'>
+                            {t('权限设置')}
+                          </span>
                           <div className='text-xs text-gray-600'>
-                            {t('管理用户已绑定的第三方账户，支持筛选与解绑')}
+                            {t('用户分组和额度管理')}
                           </div>
                         </div>
                       </div>
-                      <Button
-                        type='primary'
-                        theme='outline'
-                        onClick={openBindingModal}
-                      >
-                        {t('管理绑定')}
-                      </Button>
+
+                      <div className='space-y-4'>
+                        <div>
+                          <label className='text-sm font-medium mb-1 block'>{t('分组')} *</label>
+                          <Select
+                            value={formValues.group || undefined}
+                            onValueChange={(value) => updateField('group', value)}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder={t('请选择分组')} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {groupOptions.map((opt) => (
+                                <SelectItem key={opt.value} value={opt.value}>
+                                  {opt.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className='grid grid-cols-12 gap-3'>
+                          <div className='col-span-10'>
+                            <label className='text-sm font-medium mb-1 block'>{t('剩余额度')} *</label>
+                            <Input
+                              type='number'
+                              value={formValues.quota ?? 0}
+                              onChange={(e) => updateField('quota', parseInt(e.target.value) || 0)}
+                              placeholder={t('请输入新的剩余额度')}
+                              step={500000}
+                            />
+                            <p className='text-xs text-muted-foreground mt-1'>
+                              {renderQuotaWithPrompt(formValues.quota || 0)}
+                            </p>
+                          </div>
+                          <div className='col-span-2 flex items-end'>
+                            <Button
+                              variant='outline'
+                              size='icon'
+                              onClick={() => setIsModalOpen(true)}
+                            >
+                              <Plus className='h-4 w-4' />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                )}
+
+                {/* Binding Info Entry */}
+                {userId && (
+                  <Card className='rounded-2xl shadow-sm border-0'>
+                    <div className='p-4'>
+                      <div className='flex items-center justify-between gap-3'>
+                        <div className='flex items-center min-w-0'>
+                          <div className='w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center mr-2 shadow-md'>
+                            <Link className='h-4 w-4 text-purple-600' />
+                          </div>
+                          <div className='min-w-0'>
+                            <span className='text-lg font-medium'>
+                              {t('绑定信息')}
+                            </span>
+                            <div className='text-xs text-gray-600'>
+                              {t('管理用户已绑定的第三方账户，支持筛选与解绑')}
+                            </div>
+                          </div>
+                        </div>
+                        <Button
+                          variant='outline'
+                          onClick={openBindingModal}
+                        >
+                          {t('管理绑定')}
+                        </Button>
+                      </div>
                     </div>
                   </Card>
                 )}
               </div>
             )}
-          </Form>
-        </Spin>
-      </SideSheet>
+          </div>
+
+          <SheetFooter>
+            <div className='flex justify-end gap-2'>
+              <Button onClick={handleSubmit} disabled={loading}>
+                <Save className='h-4 w-4 mr-1' />
+                {t('提交')}
+              </Button>
+              <Button variant='outline' onClick={handleCancel}>
+                <X className='h-4 w-4 mr-1' />
+                {t('取消')}
+              </Button>
+            </div>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
 
       <UserBindingManagementModal
         visible={bindingModalVisible}
@@ -372,89 +387,93 @@ const EditUserModal = (props) => {
         formApiRef={formApiRef}
       />
 
-      {/* 添加额度模态框 */}
-      <Modal
-        centered
-        visible={addQuotaModalOpen}
-        onOk={() => {
-          addLocalQuota();
-          setIsModalOpen(false);
-          setAddQuotaLocal('');
-          setAddAmountLocal('');
-        }}
-        onCancel={() => {
-          setIsModalOpen(false);
-        }}
-        closable={null}
-        title={
-          <div className='flex items-center'>
-            <IconPlus className='mr-2' />
-            {t('添加额度')}
+      {/* Add Quota Modal */}
+      <Dialog open={addQuotaModalOpen} onOpenChange={(open) => !open && setIsModalOpen(false)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              <div className='flex items-center'>
+                <Plus className='mr-2 h-4 w-4' />
+                {t('添加额度')}
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          <div className='mb-4'>
+            {(() => {
+              const current = formValues.quota || 0;
+              return (
+                <span className='text-sm text-muted-foreground block mb-2'>
+                  {`${t('新额度：')}${renderQuota(current)} + ${renderQuota(addQuotaLocal)} = ${renderQuota(current + parseInt(addQuotaLocal || 0))}`}
+                </span>
+              );
+            })()}
           </div>
-        }
-      >
-        <div className='mb-4'>
-          {(() => {
-            const current = formApiRef.current?.getValue('quota') || 0;
-            return (
-              <Text type='secondary' className='block mb-2'>
-                {`${t('新额度：')}${renderQuota(current)} + ${renderQuota(addQuotaLocal)} = ${renderQuota(current + parseInt(addQuotaLocal || 0))}`}
-              </Text>
-            );
-          })()}
-        </div>
-        {getCurrencyConfig().type !== 'TOKENS' && (
-          <div className='mb-3'>
-            <div className='mb-1'>
-              <Text size='small'>{t('金额')}</Text>
-              <Text size='small' type='tertiary'>
-                {' '}
-                ({t('仅用于换算，实际保存的是额度')})
-              </Text>
+          {getCurrencyConfig().type !== 'TOKENS' && (
+            <div className='mb-3'>
+              <div className='mb-1'>
+                <span className='text-sm'>{t('金额')}</span>
+                <span className='text-sm text-muted-foreground'>
+                  {' '}
+                  ({t('仅用于换算，实际保存的是额度')})
+                </span>
+              </div>
+              <Input
+                type='number'
+                placeholder={t('输入金额')}
+                value={addAmountLocal}
+                onChange={(e) => {
+                  const val = e.target.value === '' ? '' : Number(e.target.value);
+                  setAddAmountLocal(val);
+                  setAddQuotaLocal(
+                    val != null && val !== ''
+                      ? displayAmountToQuota(Math.abs(val)) * Math.sign(val)
+                      : '',
+                  );
+                }}
+              />
             </div>
-            <InputNumber
-              prefix={getCurrencyConfig().symbol}
-              placeholder={t('输入金额')}
-              value={addAmountLocal}
-              precision={2}
-              onChange={(val) => {
-                setAddAmountLocal(val);
-                setAddQuotaLocal(
+          )}
+          <div>
+            <div className='mb-1'>
+              <span className='text-sm'>{t('额度')}</span>
+            </div>
+            <Input
+              type='number'
+              placeholder={t('输入额度')}
+              value={addQuotaLocal}
+              onChange={(e) => {
+                const val = e.target.value === '' ? '' : Number(e.target.value);
+                setAddQuotaLocal(val);
+                setAddAmountLocal(
                   val != null && val !== ''
-                    ? displayAmountToQuota(Math.abs(val)) * Math.sign(val)
+                    ? Number(
+                        (
+                          quotaToDisplayAmount(Math.abs(val)) * Math.sign(val)
+                        ).toFixed(2),
+                      )
                     : '',
                 );
               }}
-              style={{ width: '100%' }}
-              showClear
+              step={500000}
             />
           </div>
-        )}
-        <div>
-          <div className='mb-1'>
-            <Text size='small'>{t('额度')}</Text>
-          </div>
-          <InputNumber
-            placeholder={t('输入额度')}
-            value={addQuotaLocal}
-            onChange={(val) => {
-              setAddQuotaLocal(val);
-              setAddAmountLocal(
-                val != null && val !== ''
-                  ? Number(
-                      (
-                        quotaToDisplayAmount(Math.abs(val)) * Math.sign(val)
-                      ).toFixed(2),
-                    )
-                  : '',
-              );
-            }}
-            style={{ width: '100%' }}
-            showClear
-            step={500000}
-          />
-        </div>
-      </Modal>
+          <DialogFooter>
+            <Button variant='outline' onClick={() => setIsModalOpen(false)}>
+              {t('取消')}
+            </Button>
+            <Button
+              onClick={() => {
+                addLocalQuota();
+                setIsModalOpen(false);
+                setAddQuotaLocal('');
+                setAddAmountLocal('');
+              }}
+            >
+              {t('确定')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

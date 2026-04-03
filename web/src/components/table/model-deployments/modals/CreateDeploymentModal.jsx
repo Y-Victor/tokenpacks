@@ -37,13 +37,13 @@ import {
   Col,
   Tooltip,
   Radio,
-} from '@douyinfe/semi-ui';
+} from '../../../../components/ui/semi-compat';
 import {
   IconPlus,
   IconMinus,
   IconHelpCircle,
   IconCopy,
-} from '@douyinfe/semi-icons';
+} from '../../../../components/ui/semi-icons-compat';
 import { API } from '../../../../helpers';
 import { showError, showSuccess, copy } from '../../../../helpers';
 

@@ -18,11 +18,22 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Card, Avatar, Typography, Table, Tag } from '@douyinfe/semi-ui';
-import { IconCoinMoneyStroked } from '@douyinfe/semi-icons';
+import { Card } from '../../../../ui/card';
+import {
+  Avatar,
+  AvatarFallback,
+} from '../../../../ui/avatar';
+import { Badge } from '../../../../ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../../../../ui/table';
+import { Coins } from 'lucide-react';
 import { calculateModelPrice, getModelPriceItems } from '../../../../../helpers';
-
-const { Text } = Typography;
 
 const ModelPricingTable = ({
   modelData,
@@ -80,86 +91,83 @@ const ModelPricingTable = ({
       };
     });
 
-    // 定义表格列
-    const columns = [
-      {
-        title: t('分组'),
-        dataIndex: 'group',
-        render: (text) => (
-          <Tag color='white' size='small' shape='circle'>
-            {text}
-            {t('分组')}
-          </Tag>
-        ),
-      },
-    ];
-
-    // 如果显示倍率，添加倍率列
-    if (showRatio) {
-      columns.push({
-        title: t('倍率'),
-        dataIndex: 'ratio',
-        render: (text) => (
-          <Tag color='white' size='small' shape='circle'>
-            {text}x
-          </Tag>
-        ),
-      });
-    }
-
-    // 添加计费类型列
-    columns.push({
-      title: t('计费类型'),
-      dataIndex: 'billingType',
-      render: (text) => {
-        let color = 'white';
-        if (text === t('按量计费')) color = 'violet';
-        else if (text === t('按次计费')) color = 'teal';
-        return (
-          <Tag color={color} size='small' shape='circle'>
-            {text || '-'}
-          </Tag>
-        );
-      },
-    });
-
-    columns.push({
-      title: siteDisplayType === 'TOKENS' ? t('计费摘要') : t('价格摘要'),
-      dataIndex: 'priceItems',
-      render: (items) => (
-        <div className='space-y-1'>
-          {items.map((item) => (
-            <div key={item.key}>
-              <div className='font-semibold text-orange-600'>
-                {item.label} {item.value}
-              </div>
-              <div className='text-xs text-gray-500'>{item.suffix}</div>
-            </div>
-          ))}
-        </div>
-      ),
-    });
-
     return (
-      <Table
-        dataSource={tableData}
-        columns={columns}
-        pagination={false}
-        size='small'
-        bordered={false}
-        className='!rounded-lg'
-      />
+      <div className='rounded-lg overflow-hidden'>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t('分组')}</TableHead>
+              {showRatio && <TableHead>{t('倍率')}</TableHead>}
+              <TableHead>{t('计费类型')}</TableHead>
+              <TableHead>
+                {siteDisplayType === 'TOKENS' ? t('计费摘要') : t('价格摘要')}
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {tableData.map((row) => {
+              let billingClassName = '';
+              if (row.billingType === t('按量计费'))
+                billingClassName = 'bg-violet-100 text-violet-800';
+              else if (row.billingType === t('按次计费'))
+                billingClassName = 'bg-teal-100 text-teal-800';
+
+              return (
+                <TableRow key={row.key}>
+                  <TableCell>
+                    <Badge variant='outline' className='rounded-full'>
+                      {row.group}
+                      {t('分组')}
+                    </Badge>
+                  </TableCell>
+                  {showRatio && (
+                    <TableCell>
+                      <Badge variant='outline' className='rounded-full'>
+                        {row.ratio}x
+                      </Badge>
+                    </TableCell>
+                  )}
+                  <TableCell>
+                    <Badge
+                      variant='secondary'
+                      className={`rounded-full ${billingClassName}`}
+                    >
+                      {row.billingType || '-'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className='space-y-1'>
+                      {row.priceItems.map((item) => (
+                        <div key={item.key}>
+                          <div className='font-semibold text-orange-600'>
+                            {item.label} {item.value}
+                          </div>
+                          <div className='text-xs text-gray-500'>
+                            {item.suffix}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
     );
   };
 
   return (
-    <Card className='!rounded-2xl shadow-sm border-0'>
+    <Card className='!rounded-2xl shadow-sm border-0 p-6'>
       <div className='flex items-center mb-4'>
-        <Avatar size='small' color='orange' className='mr-2 shadow-md'>
-          <IconCoinMoneyStroked size={16} />
+        <Avatar className='mr-2 shadow-md h-8 w-8 bg-orange-500'>
+          <AvatarFallback className='bg-orange-500 text-white'>
+            <Coins size={16} />
+          </AvatarFallback>
         </Avatar>
         <div>
-          <Text className='text-lg font-medium'>{t('分组价格')}</Text>
+          <span className='text-lg font-medium'>{t('分组价格')}</span>
           <div className='text-xs text-gray-600'>
             {t('不同用户分组的价格信息')}
           </div>
@@ -171,10 +179,10 @@ const ModelPricingTable = ({
           <span className='text-sm'>→</span>
           {autoChain.map((g, idx) => (
             <React.Fragment key={g}>
-              <Tag color='white' size='small' shape='circle'>
+              <Badge variant='outline' className='rounded-full'>
                 {g}
                 {t('分组')}
-              </Tag>
+              </Badge>
               {idx < autoChain.length - 1 && <span className='text-sm'>→</span>}
             </React.Fragment>
           ))}

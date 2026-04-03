@@ -18,7 +18,8 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useRef, useEffect } from 'react';
-import { Typography, TextArea, Button } from '@douyinfe/semi-ui';
+import { Textarea } from '../ui/textarea';
+import { Button } from '../ui/button';
 import MarkdownRenderer from '../common/markdown/MarkdownRenderer';
 import ThinkingContent from './ThinkingContent';
 import { Loader2, Check, X } from 'lucide-react';
@@ -65,8 +66,10 @@ const MessageContent = ({
     }
 
     return (
-      <div className={`${className}`}>
-        <Typography.Text className='text-white'>{errorText}</Typography.Text>
+      <div className={className}>
+        <div className='rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 shadow-sm'>
+          {errorText}
+        </div>
       </div>
     );
   }
@@ -191,17 +194,16 @@ const MessageContent = ({
       {message.role === 'system' && (
         <div className='mb-2 sm:mb-4'>
           <div
-            className='flex items-center gap-2 p-2 sm:p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg'
-            style={{ border: '1px solid var(--semi-color-border)' }}
+            className='flex items-center gap-2 p-2 sm:p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-border'
           >
             <div className='w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-sm'>
-              <Typography.Text className='text-white text-xs font-bold'>
+              <span className='text-white text-xs font-bold'>
                 S
-              </Typography.Text>
+              </span>
             </div>
-            <Typography.Text className='text-amber-700 text-xs sm:text-sm font-medium'>
+            <span className='text-amber-700 text-xs sm:text-sm font-medium'>
               {t('系统消息')}
-            </Typography.Text>
+            </span>
           </div>
         </div>
       )}
@@ -218,11 +220,11 @@ const MessageContent = ({
 
       {isEditing ? (
         <div className='space-y-3'>
-          <TextArea
+          <Textarea
             value={editValue}
-            onChange={(value) => onEditValueChange(value)}
+            onChange={(e) => onEditValueChange(e.target.value)}
             placeholder={t('请输入消息内容...')}
-            autosize={{ minRows: 3, maxRows: 12 }}
+            rows={3}
             style={{
               resize: 'vertical',
               fontSize: styleState.isMobile ? '14px' : '15px',
@@ -232,24 +234,21 @@ const MessageContent = ({
           />
           <div className='flex items-center gap-2 w-full'>
             <Button
-              size='small'
-              type='danger'
-              theme='light'
-              icon={<X size={14} />}
+              size='sm'
+              variant='outline'
               onClick={onEditCancel}
               className='flex-1'
             >
+              <X size={14} className='mr-1' />
               {t('取消')}
             </Button>
             <Button
-              size='small'
-              type='warning'
-              theme='solid'
-              icon={<Check size={14} />}
+              size='sm'
               onClick={onEditSave}
               disabled={!editValue || editValue.trim() === ''}
               className='flex-1'
             >
+              <Check size={14} className='mr-1' />
               {t('保存')}
             </Button>
           </div>

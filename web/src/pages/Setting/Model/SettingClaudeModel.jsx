@@ -18,7 +18,6 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Button, Col, Form, Row, Spin } from '@douyinfe/semi-ui';
 import {
   compareObjects,
   API,
@@ -28,7 +27,8 @@ import {
   verifyJSON,
 } from '../../../helpers';
 import { useTranslation } from 'react-i18next';
-import Text from '@douyinfe/semi-ui/lib/es/typography/text';
+import { Form, Row, Col, Spin } from '../../../components/ui/form-compat';
+import { Button } from '../../../components/ui/button';
 
 const CLAUDE_HEADER = {
   'claude-3-7-sonnet-20250219-thinking': {
@@ -118,7 +118,6 @@ export default function SettingClaudeModel(props) {
         <Form
           values={inputs}
           getFormApi={(formAPI) => (refForm.current = formAPI)}
-          style={{ marginBottom: 15 }}
         >
           <Form.Section text={t('Claude设置')}>
             <Row>
@@ -212,11 +211,11 @@ export default function SettingClaudeModel(props) {
             <Row>
               <Col span={16}>
                 {/*//展示MaxTokens和BudgetTokens的计算公式, 并展示实际数字*/}
-                <Text>
+                <span>
                   {t(
                     'Claude思考适配 BudgetTokens = MaxTokens * BudgetTokens 百分比',
                   )}
-                </Text>
+                </span>
               </Col>
             </Row>
             <Row>

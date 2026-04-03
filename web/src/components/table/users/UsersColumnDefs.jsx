@@ -18,17 +18,27 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
+import { Button } from '../../ui/button';
+import { Badge } from '../../ui/badge';
 import {
-  Button,
-  Space,
-  Tag,
   Tooltip,
-  Progress,
+  TooltipContent,
+  TooltipTrigger,
+} from '../../ui/tooltip';
+import {
   Popover,
-  Typography,
-  Dropdown,
-} from '@douyinfe/semi-ui';
-import { IconMore } from '@douyinfe/semi-icons';
+  PopoverContent,
+  PopoverTrigger,
+} from '../../ui/popover';
+import { Progress } from '../../ui/progress';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '../../ui/dropdown-menu';
+import { MoreHorizontal } from 'lucide-react';
 import { renderGroup, renderNumber, renderQuota } from '../../../helpers';
 
 /**
@@ -38,27 +48,27 @@ const renderRole = (role, t) => {
   switch (role) {
     case 1:
       return (
-        <Tag color='blue' shape='circle'>
+        <Badge variant='outline' className='text-blue-600 border-blue-300'>
           {t('普通用户')}
-        </Tag>
+        </Badge>
       );
     case 10:
       return (
-        <Tag color='yellow' shape='circle'>
+        <Badge variant='outline' className='text-yellow-600 border-yellow-300'>
           {t('管理员')}
-        </Tag>
+        </Badge>
       );
     case 100:
       return (
-        <Tag color='orange' shape='circle'>
+        <Badge variant='outline' className='text-orange-600 border-orange-300'>
           {t('超级管理员')}
-        </Tag>
+        </Badge>
       );
     default:
       return (
-        <Tag color='red' shape='circle'>
+        <Badge variant='outline' className='text-red-600 border-red-300'>
           {t('未知身份')}
-        </Tag>
+        </Badge>
       );
   }
 };
@@ -73,22 +83,25 @@ const renderUsername = (text, record) => {
   }
   const maxLen = 10;
   const displayRemark =
-    remark.length > maxLen ? remark.slice(0, maxLen) + '…' : remark;
+    remark.length > maxLen ? remark.slice(0, maxLen) + '\u2026' : remark;
   return (
-    <Space spacing={2}>
+    <div className='flex items-center gap-0.5'>
       <span>{text}</span>
-      <Tooltip content={remark} position='top' showArrow>
-        <Tag color='white' shape='circle' className='!text-xs'>
-          <div className='flex items-center gap-1'>
-            <div
-              className='w-2 h-2 flex-shrink-0 rounded-full'
-              style={{ backgroundColor: '#10b981' }}
-            />
-            {displayRemark}
-          </div>
-        </Tag>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Badge variant='outline' className='text-xs cursor-help'>
+            <div className='flex items-center gap-1'>
+              <div
+                className='w-2 h-2 flex-shrink-0 rounded-full'
+                style={{ backgroundColor: '#10b981' }}
+              />
+              {displayRemark}
+            </div>
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent>{remark}</TooltipContent>
       </Tooltip>
-    </Space>
+    </div>
   );
 };
 
@@ -98,24 +111,23 @@ const renderUsername = (text, record) => {
 const renderStatistics = (text, record, showEnableDisableModal, t) => {
   const isDeleted = record.DeletedAt !== null;
 
-  // Determine tag text & color like original status column
-  let tagColor = 'grey';
+  let badgeClass = 'text-gray-600 border-gray-300';
   let tagText = t('未知状态');
   if (isDeleted) {
-    tagColor = 'red';
+    badgeClass = 'text-red-600 border-red-300';
     tagText = t('已注销');
   } else if (record.status === 1) {
-    tagColor = 'green';
+    badgeClass = 'text-green-600 border-green-300';
     tagText = t('已启用');
   } else if (record.status === 2) {
-    tagColor = 'red';
+    badgeClass = 'text-red-600 border-red-300';
     tagText = t('已禁用');
   }
 
   const content = (
-    <Tag color={tagColor} shape='circle' size='small'>
+    <Badge variant='outline' className={badgeClass}>
       {tagText}
-    </Tag>
+    </Badge>
   );
 
   const tooltipContent = (
@@ -127,45 +139,47 @@ const renderStatistics = (text, record, showEnableDisableModal, t) => {
   );
 
   return (
-    <Tooltip content={tooltipContent} position='top'>
-      {content}
+    <Tooltip>
+      <TooltipTrigger asChild>{content}</TooltipTrigger>
+      <TooltipContent>{tooltipContent}</TooltipContent>
     </Tooltip>
   );
 };
 
 // Render separate quota usage column
 const renderQuotaUsage = (text, record, t) => {
-  const { Paragraph } = Typography;
   const used = parseInt(record.used_quota) || 0;
   const remain = parseInt(record.quota) || 0;
   const total = used + remain;
   const percent = total > 0 ? (remain / total) * 100 : 0;
   const popoverContent = (
     <div className='text-xs p-2'>
-      <Paragraph copyable={{ content: renderQuota(used) }}>
+      <p className='cursor-pointer' onClick={() => navigator.clipboard.writeText(renderQuota(used))}>
         {t('已用额度')}: {renderQuota(used)}
-      </Paragraph>
-      <Paragraph copyable={{ content: renderQuota(remain) }}>
+      </p>
+      <p className='cursor-pointer' onClick={() => navigator.clipboard.writeText(renderQuota(remain))}>
         {t('剩余额度')}: {renderQuota(remain)} ({percent.toFixed(0)}%)
-      </Paragraph>
-      <Paragraph copyable={{ content: renderQuota(total) }}>
+      </p>
+      <p className='cursor-pointer' onClick={() => navigator.clipboard.writeText(renderQuota(total))}>
         {t('总额度')}: {renderQuota(total)}
-      </Paragraph>
+      </p>
     </div>
   );
   return (
-    <Popover content={popoverContent} position='top'>
-      <Tag color='white' shape='circle'>
-        <div className='flex flex-col items-end'>
-          <span className='text-xs leading-none'>{`${renderQuota(remain)} / ${renderQuota(total)}`}</span>
-          <Progress
-            percent={percent}
-            aria-label='quota usage'
-            format={() => `${percent.toFixed(0)}%`}
-            style={{ width: '100%', marginTop: '1px', marginBottom: 0 }}
-          />
-        </div>
-      </Tag>
+    <Popover>
+      <PopoverTrigger asChild>
+        <Badge variant='outline' className='cursor-pointer'>
+          <div className='flex flex-col items-end'>
+            <span className='text-xs leading-none'>{`${renderQuota(remain)} / ${renderQuota(total)}`}</span>
+            <Progress
+              value={percent}
+              aria-label='quota usage'
+              className='w-full mt-0.5 h-1.5'
+            />
+          </div>
+        </Badge>
+      </PopoverTrigger>
+      <PopoverContent className='w-auto'>{popoverContent}</PopoverContent>
     </Popover>
   );
 };
@@ -176,19 +190,19 @@ const renderQuotaUsage = (text, record, t) => {
 const renderInviteInfo = (text, record, t) => {
   return (
     <div>
-      <Space spacing={1}>
-        <Tag color='white' shape='circle' className='!text-xs'>
+      <div className='flex items-center gap-1'>
+        <Badge variant='outline' className='text-xs'>
           {t('邀请')}: {renderNumber(record.aff_count)}
-        </Tag>
-        <Tag color='white' shape='circle' className='!text-xs'>
+        </Badge>
+        <Badge variant='outline' className='text-xs'>
           {t('收益')}: {renderQuota(record.aff_history_quota)}
-        </Tag>
-        <Tag color='white' shape='circle' className='!text-xs'>
+        </Badge>
+        <Badge variant='outline' className='text-xs'>
           {record.inviter_id === 0
             ? t('无邀请人')
             : `${t('邀请人')}: ${record.inviter_id}`}
-        </Tag>
-      </Space>
+        </Badge>
+      </div>
     </div>
   );
 };
@@ -216,57 +230,27 @@ const renderOperations = (
     return <></>;
   }
 
-  const moreMenu = [
-    {
-      node: 'item',
-      name: t('订阅管理'),
-      onClick: () => showUserSubscriptionsModal(record),
-    },
-    {
-      node: 'divider',
-    },
-    {
-      node: 'item',
-      name: t('重置 Passkey'),
-      onClick: () => showResetPasskeyModal(record),
-    },
-    {
-      node: 'item',
-      name: t('重置 2FA'),
-      onClick: () => showResetTwoFAModal(record),
-    },
-    {
-      node: 'divider',
-    },
-    {
-      node: 'item',
-      name: t('注销'),
-      type: 'danger',
-      onClick: () => showDeleteModal(record),
-    },
-  ];
-
   return (
-    <Space>
+    <div className='flex items-center gap-1'>
       {record.status === 1 ? (
         <Button
-          type='danger'
-          size='small'
+          variant='destructive'
+          size='sm'
           onClick={() => showEnableDisableModal(record, 'disable')}
         >
           {t('禁用')}
         </Button>
       ) : (
         <Button
-          size='small'
+          size='sm'
           onClick={() => showEnableDisableModal(record, 'enable')}
         >
           {t('启用')}
         </Button>
       )}
       <Button
-        type='tertiary'
-        size='small'
+        variant='secondary'
+        size='sm'
         onClick={() => {
           setEditingUser(record);
           setShowEditUser(true);
@@ -275,23 +259,46 @@ const renderOperations = (
         {t('编辑')}
       </Button>
       <Button
-        type='warning'
-        size='small'
+        variant='outline'
+        size='sm'
         onClick={() => showPromoteModal(record)}
       >
         {t('提升')}
       </Button>
       <Button
-        type='secondary'
-        size='small'
+        variant='outline'
+        size='sm'
         onClick={() => showDemoteModal(record)}
       >
         {t('降级')}
       </Button>
-      <Dropdown menu={moreMenu} trigger='click' position='bottomRight'>
-        <Button type='tertiary' size='small' icon={<IconMore />} />
-      </Dropdown>
-    </Space>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant='ghost' size='sm'>
+            <MoreHorizontal className='h-4 w-4' />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align='end'>
+          <DropdownMenuItem onClick={() => showUserSubscriptionsModal(record)}>
+            {t('订阅管理')}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => showResetPasskeyModal(record)}>
+            {t('重置 Passkey')}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => showResetTwoFAModal(record)}>
+            {t('重置 2FA')}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className='text-destructive'
+            onClick={() => showDeleteModal(record)}
+          >
+            {t('注销')}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 };
 

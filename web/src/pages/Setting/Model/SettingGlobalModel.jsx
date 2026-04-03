@@ -19,16 +19,6 @@ For commercial licensing, please contact support@quantumnous.com
 
 import React, { useEffect, useState, useRef } from 'react';
 import {
-  Button,
-  Col,
-  Form,
-  Row,
-  Spin,
-  Banner,
-  Tag,
-  Divider,
-} from '@douyinfe/semi-ui';
-import {
   compareObjects,
   API,
   showError,
@@ -37,6 +27,8 @@ import {
   verifyJSON,
 } from '../../../helpers';
 import { useTranslation } from 'react-i18next';
+import { Form, Row, Col, Spin } from '../../../components/ui/form-compat';
+import { Banner, Button, Tag } from '../../../components/ui/semi-compat';
 
 const thinkingExample = JSON.stringify(
   ['moonshotai/kimi-k2-thinking', 'kimi-k2-thinking'],
@@ -185,7 +177,6 @@ export default function SettingGlobalModel(props) {
         <Form
           values={inputs}
           getFormApi={(formAPI) => (refForm.current = formAPI)}
-          style={{ marginBottom: 15 }}
         >
           <Form.Section text={t('全局设置')}>
             <Row>

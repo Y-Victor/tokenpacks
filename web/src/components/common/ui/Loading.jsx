@@ -18,12 +18,18 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Spin } from '@douyinfe/semi-ui';
+import { Loader2 } from 'lucide-react';
+
+const sizeMap = {
+  small: 'h-6 w-6',
+  middle: 'h-8 w-8',
+  large: 'h-12 w-12',
+};
 
 const Loading = ({ size = 'small' }) => {
   return (
     <div className='fixed inset-0 w-screen h-screen flex items-center justify-center'>
-      <Spin size={size} spinning={true} />
+      <Loader2 className={`${sizeMap[size] || sizeMap.small} animate-spin text-muted-foreground`} />
     </div>
   );
 };

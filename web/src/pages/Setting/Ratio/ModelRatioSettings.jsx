@@ -19,15 +19,6 @@ For commercial licensing, please contact support@quantumnous.com
 
 import React, { useEffect, useState, useRef } from 'react';
 import {
-  Button,
-  Col,
-  Form,
-  Popconfirm,
-  Row,
-  Space,
-  Spin,
-} from '@douyinfe/semi-ui';
-import {
   compareObjects,
   API,
   showError,
@@ -36,6 +27,9 @@ import {
   verifyJSON,
 } from '../../../helpers';
 import { useTranslation } from 'react-i18next';
+import { Form, Row, Col, Spin } from '../../../components/ui/form-compat';
+import { Button } from '../../../components/ui/button';
+import { Popconfirm } from '../../../components/ui/semi-compat';
 
 export default function ModelRatioSettings(props) {
   const [loading, setLoading] = useState(false);
@@ -139,7 +133,6 @@ export default function ModelRatioSettings(props) {
       <Form
         values={inputs}
         getFormApi={(formAPI) => (refForm.current = formAPI)}
-        style={{ marginBottom: 15 }}
       >
         <Row gutter={16}>
           <Col xs={24} sm={16}>
@@ -331,7 +324,7 @@ export default function ModelRatioSettings(props) {
           </Col>
         </Row>
       </Form>
-      <Space>
+      <div className="flex items-center gap-2">
         <Button onClick={onSubmit}>{t('保存模型倍率设置')}</Button>
         <Popconfirm
           title={t('确定重置模型倍率吗？')}
@@ -342,7 +335,7 @@ export default function ModelRatioSettings(props) {
         >
           <Button type={'danger'}>{t('重置模型倍率')}</Button>
         </Popconfirm>
-      </Space>
+      </div>
     </Spin>
   );
 }

@@ -31,13 +31,13 @@ import {
   Spin,
   Tag,
   Typography,
-} from '@douyinfe/semi-ui';
+} from '../../../../components/ui/semi-compat';
 import {
   IconCalendarClock,
   IconClose,
   IconCreditCard,
   IconSave,
-} from '@douyinfe/semi-icons';
+} from '../../../../components/ui/semi-icons-compat';
 import { Clock, RefreshCw } from 'lucide-react';
 import { API, showError, showSuccess } from '../../../../helpers';
 import {

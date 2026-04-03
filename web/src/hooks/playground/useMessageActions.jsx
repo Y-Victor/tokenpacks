@@ -18,7 +18,8 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import { useCallback } from 'react';
-import { Toast, Modal } from '@douyinfe/semi-ui';
+import { confirm } from '../../lib/confirm';
+import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { getTextContent } from '../../helpers';
 import { ERROR_MESSAGES } from '../../constants/playground.constants';
@@ -37,7 +38,7 @@ export const useMessageActions = (
       const textToCopy = getTextContent(targetMessage);
 
       if (!textToCopy) {
-        Toast.warning({
+        toast.warning({
           content: t(ERROR_MESSAGES.NO_TEXT_CONTENT),
           duration: 2,
         });
@@ -48,7 +49,7 @@ export const useMessageActions = (
         if (navigator.clipboard?.writeText) {
           try {
             await navigator.clipboard.writeText(text);
-            Toast.success({
+            toast.success({
               content: t('消息已复制到剪贴板'),
               duration: 2,
             });
@@ -83,7 +84,7 @@ export const useMessageActions = (
           document.body.removeChild(textArea);
 
           if (successful) {
-            Toast.success({
+            toast.success({
               content: t('消息已复制到剪贴板'),
               duration: 2,
             });
@@ -103,7 +104,7 @@ export const useMessageActions = (
             errorMessage = t(ERROR_MESSAGES.BROWSER_NOT_SUPPORTED);
           }
 
-          Toast.error({
+          toast.error({
             content: errorMessage,
             duration: 4,
           });
@@ -176,15 +177,12 @@ export const useMessageActions = (
   // 删除消息
   const handleMessageDelete = useCallback(
     (targetMessage) => {
-      Modal.confirm({
+      confirm({
         title: t('确认删除'),
         content: t('确定要删除这条消息吗？'),
         okText: t('确定'),
         cancelText: t('取消'),
-        okButtonProps: {
-          type: 'danger',
-        },
-        onOk: () => {
+        onConfirm: () => {
           setMessage((prevMessages) => {
             // 使用引用查找索引，防止重复 id 造成误匹配
             let messageIndex = prevMessages.findIndex(
@@ -207,7 +205,7 @@ export const useMessageActions = (
             ) {
               const nextMessage = prevMessages[messageIndex + 1];
               if (nextMessage.role === 'assistant') {
-                Toast.success({
+                toast.success({
                   content: t('已删除消息及其回复'),
                   duration: 2,
                 });
@@ -216,7 +214,7 @@ export const useMessageActions = (
                     index !== messageIndex && index !== messageIndex + 1,
                 );
               } else {
-                Toast.success({
+                toast.success({
                   content: t('消息已删除'),
                   duration: 2,
                 });
@@ -225,7 +223,7 @@ export const useMessageActions = (
                 );
               }
             } else {
-              Toast.success({
+              toast.success({
                 content: t('消息已删除'),
                 duration: 2,
               });
@@ -272,7 +270,7 @@ export const useMessageActions = (
         return updatedMessages;
       });
 
-      Toast.success({
+      toast.success({
         content: t(
           `已切换为${newRole === 'system' ? 'System' : 'Assistant'}角色`,
         ),

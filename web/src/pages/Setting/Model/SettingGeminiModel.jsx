@@ -18,7 +18,6 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Button, Col, Form, Row, Spin } from '@douyinfe/semi-ui';
 import {
   compareObjects,
   API,
@@ -28,7 +27,8 @@ import {
   verifyJSON,
 } from '../../../helpers';
 import { useTranslation } from 'react-i18next';
-import Text from '@douyinfe/semi-ui/lib/es/typography/text';
+import { Form, Row, Col, Spin } from '../../../components/ui/form-compat';
+import { Button } from '../../../components/ui/button';
 
 const GEMINI_SETTING_EXAMPLE = {
   default: 'OFF'
@@ -112,7 +112,6 @@ export default function SettingGeminiModel(props) {
         <Form
           values={inputs}
           getFormApi={(formAPI) => (refForm.current = formAPI)}
-          style={{ marginBottom: 15 }}
         >
           <Form.Section text={t('Gemini设置')}>
             <Row>
@@ -239,13 +238,13 @@ export default function SettingGeminiModel(props) {
           <Form.Section text={t('Gemini思考适配设置')}>
             <Row>
               <Col span={16}>
-                <Text>
+                <span>
                   {t(
                     '和Claude不同，默认情况下Gemini的思考模型会自动决定要不要思考，就算不开启适配模型也可以正常使用，' +
                       '如果您需要计费，推荐设置无后缀模型价格按思考价格设置。' +
                       '支持使用 gemini-2.5-pro-preview-06-05-thinking-128 格式来精确传递思考预算。',
                   )}
-                </Text>
+                </span>
               </Col>
             </Row>
             <Row>
@@ -267,11 +266,11 @@ export default function SettingGeminiModel(props) {
             </Row>
             <Row>
               <Col span={16}>
-                <Text>
+                <span>
                   {t(
                     'Gemini思考适配 BudgetTokens = MaxTokens * BudgetTokens 百分比',
                   )}
-                </Text>
+                </span>
               </Col>
             </Row>
             <Row>

@@ -19,15 +19,6 @@ For commercial licensing, please contact support@quantumnous.com
 
 import React, { useEffect, useState, useRef } from 'react';
 import {
-  Button,
-  Col,
-  Form,
-  Row,
-  Spin,
-  Card,
-  Typography,
-} from '@douyinfe/semi-ui';
-import {
   compareObjects,
   API,
   showError,
@@ -35,9 +26,9 @@ import {
   showWarning,
 } from '../../../helpers';
 import { useTranslation } from 'react-i18next';
-import { Server, Cloud, Zap, ArrowUpRight } from 'lucide-react';
-
-const { Text } = Typography;
+import { Cloud, Zap, ArrowUpRight } from 'lucide-react';
+import { Form, Row, Col, Spin } from '../../../components/ui/form-compat';
+import { Button, Card, Text } from '../../../components/ui/semi-compat';
 
 export default function SettingModelDeployment(props) {
   const { t } = useTranslation();
@@ -169,7 +160,6 @@ export default function SettingModelDeployment(props) {
         <Form
           values={inputs}
           getFormApi={(formAPI) => (refForm.current = formAPI)}
-          style={{ marginBottom: 15 }}
         >
           <Form.Section
             text={
@@ -180,7 +170,7 @@ export default function SettingModelDeployment(props) {
               </div>
             }
           >
-            {/*<Text */}
+            {/*<span */}
             {/*  type="secondary" */}
             {/*  size="small"*/}
             {/*  style={{ */}
@@ -190,7 +180,7 @@ export default function SettingModelDeployment(props) {
             {/*  }}*/}
             {/*>*/}
             {/*  {t('配置模型部署服务提供商的API密钥和启用状态')}*/}
-            {/*</Text>*/}
+            {/*</span>*/}
 
             <Card
               title={
@@ -240,7 +230,7 @@ export default function SettingModelDeployment(props) {
                     />
                     <div style={{ display: 'flex', gap: '12px' }}>
                       <Button
-                        type='outline'
+                        theme='light'
                         size='small'
                         icon={<Zap size={16} />}
                         onClick={testApiKey}

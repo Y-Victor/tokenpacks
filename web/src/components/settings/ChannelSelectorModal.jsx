@@ -25,15 +25,24 @@ import React, {
 } from 'react';
 import { useIsMobile } from '../../hooks/common/useIsMobile';
 import {
-  Modal,
-  Table,
-  Input,
-  Space,
-  Highlight,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../ui/dialog';
+import { Input } from '../ui/input';
+import { Badge } from '../ui/badge';
+import { Button } from '../ui/button';
+import { Checkbox } from '../ui/checkbox';
+import {
   Select,
-  Tag,
-} from '@douyinfe/semi-ui';
-import { IconSearch } from '@douyinfe/semi-icons';
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
+import { Search } from 'lucide-react';
 
 const OFFICIAL_RATIO_PRESET_ID = -100;
 const MODELS_DEV_PRESET_ID = -101;
@@ -120,7 +129,20 @@ const ChannelSelectorModal = forwardRef(
       }
     };
 
-    const renderEndpointCell = (text, record) => {
+    const highlightText = (text, search) => {
+      if (!search || !text) return text;
+      const idx = text.toLowerCase().indexOf(search.toLowerCase());
+      if (idx === -1) return text;
+      return (
+        <>
+          {text.slice(0, idx)}
+          <mark className="bg-yellow-200 dark:bg-yellow-800">{text.slice(idx, idx + search.length)}</mark>
+          {text.slice(idx + search.length)}
+        </>
+      );
+    };
+
+    const renderEndpointCell = (record) => {
       const channelId = record.key || record.value;
       const currentEndpoint = channelEndpoints[channelId] || '';
 
@@ -148,26 +170,24 @@ const ChannelSelectorModal = forwardRef(
       };
 
       return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Select
-            size='small'
-            value={currentType}
-            onChange={handleTypeChange}
-            style={{ width: 120 }}
-            optionList={[
-              { label: 'ratio_config', value: 'ratio_config' },
-              { label: 'pricing', value: 'pricing' },
-              { label: 'OpenRouter', value: 'openrouter' },
-              { label: 'custom', value: 'custom' },
-            ]}
-          />
+        <div className="flex items-center gap-2">
+          <Select value={currentType} onValueChange={handleTypeChange}>
+            <SelectTrigger className="w-[120px] h-8 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ratio_config">ratio_config</SelectItem>
+              <SelectItem value="pricing">pricing</SelectItem>
+              <SelectItem value="openrouter">OpenRouter</SelectItem>
+              <SelectItem value="custom">custom</SelectItem>
+            </SelectContent>
+          </Select>
           {currentType === 'custom' && (
             <Input
-              size='small'
               value={currentEndpoint}
-              onChange={(val) => updateEndpoint(channelId, val)}
+              onChange={(e) => updateEndpoint(channelId, e.target.value)}
               placeholder='/your/endpoint'
-              style={{ width: 160, fontSize: 12 }}
+              className="w-[160px] h-8 text-xs"
             />
           )}
         </div>
@@ -177,132 +197,132 @@ const ChannelSelectorModal = forwardRef(
     const renderStatusCell = (record) => {
       const status = record?._originalData?.status || 0;
       const official = isOfficialChannel(record);
-      let statusTag = null;
+      let statusBadge = null;
       switch (status) {
         case 1:
-          statusTag = (
-            <Tag color='green' shape='circle'>
-              {t('已启用')}
-            </Tag>
-          );
+          statusBadge = <Badge className="bg-green-500 text-white">{t('已启用')}</Badge>;
           break;
         case 2:
-          statusTag = (
-            <Tag color='red' shape='circle'>
-              {t('已禁用')}
-            </Tag>
-          );
+          statusBadge = <Badge variant="destructive">{t('已禁用')}</Badge>;
           break;
         case 3:
-          statusTag = (
-            <Tag color='yellow' shape='circle'>
-              {t('自动禁用')}
-            </Tag>
-          );
+          statusBadge = <Badge className="bg-yellow-500 text-white">{t('自动禁用')}</Badge>;
           break;
         default:
-          statusTag = (
-            <Tag color='grey' shape='circle'>
-              {t('未知状态')}
-            </Tag>
-          );
+          statusBadge = <Badge variant="secondary">{t('未知状态')}</Badge>;
       }
       return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {statusTag}
+        <div className="flex items-center gap-2">
+          {statusBadge}
           {official && (
-            <Tag color='green' shape='circle' type='light'>
-              {t('官方')}
-            </Tag>
+            <Badge className="bg-green-100 text-green-700">{t('官方')}</Badge>
           )}
         </div>
       );
     };
 
-    const renderNameCell = (text) => (
-      <Highlight sourceString={text} searchWords={[searchText]} />
-    );
+    const isSelected = (key) => selectedChannelIds.includes(key);
 
-    const renderBaseUrlCell = (text) => (
-      <Highlight sourceString={text} searchWords={[searchText]} />
-    );
-
-    const columns = [
-      {
-        title: t('名称'),
-        dataIndex: 'label',
-        render: renderNameCell,
-      },
-      {
-        title: t('源地址'),
-        dataIndex: '_originalData.base_url',
-        render: (_, record) =>
-          renderBaseUrlCell(record._originalData?.base_url || ''),
-      },
-      {
-        title: t('状态'),
-        dataIndex: '_originalData.status',
-        render: (_, record) => renderStatusCell(record),
-      },
-      {
-        title: t('同步接口'),
-        dataIndex: 'endpoint',
-        fixed: 'right',
-        render: renderEndpointCell,
-      },
-    ];
-
-    const rowSelection = {
-      selectedRowKeys: selectedChannelIds,
-      onChange: (keys) => setSelectedChannelIds(keys),
+    const toggleSelection = (key) => {
+      if (isSelected(key)) {
+        setSelectedChannelIds(selectedChannelIds.filter((k) => k !== key));
+      } else {
+        setSelectedChannelIds([...selectedChannelIds, key]);
+      }
     };
 
-    return (
-      <Modal
-        visible={visible}
-        onCancel={onCancel}
-        onOk={onOk}
-        title={
-          <span className='text-lg font-semibold'>{t('选择同步渠道')}</span>
-        }
-        size={isMobile ? 'full-width' : 'large'}
-        keepDOM
-        lazyRender={false}
-      >
-        <Space vertical style={{ width: '100%' }}>
-          <Input
-            prefix={<IconSearch size={14} />}
-            placeholder={t('搜索渠道名称或地址')}
-            value={searchText}
-            onChange={setSearchText}
-            showClear
-          />
+    const totalPages = Math.ceil(total / pageSize);
 
-          <Table
-            columns={columns}
-            dataSource={paginatedData}
-            rowKey='key'
-            rowSelection={rowSelection}
-            pagination={{
-              currentPage: currentPage,
-              pageSize: pageSize,
-              total: total,
-              showSizeChanger: true,
-              showQuickJumper: true,
-              pageSizeOptions: ['10', '20', '50', '100'],
-              onChange: (page, size) => {
-                setCurrentPage(page);
-                setPageSize(size);
-              },
-              onShowSizeChange: (curr, size) => {
-                setCurrentPage(1);
-                setPageSize(size);
-              },
-            }}
-            size='small'
-          />
-        </Space>
-      </Modal>
+    return (
+      <Dialog open={visible} onOpenChange={(open) => !open && onCancel()}>
+        <DialogContent className={isMobile ? 'max-w-full' : 'max-w-4xl'}>
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold">{t('选择同步渠道')}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-3 w-full">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder={t('搜索渠道名称或地址')}
+                value={searchText}
+                onChange={(e) => { setSearchText(e.target.value); setCurrentPage(1); }}
+                className="pl-9"
+              />
+            </div>
+
+            <div className="border rounded-md overflow-auto max-h-[60vh]">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50 sticky top-0">
+                  <tr>
+                    <th className="p-2 w-8"></th>
+                    <th className="p-2 text-left font-medium">{t('名称')}</th>
+                    <th className="p-2 text-left font-medium">{t('源地址')}</th>
+                    <th className="p-2 text-left font-medium">{t('状态')}</th>
+                    <th className="p-2 text-left font-medium">{t('同步接口')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedData.map((record) => {
+                    const key = record.key || record.value;
+                    return (
+                      <tr key={key} className="border-t hover:bg-muted/30">
+                        <td className="p-2">
+                          <Checkbox
+                            checked={isSelected(key)}
+                            onCheckedChange={() => toggleSelection(key)}
+                          />
+                        </td>
+                        <td className="p-2">{highlightText(record.label, searchText)}</td>
+                        <td className="p-2 text-xs text-muted-foreground">{highlightText(record._originalData?.base_url || '', searchText)}</td>
+                        <td className="p-2">{renderStatusCell(record)}</td>
+                        <td className="p-2">{renderEndpointCell(record)}</td>
+                      </tr>
+                    );
+                  })}
+                  {paginatedData.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="p-8 text-center text-muted-foreground">
+                        {t('暂无数据')}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">
+                {t('共')} {total} {t('条')}
+              </span>
+              <div className="flex items-center gap-2">
+                <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v)); setCurrentPage(1); }}>
+                  <SelectTrigger className="w-[80px] h-8 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="20">20</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                    <SelectItem value="100">100</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button variant="outline" size="sm" disabled={currentPage <= 1} onClick={() => setCurrentPage(currentPage - 1)}>
+                  {'<'}
+                </Button>
+                <span>{currentPage} / {totalPages || 1}</span>
+                <Button variant="outline" size="sm" disabled={currentPage >= totalPages} onClick={() => setCurrentPage(currentPage + 1)}>
+                  {'>'}
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={onCancel}>{t('取消')}</Button>
+            <Button onClick={onOk}>{t('确认')}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     );
   },
 );

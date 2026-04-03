@@ -18,19 +18,33 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Modal } from '@douyinfe/semi-ui';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../../../ui/dialog';
+import { Button } from '../../../ui/button';
 
 const DemoteUserModal = ({ visible, onCancel, onConfirm, user, t }) => {
   return (
-    <Modal
-      title={t('确定要降级此用户吗？')}
-      visible={visible}
-      onCancel={onCancel}
-      onOk={onConfirm}
-      type='warning'
-    >
-      {t('此操作将降低用户的权限级别')}
-    </Modal>
+    <Dialog open={visible} onOpenChange={(open) => !open && onCancel()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t('确定要降级此用户吗？')}</DialogTitle>
+        </DialogHeader>
+        <div>{t('此操作将降低用户的权限级别')}</div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onCancel}>
+            {t('取消')}
+          </Button>
+          <Button onClick={onConfirm}>
+            {t('确定')}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

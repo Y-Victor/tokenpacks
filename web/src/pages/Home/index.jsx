@@ -18,13 +18,8 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useContext, useEffect, useState } from 'react';
-import {
-  Button,
-  Typography,
-  Input,
-  ScrollList,
-  ScrollItem,
-} from '@douyinfe/semi-ui';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
 import { API, showError, copy, showSuccess } from '../../helpers';
 import { useIsMobile } from '../../hooks/common/useIsMobile';
 import { API_ENDPOINTS } from '../../constants/common.constant';
@@ -33,11 +28,11 @@ import { useActualTheme } from '../../context/Theme';
 import { marked } from 'marked';
 import { useTranslation } from 'react-i18next';
 import {
-  IconGithubLogo,
-  IconPlay,
-  IconFile,
-  IconCopy,
-} from '@douyinfe/semi-icons';
+  Github,
+  Play,
+  FileText,
+  Copy,
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import NoticeModal from '../../components/layout/NoticeModal';
 import {
@@ -62,8 +57,6 @@ import {
   Hunyuan,
   Xinference,
 } from '@lobehub/icons';
-
-const { Text } = Typography;
 
 const Home = () => {
   const { t, i18n } = useTranslation();
@@ -180,34 +173,26 @@ const Home = () => {
                   </p>
                   {/* BASE URL 与端点选择 */}
                   <div className='flex flex-col md:flex-row items-center justify-center gap-4 w-full mt-4 md:mt-6 max-w-md'>
-                    <Input
-                      readonly
-                      value={serverAddress}
-                      className='flex-1 !rounded-full'
-                      size={isMobile ? 'default' : 'large'}
-                      suffix={
-                        <div className='flex items-center gap-2'>
-                          <ScrollList
-                            bodyHeight={32}
-                            style={{ border: 'unset', boxShadow: 'unset' }}
-                          >
-                            <ScrollItem
-                              mode='wheel'
-                              cycled={true}
-                              list={endpointItems}
-                              selectedIndex={endpointIndex}
-                              onSelect={({ index }) => setEndpointIndex(index)}
-                            />
-                          </ScrollList>
-                          <Button
-                            type='primary'
-                            onClick={handleCopyBaseURL}
-                            icon={<IconCopy />}
-                            className='!rounded-full'
-                          />
-                        </div>
-                      }
-                    />
+                    <div className='flex items-center w-full rounded-full border border-input bg-background overflow-hidden'>
+                      <Input
+                        readOnly
+                        value={serverAddress}
+                        className='flex-1 border-0 focus-visible:ring-0 rounded-full'
+                      />
+                      <div className='flex items-center gap-2 pr-1'>
+                        <span className='text-sm text-muted-foreground whitespace-nowrap'>
+                          {endpointItems[endpointIndex]?.value}
+                        </span>
+                        <Button
+                          variant='default'
+                          size='icon'
+                          onClick={handleCopyBaseURL}
+                          className='rounded-full h-8 w-8'
+                        >
+                          <Copy className='h-4 w-4' />
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -215,20 +200,19 @@ const Home = () => {
                 <div className='flex flex-row gap-4 justify-center items-center'>
                   <Link to='/console'>
                     <Button
-                      theme='solid'
-                      type='primary'
-                      size={isMobile ? 'default' : 'large'}
-                      className='!rounded-3xl px-8 py-2'
-                      icon={<IconPlay />}
+                      variant='default'
+                      size={isMobile ? 'default' : 'lg'}
+                      className='rounded-3xl px-8 py-2'
                     >
+                      <Play className='h-4 w-4 mr-2' />
                       {t('获取密钥')}
                     </Button>
                   </Link>
                   {isDemoSiteMode && statusState?.status?.version ? (
                     <Button
-                      size={isMobile ? 'default' : 'large'}
-                      className='flex items-center !rounded-3xl px-6 py-2'
-                      icon={<IconGithubLogo />}
+                      variant='outline'
+                      size={isMobile ? 'default' : 'lg'}
+                      className='flex items-center rounded-3xl px-6 py-2'
                       onClick={() =>
                         window.open(
                           'https://github.com/QuantumNous/new-api',
@@ -236,16 +220,18 @@ const Home = () => {
                         )
                       }
                     >
+                      <Github className='h-4 w-4 mr-2' />
                       {statusState.status.version}
                     </Button>
                   ) : (
                     docsLink && (
                       <Button
-                        size={isMobile ? 'default' : 'large'}
-                        className='flex items-center !rounded-3xl px-6 py-2'
-                        icon={<IconFile />}
+                        variant='outline'
+                        size={isMobile ? 'default' : 'lg'}
+                        className='flex items-center rounded-3xl px-6 py-2'
                         onClick={() => window.open(docsLink, '_blank')}
                       >
+                        <FileText className='h-4 w-4 mr-2' />
                         {t('文档')}
                       </Button>
                     )
@@ -255,12 +241,11 @@ const Home = () => {
                 {/* 框架兼容性图标 */}
                 <div className='mt-12 md:mt-16 lg:mt-20 w-full'>
                   <div className='flex items-center mb-6 md:mb-8 justify-center'>
-                    <Text
-                      type='tertiary'
-                      className='text-lg md:text-xl lg:text-2xl font-light'
+                    <span
+                      className='text-lg md:text-xl lg:text-2xl font-light text-muted-foreground'
                     >
                       {t('支持众多的大模型供应商')}
-                    </Text>
+                    </span>
                   </div>
                   <div className='flex flex-wrap items-center justify-center gap-3 sm:gap-4 md:gap-6 lg:gap-8 max-w-5xl mx-auto px-4'>
                     <div className='w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center'>
@@ -324,9 +309,9 @@ const Home = () => {
                       <Xinference.Color size={40} />
                     </div>
                     <div className='w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center'>
-                      <Typography.Text className='!text-lg sm:!text-xl md:!text-2xl lg:!text-3xl font-bold'>
+                      <span className='text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold'>
                         30+
-                      </Typography.Text>
+                      </span>
                     </div>
                   </div>
                 </div>

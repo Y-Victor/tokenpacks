@@ -21,7 +21,19 @@ import React, { useState } from 'react';
 import MissingModelsModal from './modals/MissingModelsModal';
 import PrefillGroupManagement from './modals/PrefillGroupManagement';
 import EditPrefillGroupModal from './modals/EditPrefillGroupModal';
-import { Button, Modal, Popover, RadioGroup, Radio } from '@douyinfe/semi-ui';
+import { Button } from '../../ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../../ui/dialog';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '../../ui/popover';
 import { showSuccess, showError, copy } from '../../../helpers';
 import CompactModeToggle from '../../common/ui/CompactModeToggle';
 import SelectionNotification from './components/SelectionNotification';
@@ -55,7 +67,6 @@ const ModelsActions = ({
   const [syncLocale, setSyncLocale] = useState('zh');
 
   const handleSyncUpstream = async (locale) => {
-    // 先预览
     const data = await previewUpstreamDiff?.({ locale });
     const conflictItems = data?.conflicts || [];
     if (conflictItems.length > 0) {
@@ -63,27 +74,22 @@ const ModelsActions = ({
       setShowConflict(true);
       return;
     }
-    // 无冲突，直接同步缺失
     await syncUpstream?.({ locale });
   };
 
-  // Handle delete selected models with confirmation
   const handleDeleteSelectedModels = () => {
     setShowDeleteModal(true);
   };
 
-  // Handle delete confirmation
   const handleConfirmDelete = () => {
     batchDeleteModels();
     setShowDeleteModal(false);
   };
 
-  // Handle clear selection
   const handleClearSelected = () => {
     setSelectedKeys([]);
   };
 
-  // Handle add selected models to prefill group
   const handleCopyNames = async () => {
     const text = selectedKeys.map((m) => m.model_name).join(',');
     if (!text) return;
@@ -96,7 +102,6 @@ const ModelsActions = ({
   };
 
   const handleAddToPrefill = () => {
-    // Prepare initial data
     const items = selectedKeys.map((m) => m.model_name);
     setPrefillInit({ id: undefined, type: 'model', items });
     setShowAddPrefill(true);
@@ -106,7 +111,6 @@ const ModelsActions = ({
     <>
       <div className='flex flex-wrap gap-2 w-full md:w-auto order-2 md:order-1'>
         <Button
-          type='primary'
           className='flex-1 md:flex-initial'
           onClick={() => {
             setEditingModel({
@@ -114,59 +118,56 @@ const ModelsActions = ({
             });
             setShowEdit(true);
           }}
-          size='small'
+          size='sm'
         >
           {t('添加模型')}
         </Button>
 
         <Button
-          type='secondary'
+          variant='secondary'
           className='flex-1 md:flex-initial'
-          size='small'
+          size='sm'
           onClick={() => setShowMissingModal(true)}
         >
           {t('未配置模型')}
         </Button>
 
-        <Popover
-          position='bottom'
-          trigger='hover'
-          content={
-            <div className='p-2 max-w-[360px]'>
-              <div className='text-[var(--semi-color-text-2)] text-sm'>
-                {t(
-                  '模型社区需要大家的共同维护，如发现数据有误或想贡献新的模型数据，请访问：',
-                )}
-              </div>
-              <a
-                href='https://github.com/basellm/llm-metadata'
-                target='_blank'
-                rel='noreferrer'
-                className='text-blue-600 underline'
-              >
-                https://github.com/basellm/llm-metadata
-              </a>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant='secondary'
+              className='flex-1 md:flex-initial'
+              size='sm'
+              disabled={syncing || previewing}
+              onClick={() => {
+                setSyncLocale('zh');
+                setShowSyncModal(true);
+              }}
+            >
+              {t('同步')}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className='max-w-[360px]'>
+            <div className='text-muted-foreground text-sm'>
+              {t(
+                '模型社区需要大家的共同维护，如发现数据有误或想贡献新的模型数据，请访问：',
+              )}
             </div>
-          }
-        >
-          <Button
-            type='secondary'
-            className='flex-1 md:flex-initial'
-            size='small'
-            loading={syncing || previewing}
-            onClick={() => {
-              setSyncLocale('zh');
-              setShowSyncModal(true);
-            }}
-          >
-            {t('同步')}
-          </Button>
+            <a
+              href='https://github.com/basellm/llm-metadata'
+              target='_blank'
+              rel='noreferrer'
+              className='text-blue-600 underline'
+            >
+              https://github.com/basellm/llm-metadata
+            </a>
+          </PopoverContent>
         </Popover>
 
         <Button
-          type='secondary'
+          variant='secondary'
           className='flex-1 md:flex-initial'
-          size='small'
+          size='sm'
           onClick={() => setShowGroupManagement(true)}
         >
           {t('预填组管理')}
@@ -188,19 +189,26 @@ const ModelsActions = ({
         onCopy={handleCopyNames}
       />
 
-      <Modal
-        title={t('批量删除模型')}
-        visible={showDeleteModal}
-        onCancel={() => setShowDeleteModal(false)}
-        onOk={handleConfirmDelete}
-        type='warning'
-      >
-        <div>
-          {t('确定要删除所选的 {{count}} 个模型吗？', {
-            count: selectedKeys.length,
-          })}
-        </div>
-      </Modal>
+      <Dialog open={showDeleteModal} onOpenChange={(open) => !open && setShowDeleteModal(false)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('批量删除模型')}</DialogTitle>
+          </DialogHeader>
+          <div>
+            {t('确定要删除所选的 {{count}} 个模型吗？', {
+              count: selectedKeys.length,
+            })}
+          </div>
+          <DialogFooter>
+            <Button variant='outline' onClick={() => setShowDeleteModal(false)}>
+              {t('取消')}
+            </Button>
+            <Button variant='destructive' onClick={handleConfirmDelete}>
+              {t('确定')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <SyncWizardModal
         visible={showSyncModal}

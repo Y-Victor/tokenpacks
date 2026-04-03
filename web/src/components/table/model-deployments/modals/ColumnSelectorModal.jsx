@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useMemo } from 'react';
-import { Modal, Button, Checkbox } from '@douyinfe/semi-ui';
+import { Modal, Button, Checkbox } from '../../../../components/ui/semi-compat';
 
 const ColumnSelectorModal = ({
   visible,

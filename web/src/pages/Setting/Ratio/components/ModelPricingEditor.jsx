@@ -18,28 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useMemo, useState } from 'react';
-import {
-  Banner,
-  Button,
-  Card,
-  Checkbox,
-  Empty,
-  Input,
-  Modal,
-  Radio,
-  RadioGroup,
-  Space,
-  Switch,
-  Table,
-  Tag,
-  Typography,
-} from '@douyinfe/semi-ui';
-import {
-  IconDelete,
-  IconPlus,
-  IconSave,
-  IconSearch,
-} from '@douyinfe/semi-icons';
+import { Trash2, Plus, Save, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
   PAGE_SIZE,
@@ -49,8 +28,21 @@ import {
   useModelPricingEditorState,
 } from '../hooks/useModelPricingEditorState';
 import { useIsMobile } from '../../../../hooks/common/useIsMobile';
+import {
+  Banner,
+  Button,
+  Card,
+  Checkbox,
+  Empty,
+  Input,
+  Modal as Dialog,
+  Radio,
+  RadioGroup,
+  Switch,
+  Table,
+  Tag,
+} from '../../../../components/ui/semi-compat';
 
-const { Text } = Typography;
 const EMPTY_CANDIDATE_MODEL_NAMES = [];
 
 const PriceInput = ({
@@ -142,7 +134,7 @@ export default function ModelPricingEditor({
         dataIndex: 'name',
         key: 'name',
         render: (text, record) => (
-          <Space>
+          <div className="flex items-center gap-2">
             <Button
               theme='borderless'
               type='tertiary'
@@ -167,7 +159,7 @@ export default function ModelPricingEditor({
                 {t('矛盾')}
               </Tag>
             ) : null}
-          </Space>
+          </div>
         ),
       },
       {
@@ -192,16 +184,16 @@ export default function ModelPricingEditor({
         title: t('操作'),
         key: 'action',
         render: (_, record) => (
-          <Space>
+          <div className="flex items-center gap-2">
             {allowDeleteModel ? (
               <Button
                 size='small'
                 type='danger'
-                icon={<IconDelete />}
+                icon={<Trash2 size={14} />}
                 onClick={() => deleteModel(record.name)}
               />
             ) : null}
-          </Space>
+          </div>
         ),
       },
     ],
@@ -229,11 +221,12 @@ export default function ModelPricingEditor({
 
   return (
     <>
-      <Space vertical align='start' style={{ width: '100%' }}>
-        <Space wrap className='mt-2'>
+      <div className='pricing-editor-shell'>
+        <div className='pricing-editor-toolbar'>
+          <div className='pricing-editor-actions'>
           {allowAddModel ? (
             <Button
-              icon={<IconPlus />}
+              icon={<Plus size={14} />}
               onClick={() => setAddVisible(true)}
               style={isMobile ? { width: '100%' } : undefined}
             >
@@ -242,7 +235,7 @@ export default function ModelPricingEditor({
           ) : null}
           <Button
             type='primary'
-            icon={<IconSave />}
+            icon={<Save size={14} />}
             loading={loading}
             onClick={handleSubmit}
             style={isMobile ? { width: '100%' } : undefined}
@@ -258,7 +251,7 @@ export default function ModelPricingEditor({
             {selectedModelNames.length > 0 ? ` (${selectedModelNames.length})` : ''}
           </Button>
           <Input
-            prefix={<IconSearch />}
+            prefix={<Search size={14} />}
             placeholder={t('搜索模型名称')}
             value={searchText}
             onChange={(value) => setSearchText(value)}
@@ -273,38 +266,29 @@ export default function ModelPricingEditor({
               {t('仅显示矛盾倍率')}
             </Checkbox>
           ) : null}
-        </Space>
+          </div>
 
-        {listDescription ? (
-          <div className='text-sm text-gray-500'>{listDescription}</div>
-        ) : null}
+          {listDescription ? (
+            <div className='pricing-editor-description'>{listDescription}</div>
+          ) : null}
+        </div>
+
         {selectedModelNames.length > 0 ? (
-          <div
-            style={{
-              width: '100%',
-              padding: '10px 12px',
-              borderRadius: 8,
-              background: 'var(--semi-color-primary-light-default)',
-              border: '1px solid var(--semi-color-primary)',
-              color: 'var(--semi-color-primary)',
-              fontWeight: 600,
-            }}
-          >
+          <div className='pricing-editor-selection-banner'>
             {t('已勾选 {{count}} 个模型', { count: selectedModelNames.length })}
           </div>
         ) : null}
 
         <div
+          className='pricing-editor-grid'
           style={{
-            width: '100%',
-            display: 'grid',
-            gap: 16,
             gridTemplateColumns: isMobile
               ? 'minmax(0, 1fr)'
               : 'minmax(360px, 1.1fr) minmax(420px, 1fr)',
           }}
         >
           <Card
+            className='pricing-editor-list-card'
             bodyStyle={{ padding: 0 }}
             style={isMobile ? { order: 2 } : undefined}
           >
@@ -349,9 +333,10 @@ export default function ModelPricingEditor({
           </Card>
 
           <Card
+            className='pricing-editor-detail-card'
             style={isMobile ? { order: 1 } : undefined}
             title={selectedModel ? selectedModel.name : t('模型计费编辑器')}
-            headerExtraContent={
+            extra={
               selectedModel ? (
                 <Tag color='blue'>
                   {selectedModel.billingMode === 'per-request'
@@ -675,8 +660,8 @@ export default function ModelPricingEditor({
                   >
                     {previewRows.map((row) => (
                       <React.Fragment key={row.key}>
-                        <Text strong>{row.label}</Text>
-                        <Text>{row.value}</Text>
+                        <span className='font-semibold'>{row.label}</span>
+                        <span>{row.value}</span>
                       </React.Fragment>
                     ))}
                   </div>
@@ -685,12 +670,12 @@ export default function ModelPricingEditor({
             )}
           </Card>
         </div>
-      </Space>
+      </div>
 
       {allowAddModel ? (
-        <Modal
+        <Dialog
           title={t('添加模型')}
-          visible={addVisible}
+          open={addVisible}
           onCancel={() => {
             setAddVisible(false);
             setNewModelName('');
@@ -702,12 +687,12 @@ export default function ModelPricingEditor({
             placeholder={t('输入模型名称，例如 gpt-4.1')}
             onChange={(value) => setNewModelName(value)}
           />
-        </Modal>
+        </Dialog>
       ) : null}
 
-      <Modal
+      <Dialog
         title={t('批量应用当前模型价格')}
-        visible={batchVisible}
+        open={batchVisible}
         onCancel={() => setBatchVisible(false)}
         onOk={() => {
           if (applySelectedModelPricing()) {
@@ -733,7 +718,7 @@ export default function ModelPricingEditor({
             )}
           </div>
         ) : null}
-      </Modal>
+      </Dialog>
     </>
   );
 }

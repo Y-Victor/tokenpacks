@@ -18,14 +18,14 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
+import { Button } from '../../ui/button';
+import { Badge } from '../../ui/badge';
 import {
-  Button,
-  Space,
-  Tag,
-  Typography,
-  Modal,
   Tooltip,
-} from '@douyinfe/semi-ui';
+  TooltipContent,
+  TooltipTrigger,
+} from '../../ui/tooltip';
+import { confirm } from '../../../lib/confirm';
 import {
   timestamp2string,
   getLobeHubIcon,
@@ -35,8 +35,6 @@ import {
   renderLimitedItems,
   renderDescription,
 } from '../../common/ui/RenderUtils';
-
-const { Text } = Typography;
 
 // Render timestamp
 function renderTimestamp(timestamp) {
@@ -59,13 +57,12 @@ const renderVendorTag = (vendorId, vendorMap, t) => {
   if (!vendorId || !vendorMap[vendorId]) return '-';
   const v = vendorMap[vendorId];
   return (
-    <Tag
-      color='white'
-      shape='circle'
-      prefixIcon={getLobeHubIcon(v.icon || 'Layers', 14)}
-    >
-      {v.name}
-    </Tag>
+    <Badge variant='outline'>
+      <span className='flex items-center gap-1'>
+        {getLobeHubIcon(v.icon || 'Layers', 14)}
+        {v.name}
+      </span>
+    </Badge>
   );
 };
 
@@ -75,9 +72,9 @@ const renderGroups = (groups) => {
   return renderLimitedItems({
     items: groups,
     renderItem: (g, idx) => (
-      <Tag key={idx} size='small' shape='circle' color={stringToColor(g)}>
+      <Badge key={idx} variant='outline' style={{ borderColor: stringToColor(g), color: stringToColor(g) }}>
         {g}
-      </Tag>
+      </Badge>
     ),
   });
 };
@@ -89,9 +86,9 @@ const renderTags = (text) => {
   return renderLimitedItems({
     items: tagsArr,
     renderItem: (tag, idx) => (
-      <Tag key={idx} size='small' shape='circle' color={stringToColor(tag)}>
+      <Badge key={idx} variant='outline' style={{ borderColor: stringToColor(tag), color: stringToColor(tag) }}>
         {tag}
-      </Tag>
+      </Badge>
     ),
   });
 };
@@ -106,9 +103,9 @@ const renderEndpoints = (value) => {
       return renderLimitedItems({
         items: keys,
         renderItem: (key, idx) => (
-          <Tag key={idx} size='small' shape='circle' color={stringToColor(key)}>
+          <Badge key={idx} variant='outline' style={{ borderColor: stringToColor(key), color: stringToColor(key) }}>
             {key}
-          </Tag>
+          </Badge>
         ),
         maxDisplay: 3,
       });
@@ -118,9 +115,9 @@ const renderEndpoints = (value) => {
       return renderLimitedItems({
         items: parsed,
         renderItem: (ep, idx) => (
-          <Tag key={idx} color='white' size='small' shape='circle'>
+          <Badge key={idx} variant='outline'>
             {ep}
-          </Tag>
+          </Badge>
         ),
         maxDisplay: 3,
       });
@@ -139,22 +136,22 @@ const renderQuotaTypes = (arr, t) => {
     renderItem: (qt, idx) => {
       if (qt === 1) {
         return (
-          <Tag key={`${qt}-${idx}`} color='teal' size='small' shape='circle'>
+          <Badge key={`${qt}-${idx}`} variant='outline' className='text-teal-600 border-teal-300'>
             {t('按次计费')}
-          </Tag>
+          </Badge>
         );
       }
       if (qt === 0) {
         return (
-          <Tag key={`${qt}-${idx}`} color='violet' size='small' shape='circle'>
+          <Badge key={`${qt}-${idx}`} variant='outline' className='text-violet-600 border-violet-300'>
             {t('按量计费')}
-          </Tag>
+          </Badge>
         );
       }
       return (
-        <Tag key={`${qt}-${idx}`} color='white' size='small' shape='circle'>
+        <Badge key={`${qt}-${idx}`} variant='outline'>
           {qt}
-        </Tag>
+        </Badge>
       );
     },
     maxDisplay: 3,
@@ -167,9 +164,9 @@ const renderBoundChannels = (channels) => {
   return renderLimitedItems({
     items: channels,
     renderItem: (c, idx) => (
-      <Tag key={idx} color='white' size='small' shape='circle'>
+      <Badge key={idx} variant='outline'>
         {c.name}({c.type})
-      </Tag>
+      </Badge>
     ),
   });
 };
@@ -185,18 +182,18 @@ const renderOperations = (
   t,
 ) => {
   return (
-    <Space wrap>
+    <div className='flex items-center gap-1 flex-wrap'>
       {record.status === 1 ? (
         <Button
-          type='danger'
-          size='small'
+          variant='destructive'
+          size='sm'
           onClick={() => manageModel(record.id, 'disable', record)}
         >
           {t('禁用')}
         </Button>
       ) : (
         <Button
-          size='small'
+          size='sm'
           onClick={() => manageModel(record.id, 'enable', record)}
         >
           {t('启用')}
@@ -204,8 +201,8 @@ const renderOperations = (
       )}
 
       <Button
-        type='tertiary'
-        size='small'
+        variant='secondary'
+        size='sm'
         onClick={() => {
           setEditingModel(record);
           setShowEdit(true);
@@ -215,13 +212,13 @@ const renderOperations = (
       </Button>
 
       <Button
-        type='danger'
-        size='small'
+        variant='destructive'
+        size='sm'
         onClick={() => {
-          Modal.confirm({
+          confirm({
             title: t('确定是否要删除此模型？'),
             content: t('此修改将不可逆'),
-            onOk: () => {
+            onConfirm: () => {
               (async () => {
                 await manageModel(record.id, 'delete', record);
                 await refresh();
@@ -232,17 +229,17 @@ const renderOperations = (
       >
         {t('删除')}
       </Button>
-    </Space>
+    </div>
   );
 };
 
-// 名称匹配类型渲染（带匹配数量 Tooltip）
+// Name rule rendering (with match count Tooltip)
 const renderNameRule = (rule, record, t) => {
   const map = {
-    0: { color: 'green', label: t('精确') },
-    1: { color: 'blue', label: t('前缀') },
-    2: { color: 'orange', label: t('包含') },
-    3: { color: 'purple', label: t('后缀') },
+    0: { className: 'text-green-600 border-green-300', label: t('精确') },
+    1: { className: 'text-blue-600 border-blue-300', label: t('前缀') },
+    2: { className: 'text-orange-600 border-orange-300', label: t('包含') },
+    3: { className: 'text-purple-600 border-purple-300', label: t('后缀') },
   };
   const cfg = map[rule];
   if (!cfg) return '-';
@@ -252,10 +249,10 @@ const renderNameRule = (rule, record, t) => {
     label = `${cfg.label} ${record.matched_count}${t('个模型')}`;
   }
 
-  const tagElement = (
-    <Tag color={cfg.color} size='small' shape='circle'>
+  const badgeElement = (
+    <Badge variant='outline' className={cfg.className}>
       {label}
-    </Tag>
+    </Badge>
   );
 
   if (
@@ -263,12 +260,13 @@ const renderNameRule = (rule, record, t) => {
     !record.matched_models ||
     record.matched_models.length === 0
   ) {
-    return tagElement;
+    return badgeElement;
   }
 
   return (
-    <Tooltip content={record.matched_models.join(', ')} showArrow>
-      {tagElement}
+    <Tooltip>
+      <TooltipTrigger asChild>{badgeElement}</TooltipTrigger>
+      <TooltipContent>{record.matched_models.join(', ')}</TooltipContent>
     </Tooltip>
   );
 };
@@ -293,9 +291,15 @@ export const getModelsColumns = ({
       title: t('模型名称'),
       dataIndex: 'model_name',
       render: (text) => (
-        <Text copyable onClick={(e) => e.stopPropagation()}>
+        <span
+          className='cursor-pointer hover:underline'
+          onClick={(e) => {
+            e.stopPropagation();
+            navigator.clipboard.writeText(text);
+          }}
+        >
           {text}
-        </Text>
+        </span>
       ),
     },
     {
@@ -307,9 +311,9 @@ export const getModelsColumns = ({
       title: t('参与官方同步'),
       dataIndex: 'sync_official',
       render: (val) => (
-        <Tag size='small' shape='circle' color={val === 1 ? 'green' : 'orange'}>
+        <Badge variant='outline' className={val === 1 ? 'text-green-600 border-green-300' : 'text-orange-600 border-orange-300'}>
           {val === 1 ? t('是') : t('否')}
-        </Tag>
+        </Badge>
       ),
     },
     {

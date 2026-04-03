@@ -18,7 +18,16 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { Card, Spin, Button, Modal } from '@douyinfe/semi-ui';
+import { Card } from '../ui/semi-compat';
+import { Loader2 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../ui/dialog';
+import { Button } from '../ui/button';
 import { API, showError, showSuccess, toBoolean } from '../../helpers';
 import SettingsAPIInfo from '../../pages/Setting/Dashboard/SettingsAPIInfo';
 import SettingsAnnouncements from '../../pages/Setting/Dashboard/SettingsAnnouncements';
@@ -123,49 +132,58 @@ const DashboardSetting = () => {
 
   return (
     <>
-      <Spin spinning={loading} size='large'>
+      <div className="settings-panel-stack relative">
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        )}
         {/* 用于迁移检测的旧键模态框，下个版本会删除 */}
-        <Modal
-          title='配置迁移确认'
-          visible={showMigrateModal}
-          onOk={handleMigrate}
-          onCancel={() => setShowMigrateModal(false)}
-          confirmLoading={loading}
-          okText='确认迁移'
-          cancelText='取消'
-        >
-          <p>检测到旧版本的配置数据，是否要迁移到新的配置格式？</p>
-          <p style={{ color: '#f57c00', marginTop: '10px' }}>
-            <strong>注意：</strong>
-            迁移过程中会自动处理数据格式转换，迁移完成后旧配置将被清除，请在迁移前在数据库中备份好旧配置。
-          </p>
-        </Modal>
+        <Dialog open={showMigrateModal} onOpenChange={(open) => !open && setShowMigrateModal(false)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>配置迁移确认</DialogTitle>
+            </DialogHeader>
+            <p>检测到旧版本的配置数据，是否要迁移到新的配置格式？</p>
+            <p style={{ color: '#f57c00', marginTop: '10px' }}>
+              <strong>注意：</strong>
+              迁移过程中会自动处理数据格式转换，迁移完成后旧配置将被清除，请在迁移前在数据库中备份好旧配置。
+            </p>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowMigrateModal(false)}>取消</Button>
+              <Button onClick={handleMigrate} disabled={loading}>
+                {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                确认迁移
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* 数据看板设置 */}
-        <Card style={{ marginTop: '10px' }}>
+        <Card className="settings-panel-card">
           <SettingsDataDashboard options={inputs} refresh={onRefresh} />
         </Card>
 
         {/* 系统公告管理 */}
-        <Card style={{ marginTop: '10px' }}>
+        <Card className="settings-panel-card">
           <SettingsAnnouncements options={inputs} refresh={onRefresh} />
         </Card>
 
         {/* API信息管理 */}
-        <Card style={{ marginTop: '10px' }}>
+        <Card className="settings-panel-card">
           <SettingsAPIInfo options={inputs} refresh={onRefresh} />
         </Card>
 
         {/* 常见问答管理 */}
-        <Card style={{ marginTop: '10px' }}>
+        <Card className="settings-panel-card">
           <SettingsFAQ options={inputs} refresh={onRefresh} />
         </Card>
 
         {/* Uptime Kuma 监控设置 */}
-        <Card style={{ marginTop: '10px' }}>
+        <Card className="settings-panel-card">
           <SettingsUptimeKuma options={inputs} refresh={onRefresh} />
         </Card>
-      </Spin>
+      </div>
     </>
   );
 };

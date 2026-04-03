@@ -18,7 +18,14 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Skeleton } from '@douyinfe/semi-ui';
+import { Skeleton } from '../../ui/skeleton';
+
+const SkeletonBlock = ({ width, height, rounded = 'md', className = '' }) => (
+  <Skeleton
+    className={className}
+    style={{ width, height, borderRadius: rounded === 'full' ? 9999 : undefined }}
+  />
+);
 
 const SkeletonWrapper = ({
   loading = false,
@@ -37,7 +44,6 @@ const SkeletonWrapper = ({
     return children;
   }
 
-  // 导航链接骨架屏
   const renderNavigationSkeleton = () => {
     const skeletonLinkClasses = isMobile
       ? 'flex items-center gap-1 p-1 w-full rounded-md'
@@ -47,103 +53,51 @@ const SkeletonWrapper = ({
       .fill(null)
       .map((_, index) => (
         <div key={index} className={skeletonLinkClasses}>
-          <Skeleton
-            loading={true}
-            active
-            placeholder={
-              <Skeleton.Title
-                style={{ width: isMobile ? 40 : width, height }}
-              />
-            }
-          />
+          <SkeletonBlock width={isMobile ? 40 : width} height={height} />
         </div>
       ));
   };
 
-  // 用户区域骨架屏 (头像 + 文本)
   const renderUserAreaSkeleton = () => {
     return (
-      <div
-        className={`flex items-center p-1 rounded-full bg-semi-color-fill-0 dark:bg-semi-color-fill-1 ${className}`}
-      >
-        <Skeleton
-          loading={true}
-          active
-          placeholder={
-            <Skeleton.Avatar size='extra-small' className='shadow-sm' />
-          }
-        />
+      <div className={`flex items-center p-1 rounded-full bg-muted ${className}`}>
+        <Skeleton className='h-6 w-6 rounded-full' />
         <div className='ml-1.5 mr-1'>
-          <Skeleton
-            loading={true}
-            active
-            placeholder={
-              <Skeleton.Title
-                style={{ width: isMobile ? 15 : width, height: 12 }}
-              />
-            }
-          />
+          <SkeletonBlock width={isMobile ? 15 : width} height={12} />
         </div>
       </div>
     );
   };
 
-  // Logo图片骨架屏
   const renderImageSkeleton = () => {
     return (
       <Skeleton
-        loading={true}
-        active
-        placeholder={
-          <Skeleton.Image
-            className={`absolute inset-0 !rounded-full ${className}`}
-            style={{ width: '100%', height: '100%' }}
-          />
-        }
+        className={`absolute inset-0 rounded-full ${className}`}
+        style={{ width: '100%', height: '100%' }}
       />
     );
   };
 
-  // 系统名称骨架屏
   const renderTitleSkeleton = () => {
-    return (
-      <Skeleton
-        loading={true}
-        active
-        placeholder={<Skeleton.Title style={{ width, height: 24 }} />}
-      />
-    );
+    return <SkeletonBlock width={width} height={24} />;
   };
 
-  // 通用文本骨架屏
   const renderTextSkeleton = () => {
     return (
       <div className={className}>
-        <Skeleton
-          loading={true}
-          active
-          placeholder={<Skeleton.Title style={{ width, height }} />}
-        />
+        <SkeletonBlock width={width} height={height} />
       </div>
     );
   };
 
-  // 按钮骨架屏（支持圆角）
   const renderButtonSkeleton = () => {
     return (
       <div className={className}>
-        <Skeleton
-          loading={true}
-          active
-          placeholder={
-            <Skeleton.Title style={{ width, height, borderRadius: 9999 }} />
-          }
-        />
+        <SkeletonBlock width={width} height={height} rounded='full' />
       </div>
     );
   };
 
-  // 侧边栏导航项骨架屏 (图标 + 文本)
   const renderSidebarNavItemSkeleton = () => {
     return Array(count)
       .fill(null)
@@ -152,48 +106,22 @@ const SkeletonWrapper = ({
           key={index}
           className={`flex items-center p-2 mb-1 rounded-md ${className}`}
         >
-          {/* 图标骨架屏 */}
           <div className='sidebar-icon-container flex-shrink-0'>
-            <Skeleton
-              loading={true}
-              active
-              placeholder={
-                <Skeleton.Avatar size='extra-small' shape='square' />
-              }
-            />
+            <Skeleton className='h-4 w-4 rounded-sm' />
           </div>
-          {/* 文本骨架屏 */}
-          <Skeleton
-            loading={true}
-            active
-            placeholder={
-              <Skeleton.Title
-                style={{ width: width || 80, height: height || 14 }}
-              />
-            }
-          />
+          <SkeletonBlock width={width || 80} height={height || 14} />
         </div>
       ));
   };
 
-  // 侧边栏组标题骨架屏
   const renderSidebarGroupTitleSkeleton = () => {
     return (
       <div className={`mb-2 ${className}`}>
-        <Skeleton
-          loading={true}
-          active
-          placeholder={
-            <Skeleton.Title
-              style={{ width: width || 60, height: height || 12 }}
-            />
-          }
-        />
+        <SkeletonBlock width={width || 60} height={height || 12} />
       </div>
     );
   };
 
-  // 完整侧边栏骨架屏 - 1:1 还原，去重实现
   const renderSidebarSkeleton = () => {
     const NAV_WIDTH = 164;
     const NAV_HEIGHT = 30;
@@ -202,29 +130,6 @@ const SkeletonWrapper = ({
     const ICON_SIZE = 16;
     const TITLE_HEIGHT = 12;
     const TEXT_HEIGHT = 16;
-
-    const renderIcon = () => (
-      <Skeleton
-        loading={true}
-        active
-        placeholder={
-          <Skeleton.Avatar
-            shape='square'
-            style={{ width: ICON_SIZE, height: ICON_SIZE }}
-          />
-        }
-      />
-    );
-
-    const renderLabel = (labelWidth) => (
-      <Skeleton
-        loading={true}
-        active
-        placeholder={
-          <Skeleton.Title style={{ width: labelWidth, height: TEXT_HEIGHT }} />
-        }
-      />
-    );
 
     const NavRow = ({ labelWidth }) => (
       <div
@@ -236,9 +141,9 @@ const SkeletonWrapper = ({
         }}
       >
         <div className='sidebar-icon-container flex-shrink-0'>
-          {renderIcon()}
+          <Skeleton className='rounded-sm' style={{ width: ICON_SIZE, height: ICON_SIZE }} />
         </div>
-        {renderLabel(labelWidth)}
+        <SkeletonBlock width={labelWidth} height={TEXT_HEIGHT} />
       </div>
     );
 
@@ -252,42 +157,25 @@ const SkeletonWrapper = ({
           margin: '0 8px 4px 8px',
         }}
       >
-        <Skeleton
-          loading={true}
-          active
-          placeholder={
-            <Skeleton.Avatar
-              shape='square'
-              style={{ width: ICON_SIZE, height: ICON_SIZE }}
-            />
-          }
-        />
+        <Skeleton className='rounded-sm' style={{ width: ICON_SIZE, height: ICON_SIZE }} />
       </div>
     );
 
     if (collapsed) {
       return (
         <div className={`w-full ${className}`} style={{ paddingTop: '12px' }}>
-          {Array(2)
-            .fill(null)
-            .map((_, i) => (
-              <CollapsedRow keyPrefix='c-chat' index={i} />
-            ))}
-          {Array(5)
-            .fill(null)
-            .map((_, i) => (
-              <CollapsedRow keyPrefix='c-console' index={i} />
-            ))}
-          {Array(2)
-            .fill(null)
-            .map((_, i) => (
-              <CollapsedRow keyPrefix='c-personal' index={i} />
-            ))}
-          {Array(5)
-            .fill(null)
-            .map((_, i) => (
-              <CollapsedRow keyPrefix='c-admin' index={i} />
-            ))}
+          {Array(2).fill(null).map((_, i) => (
+            <CollapsedRow key={`c-chat-${i}`} keyPrefix='c-chat' index={i} />
+          ))}
+          {Array(5).fill(null).map((_, i) => (
+            <CollapsedRow key={`c-console-${i}`} keyPrefix='c-console' index={i} />
+          ))}
+          {Array(2).fill(null).map((_, i) => (
+            <CollapsedRow key={`c-personal-${i}`} keyPrefix='c-personal' index={i} />
+          ))}
+          {Array(5).fill(null).map((_, i) => (
+            <CollapsedRow key={`c-admin-${i}`} keyPrefix='c-admin' index={i} />
+          ))}
         </div>
       );
     }
@@ -303,56 +191,25 @@ const SkeletonWrapper = ({
 
     return (
       <div className={`w-full ${className}`} style={{ paddingTop: '12px' }}>
-        {sections.map((sec, idx) => (
+        {sections.map((sec) => (
           <React.Fragment key={sec.key}>
-            {sec.wrapper === 'section' ? (
-              <div className='sidebar-section'>
-                <div
-                  className='sidebar-group-label'
-                  style={{ padding: '4px 15px 8px' }}
-                >
-                  <Skeleton
-                    loading={true}
-                    active
-                    placeholder={
-                      <Skeleton.Title
-                        style={{ width: sec.titleWidth, height: TITLE_HEIGHT }}
-                      />
-                    }
-                  />
-                </div>
-                {sec.itemWidths.map((w, i) => (
-                  <NavRow key={`${sec.key}-${i}`} labelWidth={w} />
-                ))}
+            <div className={sec.wrapper === 'section' ? 'sidebar-section' : ''}>
+              <div
+                className='sidebar-group-label'
+                style={{ padding: '4px 15px 8px' }}
+              >
+                <SkeletonBlock width={sec.titleWidth} height={TITLE_HEIGHT} />
               </div>
-            ) : (
-              <div>
-                <div
-                  className='sidebar-group-label'
-                  style={{ padding: '4px 15px 8px' }}
-                >
-                  <Skeleton
-                    loading={true}
-                    active
-                    placeholder={
-                      <Skeleton.Title
-                        style={{ width: sec.titleWidth, height: TITLE_HEIGHT }}
-                      />
-                    }
-                  />
-                </div>
-                {sec.itemWidths.map((w, i) => (
-                  <NavRow key={`${sec.key}-${i}`} labelWidth={w} />
-                ))}
-              </div>
-            )}
+              {sec.itemWidths.map((w, i) => (
+                <NavRow key={`${sec.key}-${i}`} labelWidth={w} />
+              ))}
+            </div>
           </React.Fragment>
         ))}
       </div>
     );
   };
 
-  // 根据类型渲染不同的骨架屏
   switch (type) {
     case 'navigation':
       return renderNavigationSkeleton();

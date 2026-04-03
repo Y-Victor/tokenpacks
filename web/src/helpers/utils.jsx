@@ -17,10 +17,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import { Toast, Pagination } from '@douyinfe/semi-ui';
+import { toast } from 'sonner';
 import { toastConstants } from '../constants';
 import React from 'react';
-import { toast } from 'react-toastify';
 import {
   THINK_TAG_REGEX,
   MESSAGE_ROLES,
@@ -48,7 +47,7 @@ export function isRoot() {
 
 export function getSystemName() {
   let system_name = localStorage.getItem('system_name');
-  if (!system_name) return 'New API';
+  if (!system_name) return 'TokenPacks';
   return system_name;
 }
 
@@ -125,48 +124,46 @@ export function showError(error) {
     if (error.name === 'AxiosError') {
       switch (error.response.status) {
         case 401:
-          // 清除用户状态
           localStorage.removeItem('user');
-          // toast.error('错误：未登录或登录已过期，请重新登录！', showErrorOptions);
           window.location.href = '/login?expired=true';
           break;
         case 429:
-          Toast.error('错误：请求次数过多，请稍后再试！');
+          toast.error('错误：请求次数过多，请稍后再试！');
           break;
         case 500:
-          Toast.error('错误：服务器内部错误，请联系管理员！');
+          toast.error('错误：服务器内部错误，请联系管理员！');
           break;
         case 405:
-          Toast.info('本站仅作演示之用，无服务端！');
+          toast.info('本站仅作演示之用，无服务端！');
           break;
         default:
-          Toast.error('错误：' + error.message);
+          toast.error('错误：' + error.message);
       }
       return;
     }
-    Toast.error('错误：' + error.message);
+    toast.error('错误：' + error.message);
   } else {
-    Toast.error('错误：' + error);
+    toast.error('错误：' + error);
   }
 }
 
 export function showWarning(message) {
-  Toast.warning(message);
+  toast.warning(message);
 }
 
 export function showSuccess(message) {
-  Toast.success(message);
+  toast.success(message);
 }
 
 export function showInfo(message) {
-  Toast.info(message);
+  toast.info(message);
 }
 
 export function showNotice(message, isHTML = false) {
   if (isHTML) {
-    toast(<HTMLToastContent htmlContent={message} />, showNoticeOptions);
+    toast(<HTMLToastContent htmlContent={message} />, { duration: Infinity });
   } else {
-    Toast.info(message);
+    toast.info(message);
   }
 }
 
@@ -333,8 +330,32 @@ export function compareObjects(oldObject, newObject) {
 // playground message
 
 // 生成唯一ID
-let messageId = 4;
-export const generateMessageId = () => `${messageId++}`;
+let messageIdSeed = Date.now();
+export const generateMessageId = () =>
+  `${Date.now()}-${messageIdSeed++}`;
+
+export const normalizeMessageIds = (messages) => {
+  if (!Array.isArray(messages)) return [];
+
+  const usedIds = new Set();
+
+  return messages.map((message) => {
+    const currentId =
+      message?.id === undefined || message?.id === null
+        ? ''
+        : String(message.id);
+    const shouldGenerateNewId = !currentId || usedIds.has(currentId);
+    const nextId = shouldGenerateNewId ? generateMessageId() : currentId;
+
+    usedIds.add(nextId);
+
+    if (shouldGenerateNewId || nextId !== message.id) {
+      return { ...message, id: nextId };
+    }
+
+    return message;
+  });
+};
 
 // 提取消息中的文本内容
 export const getTextContent = (message) => {
@@ -914,26 +935,45 @@ export const createCardProPagination = ({
       {/* 桌面端左侧总数信息 */}
       {!isMobile && (
         <span
-          className='text-sm select-none'
-          style={{ color: 'var(--semi-color-text-2)' }}
+          className='text-sm select-none text-muted-foreground'
         >
           {totalText}
         </span>
       )}
 
       {/* 右侧分页控件 */}
-      <Pagination
-        currentPage={currentPage}
-        pageSize={pageSize}
-        total={total}
-        pageSizeOpts={pageSizeOpts}
-        showSizeChanger={showSizeChanger}
-        onPageSizeChange={onPageSizeChange}
-        onPageChange={onPageChange}
-        size={isMobile ? 'small' : 'default'}
-        showQuickJumper={isMobile}
-        showTotal
-      />
+      <div className='flex items-center gap-2'>
+        {showSizeChanger && (
+          <select
+            className='h-8 rounded-md border border-input bg-background px-2 text-sm'
+            value={pageSize}
+            onChange={(e) => onPageSizeChange(Number(e.target.value))}
+          >
+            {pageSizeOpts.map((size) => (
+              <option key={size} value={size}>{size} / {t('页')}</option>
+            ))}
+          </select>
+        )}
+        <div className='flex items-center gap-1'>
+          <button
+            className='inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-sm disabled:opacity-50'
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage <= 1}
+          >
+            &lt;
+          </button>
+          <span className='px-2 text-sm'>
+            {currentPage} / {Math.ceil(total / pageSize)}
+          </span>
+          <button
+            className='inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background text-sm disabled:opacity-50'
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage >= Math.ceil(total / pageSize)}
+          >
+            &gt;
+          </button>
+        </div>
+      </div>
     </>
   );
 };

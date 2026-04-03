@@ -19,17 +19,39 @@ For commercial licensing, please contact support@quantumnous.com
 
 import react from '@vitejs/plugin-react';
 import { defineConfig, transformWithEsbuild } from 'vite';
-import pkg from '@douyinfe/vite-plugin-semi';
 import path from 'path';
 import { codeInspectorPlugin } from 'code-inspector-plugin';
-const { vitePluginSemi } = pkg;
 
 // https://vitejs.dev/config/
 export default defineConfig({
   resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-    },
+    alias: [
+      {
+        find: '@douyinfe/semi-ui/lib/es/typography/text',
+        replacement: path.resolve(
+          __dirname,
+          './src/components/ui/semi-text-compat.jsx',
+        ),
+      },
+      {
+        find: '@douyinfe/semi-icons',
+        replacement: path.resolve(
+          __dirname,
+          './src/components/ui/semi-icons-compat.jsx',
+        ),
+      },
+      {
+        find: '@douyinfe/semi-ui',
+        replacement: path.resolve(
+          __dirname,
+          './src/components/ui/semi-compat.jsx',
+        ),
+      },
+      {
+        find: '@',
+        replacement: path.resolve(__dirname, './src'),
+      },
+    ],
   },
   plugins: [
     codeInspectorPlugin({
@@ -51,9 +73,6 @@ export default defineConfig({
       },
     },
     react(),
-    vitePluginSemi({
-      cssLayer: true,
-    }),
   ],
   optimizeDeps: {
     force: true,
@@ -69,14 +88,25 @@ export default defineConfig({
       output: {
         manualChunks: {
           'react-core': ['react', 'react-dom', 'react-router-dom'],
-          'semi-ui': ['@douyinfe/semi-icons', '@douyinfe/semi-ui'],
           tools: ['axios', 'history', 'marked'],
           'react-components': [
             'react-dropzone',
             'react-fireworks',
             'react-telegram-login',
-            'react-toastify',
             'react-turnstile',
+          ],
+          'ui-lib': [
+            '@radix-ui/react-alert-dialog',
+            '@radix-ui/react-avatar',
+            '@radix-ui/react-checkbox',
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-popover',
+            '@radix-ui/react-radio-group',
+            '@radix-ui/react-scroll-area',
+            '@radix-ui/react-select',
+            '@radix-ui/react-tabs',
+            '@radix-ui/react-tooltip',
           ],
           i18n: [
             'i18next',

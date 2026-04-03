@@ -29,7 +29,7 @@ import {
   TabPane,
   Popover,
   Modal,
-} from '@douyinfe/semi-ui';
+} from '../../../ui/semi-compat';
 import {
   IconMail,
   IconShield,
@@ -37,7 +37,7 @@ import {
   IconKey,
   IconLock,
   IconDelete,
-} from '@douyinfe/semi-icons';
+} from '../../../ui/semi-icons-compat';
 import { SiTelegram, SiWechat, SiLinux, SiDiscord } from 'react-icons/si';
 import { UserPlus, ShieldCheck } from 'lucide-react';
 import TelegramLoginButton from 'react-telegram-login';

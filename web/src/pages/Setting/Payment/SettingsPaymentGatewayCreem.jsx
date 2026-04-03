@@ -17,24 +17,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import React, { useEffect, useState, useRef } from 'react';
-import {
-  Banner,
-  Button,
-  Form,
-  Row,
-  Col,
-  Typography,
-  Spin,
-  Table,
-  Modal,
-  Input,
-  InputNumber,
-  Select,
-} from '@douyinfe/semi-ui';
-const { Text } = Typography;
 import { API, showError, showSuccess } from '../../../helpers';
 import { useTranslation } from 'react-i18next';
 import { Plus, Trash2 } from 'lucide-react';
+import { Form, Row, Col, Spin } from '../../../components/ui/form-compat';
+import {
+  Banner,
+  Button,
+  Input,
+  InputNumber,
+  Modal as Dialog,
+  Select,
+  Table,
+  Text,
+} from '../../../components/ui/semi-compat';
 
 export default function SettingsPaymentGatewayCreem(props) {
   const { t } = useTranslation();
@@ -260,13 +256,13 @@ export default function SettingsPaymentGatewayCreem(props) {
         getFormApi={(api) => (formApiRef.current = api)}
       >
         <Form.Section text={t('Creem 设置')}>
-          <Text>
+          <span>
             {t('Creem 介绍')}
             <a href='https://creem.io' target='_blank' rel='noreferrer'>
               Creem Official Site
             </a>
             <br />
-          </Text>
+          </span>
           <Banner type='info' description={t('Creem Setting Tips')} />
 
           <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 24, xl: 24, xxl: 24 }}>
@@ -328,9 +324,9 @@ export default function SettingsPaymentGatewayCreem(props) {
       </Form>
 
       {/* 产品配置模态框 */}
-      <Modal
+      <Dialog
         title={editingProduct ? t('编辑产品') : t('添加产品')}
-        visible={showProductModal}
+        open={showProductModal}
         onOk={saveProduct}
         onCancel={closeProductModal}
         maskClosable={false}
@@ -416,7 +412,7 @@ export default function SettingsPaymentGatewayCreem(props) {
             />
           </div>
         </div>
-      </Modal>
+      </Dialog>
     </Spin>
   );
 }

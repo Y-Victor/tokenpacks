@@ -18,10 +18,19 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Tabs, TabPane, Tag, Button, Dropdown, Modal } from '@douyinfe/semi-ui';
-import { IconEdit, IconDelete } from '@douyinfe/semi-icons';
+import { Tabs, TabsList, TabsTrigger } from '../../ui/tabs';
+import { Badge } from '../../ui/badge';
+import { Button } from '../../ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../../ui/dropdown-menu';
+import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import { getLobeHubIcon, showError, showSuccess } from '../../../helpers';
 import { API } from '../../../helpers';
+import { confirm } from '../../../lib/confirm';
 
 const ModelsTabs = ({
   activeVendorKey,
@@ -45,25 +54,24 @@ const ModelsTabs = ({
   };
 
   const handleEditVendor = (vendor, e) => {
-    e.stopPropagation(); // 阻止事件冒泡，避免触发tab切换
+    e.stopPropagation();
     setEditingVendor(vendor);
     setShowEditVendor(true);
   };
 
   const handleDeleteVendor = async (vendor, e) => {
-    e.stopPropagation(); // 阻止事件冒泡，避免触发tab切换
+    e.stopPropagation();
     try {
       const res = await API.delete(`/api/vendors/${vendor.id}`);
       if (res.data.success) {
         showSuccess(t('供应商删除成功'));
-        // 如果删除的是当前选中的供应商，切换到"全部"
         if (activeVendorKey === String(vendor.id)) {
           setActiveVendorKey('all');
           loadModels(1, pageSize, 'all');
         } else {
           loadModels(activePage, pageSize, activeVendorKey);
         }
-        loadVendors(); // 重新加载供应商列表
+        loadVendors();
       } else {
         showError(res.data.message || t('删除失败'));
       }
@@ -73,105 +81,85 @@ const ModelsTabs = ({
   };
 
   return (
-    <Tabs
-      activeKey={activeVendorKey}
-      type='card'
-      collapsible
-      onChange={handleTabChange}
-      className='mb-2'
-      tabBarExtraContent={
-        <Button
-          type='primary'
-          size='small'
-          onClick={() => setShowAddVendor(true)}
-        >
-          {t('新增供应商')}
-        </Button>
-      }
-    >
-      <TabPane
-        itemKey='all'
-        tab={
-          <span className='flex items-center gap-2'>
-            {t('全部')}
-            <Tag
-              color={activeVendorKey === 'all' ? 'red' : 'grey'}
-              shape='circle'
-            >
-              {vendorCounts['all'] || 0}
-            </Tag>
-          </span>
-        }
-      />
-
-      {vendors.map((vendor) => {
-        const key = String(vendor.id);
-        const count = vendorCounts[vendor.id] || 0;
-        return (
-          <TabPane
-            key={key}
-            itemKey={key}
-            tab={
+    <div className='mb-2'>
+      <div className='flex items-center justify-between gap-2'>
+        <Tabs value={activeVendorKey} onValueChange={handleTabChange} className='flex-1 overflow-x-auto'>
+          <TabsList className='flex-wrap h-auto gap-1'>
+            <TabsTrigger value='all'>
               <span className='flex items-center gap-2'>
-                {getLobeHubIcon(vendor.icon || 'Layers', 14)}
-                {vendor.name}
-                <Tag
-                  color={activeVendorKey === key ? 'red' : 'grey'}
-                  shape='circle'
-                >
-                  {count}
-                </Tag>
-                <Dropdown
-                  trigger='click'
-                  position='bottomRight'
-                  render={
-                    <Dropdown.Menu>
-                      <Dropdown.Item
-                        icon={<IconEdit />}
-                        onClick={(e) => handleEditVendor(vendor, e)}
+                {t('全部')}
+                <Badge variant={activeVendorKey === 'all' ? 'destructive' : 'secondary'} className='text-xs'>
+                  {vendorCounts['all'] || 0}
+                </Badge>
+              </span>
+            </TabsTrigger>
+
+            {vendors.map((vendor) => {
+              const key = String(vendor.id);
+              const count = vendorCounts[vendor.id] || 0;
+              return (
+                <div key={key} className='inline-flex items-center gap-1'>
+                  <TabsTrigger value={key} className='gap-2'>
+                    {getLobeHubIcon(vendor.icon || 'Layers', 14)}
+                    <span>{vendor.name}</span>
+                    <Badge
+                      variant={activeVendorKey === key ? 'destructive' : 'secondary'}
+                      className='text-xs'
+                    >
+                      {count}
+                    </Badge>
+                  </TabsTrigger>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant='ghost'
+                        size='sm'
+                        className='h-9 w-9 rounded-xl p-0'
+                        onClick={(e) => e.stopPropagation()}
+                        aria-label={t('供应商操作')}
                       >
+                        <MoreHorizontal className='h-4 w-4' />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align='end'>
+                      <DropdownMenuItem onClick={(e) => handleEditVendor(vendor, e)}>
+                        <Pencil className='h-4 w-4 mr-2' />
                         {t('编辑')}
-                      </Dropdown.Item>
-                      <Dropdown.Item
-                        type='danger'
-                        icon={<IconDelete />}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className='text-destructive'
                         onClick={(e) => {
                           e.stopPropagation();
-                          Modal.confirm({
+                          confirm({
                             title: t('确认删除'),
                             content: t(
                               '确定要删除供应商 "{{name}}" 吗？此操作不可撤销。',
                               { name: vendor.name },
                             ),
-                            onOk: () => handleDeleteVendor(vendor, e),
                             okText: t('删除'),
                             cancelText: t('取消'),
-                            type: 'warning',
-                            okType: 'danger',
+                            onConfirm: () => handleDeleteVendor(vendor, e),
                           });
                         }}
                       >
+                        <Trash2 className='h-4 w-4 mr-2' />
                         {t('删除')}
-                      </Dropdown.Item>
-                    </Dropdown.Menu>
-                  }
-                  onClickOutSide={(e) => e.stopPropagation()}
-                >
-                  <Button
-                    size='small'
-                    type='tertiary'
-                    theme='outline'
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {t('操作')}
-                  </Button>
-                </Dropdown>
-              </span>
-            }
-          />
-        );
-      })}
-    </Tabs>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              );
+            })}
+          </TabsList>
+        </Tabs>
+        <Button
+          size='sm'
+          onClick={() => setShowAddVendor(true)}
+        >
+          {t('新增供应商')}
+        </Button>
+      </div>
+    </div>
   );
 };
 

@@ -18,23 +18,17 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useEffect, useState, useRef } from 'react';
+import { API, showError, showSuccess } from '../../../helpers';
+import { useTranslation } from 'react-i18next';
+import { Form, Row, Col, Spin } from '../../../components/ui/form-compat';
 import {
   Banner,
   Button,
-  Form,
-  Row,
-  Col,
-  Typography,
-  Spin,
-  Table,
-  Modal,
   Input,
-  Space,
-} from '@douyinfe/semi-ui';
-import { API, showError, showSuccess } from '../../../helpers';
-import { useTranslation } from 'react-i18next';
-
-const { Text } = Typography;
+  Modal as Dialog,
+  Table,
+  Text,
+} from '../../../components/ui/semi-compat';
 
 export default function SettingsPaymentGatewayWaffo(props) {
   const { t } = useTranslation();
@@ -298,7 +292,7 @@ export default function SettingsPaymentGatewayWaffo(props) {
       title: t('操作'),
       key: 'action',
       render: (_, record, index) => (
-        <Space>
+        <div className="flex items-center gap-2">
           <Button
             size='small'
             onClick={() => openEditPayMethodModal(record, index)}
@@ -312,7 +306,7 @@ export default function SettingsPaymentGatewayWaffo(props) {
           >
             {t('删除')}
           </Button>
-        </Space>
+        </div>
       ),
     },
   ];
@@ -325,13 +319,13 @@ export default function SettingsPaymentGatewayWaffo(props) {
         getFormApi={(api) => (formApiRef.current = api)}
       >
         <Form.Section text={t('Waffo 设置')}>
-          <Text>
+          <div>
             {t('Waffo 是一个支付聚合平台，支持多种支付方式。')}
             <a href='https://waffo.com' target='_blank' rel='noreferrer'>
               Waffo Official Site
             </a>
             <br />
-          </Text>
+          </div>
           <Banner
             type='info'
             description={t(
@@ -486,10 +480,10 @@ export default function SettingsPaymentGatewayWaffo(props) {
 
       {/* 支付方式配置区块（独立于 Form，使用独立状态管理） */}
       <div style={{ marginTop: 24 }}>
-        <Typography.Title heading={6} style={{ marginBottom: 8 }}>{t('支付方式')}</Typography.Title>
-        <Text type='secondary'>
+        <h3 className="text-lg font-semibold">{t('支付方式')}</h3>
+        <span type='secondary'>
           {t('配置 Waffo 充值时可用的支付方式，保存后在充值页面展示给用户。')}
-        </Text>
+        </span>
         <div style={{ marginTop: 12, marginBottom: 12 }}>
           <Button onClick={openAddPayMethodModal}>
             {t('新增支付方式')}
@@ -509,9 +503,9 @@ export default function SettingsPaymentGatewayWaffo(props) {
       </div>
 
       {/* 新增/编辑支付方式弹窗 */}
-      <Modal
+      <Dialog
         title={editingPayMethodIndex === -1 ? t('新增支付方式') : t('编辑支付方式')}
-        visible={payMethodModalVisible}
+        open={payMethodModalVisible}
         onOk={handlePayMethodModalOk}
         onCancel={() => setPayMethodModalVisible(false)}
         okText={t('确定')}
@@ -528,13 +522,13 @@ export default function SettingsPaymentGatewayWaffo(props) {
               onChange={(val) => setPayMethodForm({ ...payMethodForm, name: val })}
               placeholder={t('例如：Credit Card')}
             />
-            <Text type='tertiary' size='small'>{t('用户在充值页面看到的支付方式名称，例如：Credit Card')}</Text>
+            <Text type='tertiary'>{t('用户在充值页面看到的支付方式名称，例如：Credit Card')}</Text>
           </div>
           <div>
             <div style={{ marginBottom: 4 }}>
               <Text strong>{t('图标')}</Text>
             </div>
-            <Space align='center'>
+            <div className="flex items-center gap-2">
               {payMethodForm.icon && (
                 <img
                   src={payMethodForm.icon}
@@ -572,9 +566,9 @@ export default function SettingsPaymentGatewayWaffo(props) {
                   {t('清除')}
                 </Button>
               )}
-            </Space>
+            </div>
             <div>
-              <Text type='tertiary' size='small'>{t('上传 PNG/JPG/SVG 图片，建议尺寸 ≤ 128×128px')}</Text>
+              <Text type='tertiary'>{t('上传 PNG/JPG/SVG 图片，建议尺寸 ≤ 128×128px')}</Text>
             </div>
           </div>
           <div>
@@ -587,7 +581,7 @@ export default function SettingsPaymentGatewayWaffo(props) {
               placeholder='CREDITCARD,DEBITCARD'
               maxLength={64}
             />
-            <Text type='tertiary' size='small'>{t('Waffo API 参数，可空，例如：CREDITCARD,DEBITCARD（最多64位）')}</Text>
+            <Text type='tertiary'>{t('Waffo API 参数，可空，例如：CREDITCARD,DEBITCARD（最多64位）')}</Text>
           </div>
           <div>
             <div style={{ marginBottom: 4 }}>
@@ -599,10 +593,10 @@ export default function SettingsPaymentGatewayWaffo(props) {
               placeholder={t('可空')}
               maxLength={64}
             />
-            <Text type='tertiary' size='small'>{t('Waffo API 参数，可空（最多64位）')}</Text>
+            <Text type='tertiary'>{t('Waffo API 参数，可空（最多64位）')}</Text>
           </div>
         </div>
-      </Modal>
+      </Dialog>
     </Spin>
   );
 }

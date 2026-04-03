@@ -18,23 +18,21 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useEffect, useState, useContext, useMemo } from 'react';
-import {
-  Button,
-  Modal,
-  Empty,
-  Tabs,
-  TabPane,
-  Timeline,
-} from '@douyinfe/semi-ui';
 import { useTranslation } from 'react-i18next';
 import { API, showError, getRelativeTime } from '../../helpers';
 import { marked } from 'marked';
-import {
-  IllustrationNoContent,
-  IllustrationNoContentDark,
-} from '@douyinfe/semi-illustrations';
 import { StatusContext } from '../../context/Status';
 import { Bell, Megaphone } from 'lucide-react';
+import { Button } from '../ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../ui/dialog';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
+import { EmptyState } from '../ui/empty-state';
 
 const NoticeModal = ({
   visible,
@@ -120,7 +118,7 @@ const NoticeModal = ({
     if (loading) {
       return (
         <div className='py-12'>
-          <Empty description={t('加载中...')} />
+          <EmptyState type='no-content' title={t('加载中...')} />
         </div>
       );
     }
@@ -128,15 +126,7 @@ const NoticeModal = ({
     if (!noticeContent) {
       return (
         <div className='py-12'>
-          <Empty
-            image={
-              <IllustrationNoContent style={{ width: 150, height: 150 }} />
-            }
-            darkModeImage={
-              <IllustrationNoContentDark style={{ width: 150, height: 150 }} />
-            }
-            description={t('暂无公告')}
-          />
+          <EmptyState type='no-content' title={t('暂无公告')} />
         </div>
       );
     }
@@ -153,102 +143,73 @@ const NoticeModal = ({
     if (processedAnnouncements.length === 0) {
       return (
         <div className='py-12'>
-          <Empty
-            image={
-              <IllustrationNoContent style={{ width: 150, height: 150 }} />
-            }
-            darkModeImage={
-              <IllustrationNoContentDark style={{ width: 150, height: 150 }} />
-            }
-            description={t('暂无系统公告')}
-          />
+          <EmptyState type='no-content' title={t('暂无系统公告')} />
         </div>
       );
     }
 
     return (
       <div className='max-h-[55vh] overflow-y-auto pr-2 card-content-scroll'>
-        <Timeline mode='left'>
+        <div className='relative border-l-2 border-border ml-4'>
           {processedAnnouncements.map((item, idx) => {
             const htmlContent = marked.parse(item.content || '');
             const htmlExtra = item.extra ? marked.parse(item.extra) : '';
             return (
-              <Timeline.Item
-                key={idx}
-                type={item.type}
-                time={`${item.relative ? item.relative + ' ' : ''}${item.time}`}
-                extra={
-                  item.extra ? (
-                    <div
-                      className='text-xs text-gray-500'
-                      dangerouslySetInnerHTML={{ __html: htmlExtra }}
-                    />
-                  ) : null
-                }
-                className={item.isUnread ? '' : ''}
-              >
-                <div>
-                  <div
-                    className={item.isUnread ? 'shine-text' : ''}
-                    dangerouslySetInnerHTML={{ __html: htmlContent }}
-                  />
+              <div key={idx} className='relative pl-6 pb-6'>
+                <div className='absolute -left-[5px] top-1.5 h-2 w-2 rounded-full bg-primary' />
+                <div className='text-xs text-muted-foreground mb-1'>
+                  {item.relative ? item.relative + ' ' : ''}{item.time}
                 </div>
-              </Timeline.Item>
+                <div
+                  className={item.isUnread ? 'shine-text' : ''}
+                  dangerouslySetInnerHTML={{ __html: htmlContent }}
+                />
+                {item.extra && (
+                  <div
+                    className='text-xs text-muted-foreground mt-1'
+                    dangerouslySetInnerHTML={{ __html: htmlExtra }}
+                  />
+                )}
+              </div>
             );
           })}
-        </Timeline>
+        </div>
       </div>
     );
   };
 
-  const renderBody = () => {
-    if (activeTab === 'inApp') {
-      return renderMarkdownNotice();
-    }
-    return renderAnnouncementTimeline();
-  };
-
   return (
-    <Modal
-      title={
-        <div className='flex items-center justify-between w-full'>
-          <span>{t('系统公告')}</span>
-          <Tabs activeKey={activeTab} onChange={setActiveTab} type='button'>
-            <TabPane
-              tab={
-                <span className='flex items-center gap-1'>
-                  <Bell size={14} /> {t('通知')}
-                </span>
-              }
-              itemKey='inApp'
-            />
-            <TabPane
-              tab={
-                <span className='flex items-center gap-1'>
-                  <Megaphone size={14} /> {t('系统公告')}
-                </span>
-              }
-              itemKey='system'
-            />
-          </Tabs>
-        </div>
-      }
-      visible={visible}
-      onCancel={onClose}
-      footer={
-        <div className='flex justify-end'>
-          <Button type='secondary' onClick={handleCloseTodayNotice}>
+    <Dialog open={visible} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className={isMobile ? 'max-w-full h-full' : 'max-w-2xl'}>
+        <DialogHeader>
+          <DialogTitle>{t('系统公告')}</DialogTitle>
+        </DialogHeader>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className='grid w-full grid-cols-2'>
+            <TabsTrigger value='inApp' className='flex w-full items-center gap-1'>
+              <Bell size={14} /> {t('通知')}
+            </TabsTrigger>
+            <TabsTrigger value='system' className='flex w-full items-center gap-1'>
+              <Megaphone size={14} /> {t('系统公告')}
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value='inApp'>
+            {renderMarkdownNotice()}
+          </TabsContent>
+          <TabsContent value='system'>
+            {renderAnnouncementTimeline()}
+          </TabsContent>
+        </Tabs>
+        <DialogFooter>
+          <Button variant='outline' onClick={handleCloseTodayNotice}>
             {t('今日关闭')}
           </Button>
-          <Button type='primary' onClick={onClose}>
+          <Button onClick={onClose}>
             {t('关闭公告')}
           </Button>
-        </div>
-      }
-      size={isMobile ? 'full-width' : 'large'}
-    >
-      {renderBody()}
-    </Modal>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

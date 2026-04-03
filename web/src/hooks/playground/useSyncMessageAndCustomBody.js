@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 
 import { useCallback, useRef } from 'react';
 import { MESSAGE_ROLES } from '../../constants/playground.constants';
+import { normalizeMessageIds } from '../../helpers';
 
 export const useSyncMessageAndCustomBody = (
   customRequestMode,
@@ -114,16 +115,18 @@ export const useSyncMessageAndCustomBody = (
       const customPayload = JSON.parse(customRequestBody || '{}');
 
       if (customPayload.messages && Array.isArray(customPayload.messages)) {
-        const newMessages = customPayload.messages.map((msg, index) => ({
-          id: msg.id || (index + 1).toString(),
-          role: msg.role || MESSAGE_ROLES.USER,
-          content: msg.content || '',
-          createAt: Date.now(),
-          ...(msg.role === MESSAGE_ROLES.ASSISTANT && {
-            reasoningContent: msg.reasoningContent || '',
-            isReasoningExpanded: false,
-          }),
-        }));
+        const newMessages = normalizeMessageIds(
+          customPayload.messages.map((msg, index) => ({
+            id: msg.id || (index + 1).toString(),
+            role: msg.role || MESSAGE_ROLES.USER,
+            content: msg.content || '',
+            createAt: Date.now(),
+            ...(msg.role === MESSAGE_ROLES.ASSISTANT && {
+              reasoningContent: msg.reasoningContent || '',
+              isReasoningExpanded: false,
+            }),
+          })),
+        );
 
         setMessage(newMessages);
         lastCustomBodyHash.current = currentCustomBodyHash;

@@ -18,22 +18,28 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
+import { Card } from '../../../../ui/card';
+import { Badge } from '../../../../ui/badge';
 import {
-  Card,
-  Tag,
   Tooltip,
-  Checkbox,
-  Empty,
-  Pagination,
-  Button,
-  Avatar,
-} from '@douyinfe/semi-ui';
-import { IconHelpCircle } from '@douyinfe/semi-icons';
-import { Copy } from 'lucide-react';
+  TooltipContent,
+  TooltipTrigger,
+} from '../../../../ui/tooltip';
+import { Checkbox } from '../../../../ui/checkbox';
+import { EmptyState } from '../../../../ui/empty-state';
+import { Button } from '../../../../ui/button';
 import {
-  IllustrationNoResult,
-  IllustrationNoResultDark,
-} from '@douyinfe/semi-illustrations';
+  Avatar,
+  AvatarFallback,
+} from '../../../../ui/avatar';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../../../ui/select';
+import { HelpCircle, Copy, ChevronLeft, ChevronRight } from 'lucide-react';
 import {
   stringToColor,
   calculateModelPrice,
@@ -100,7 +106,9 @@ const PricingCardView = ({
     if (!model || !model.model_name) {
       return (
         <div className={CARD_STYLES.container}>
-          <Avatar size='large'>?</Avatar>
+          <Avatar className='h-12 w-12'>
+            <AvatarFallback>?</AvatarFallback>
+          </Avatar>
         </div>
       );
     }
@@ -131,16 +139,9 @@ const PricingCardView = ({
     return (
       <div className={CARD_STYLES.container}>
         <Avatar
-          size='large'
-          style={{
-            width: 48,
-            height: 48,
-            borderRadius: 16,
-            fontSize: 16,
-            fontWeight: 'bold',
-          }}
+          className='h-12 w-12 rounded-2xl text-base font-bold'
         >
-          {avatarText}
+          <AvatarFallback className='rounded-2xl text-base font-bold'>{avatarText}</AvatarFallback>
         </Avatar>
       </div>
     );
@@ -155,21 +156,21 @@ const PricingCardView = ({
   const renderTags = (record) => {
     // 计费类型标签（左边）
     let billingTag = (
-      <Tag key='billing' shape='circle' color='white' size='small'>
+      <Badge key='billing' variant='outline'>
         -
-      </Tag>
+      </Badge>
     );
     if (record.quota_type === 1) {
       billingTag = (
-        <Tag key='billing' shape='circle' color='teal' size='small'>
+        <Badge key='billing' variant='secondary' className='bg-teal-100 text-teal-800'>
           {t('按次计费')}
-        </Tag>
+        </Badge>
       );
     } else if (record.quota_type === 0) {
       billingTag = (
-        <Tag key='billing' shape='circle' color='violet' size='small'>
+        <Badge key='billing' variant='secondary' className='bg-violet-100 text-violet-800'>
           {t('按量计费')}
-        </Tag>
+        </Badge>
       );
     }
 
@@ -179,14 +180,13 @@ const PricingCardView = ({
       const tagArr = record.tags.split(',').filter(Boolean);
       tagArr.forEach((tg, idx) => {
         customTags.push(
-          <Tag
+          <Badge
             key={`custom-${idx}`}
-            shape='circle'
-            color={stringToColor(tg)}
-            size='small'
+            variant='secondary'
+            style={{ backgroundColor: stringToColor(tg), color: '#fff' }}
           >
             {tg}
-          </Tag>,
+          </Badge>,
         );
       });
     }
@@ -222,12 +222,8 @@ const PricingCardView = ({
   if (!filteredModels || filteredModels.length === 0) {
     return (
       <div className='flex justify-center items-center py-20'>
-        <Empty
-          image={<IllustrationNoResult style={{ width: 150, height: 150 }} />}
-          darkModeImage={
-            <IllustrationNoResultDark style={{ width: 150, height: 150 }} />
-          }
-          description={t('搜索无结果')}
+        <EmptyState
+          title={t('搜索无结果')}
         />
       </div>
     );
@@ -235,7 +231,7 @@ const PricingCardView = ({
 
   return (
     <div className='px-2 pt-2'>
-      <div className='grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-4'>
+      <div className='grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-4 items-stretch'>
         {paginatedModels.map((model, index) => {
           const modelKey = getModelKey(model);
           const isSelected = selectedRowKeys.includes(modelKey);
@@ -253,13 +249,12 @@ const PricingCardView = ({
           return (
             <Card
               key={modelKey || index}
-              className={`!rounded-2xl transition-all duration-200 hover:shadow-lg border cursor-pointer ${isSelected ? CARD_STYLES.selected : CARD_STYLES.default}`}
-              bodyStyle={{ height: '100%' }}
+              className={`pricing-model-card !rounded-2xl transition-all duration-200 hover:shadow-lg border cursor-pointer h-full ${isSelected ? CARD_STYLES.selected : CARD_STYLES.default}`}
               onClick={() => openModelDetail && openModelDetail(model)}
             >
-              <div className='flex flex-col h-full'>
+              <div className='pricing-model-card-inner flex h-full flex-col gap-3'>
                 {/* 头部：图标 + 模型名称 + 操作按钮 */}
-                <div className='flex items-start justify-between mb-3'>
+                <div className='flex items-start justify-between'>
                   <div className='flex items-start space-x-3 flex-1 min-w-0'>
                     {getModelIcon(model)}
                     <div className='flex-1 min-w-0'>
@@ -275,41 +270,40 @@ const PricingCardView = ({
                   <div className='flex items-center space-x-2 ml-3'>
                     {/* 复制按钮 */}
                     <Button
-                      size='small'
-                      theme='outline'
-                      type='tertiary'
-                      icon={<Copy size={12} />}
+                      size='sm'
+                      variant='outline'
                       onClick={(e) => {
                         e.stopPropagation();
                         copyText(model.model_name);
                       }}
-                    />
+                    >
+                      <Copy size={12} />
+                    </Button>
 
                     {/* 选择框 */}
                     {rowSelection && (
                       <Checkbox
                         checked={isSelected}
-                        onChange={(e) => {
-                          e.stopPropagation();
-                          handleCheckboxChange(model, e.target.checked);
+                        onCheckedChange={(checked) => {
+                          handleCheckboxChange(model, checked);
                         }}
+                        onClick={(e) => e.stopPropagation()}
                       />
                     )}
                   </div>
                 </div>
 
-                {/* 模型描述 - 占据剩余空间 */}
-                <div className='flex-1 mb-4'>
+                {/* 模型描述 */}
+                <div>
                   <p
-                    className='text-xs line-clamp-2 leading-relaxed'
-                    style={{ color: 'var(--semi-color-text-2)' }}
+                    className='text-xs line-clamp-2 leading-relaxed text-muted-foreground'
                   >
                     {getModelDescription(model)}
                   </p>
                 </div>
 
                 {/* 底部区域 */}
-                <div className='mt-auto'>
+                <div className='mt-auto pt-1'>
                   {/* 标签区域 */}
                   {renderTags(model)}
 
@@ -320,18 +314,18 @@ const PricingCardView = ({
                         <span className='text-xs font-medium text-gray-700'>
                           {t('倍率信息')}
                         </span>
-                        <Tooltip
-                          content={t('倍率是为了方便换算不同价格的模型')}
-                        >
-                          <IconHelpCircle
-                            className='text-blue-500 cursor-pointer'
-                            size='small'
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setModalImageUrl('/ratio.png');
-                              setIsModalOpenurl(true);
-                            }}
-                          />
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <HelpCircle
+                              className='text-blue-500 cursor-pointer h-4 w-4'
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setModalImageUrl('/ratio.png');
+                                setIsModalOpenurl(true);
+                              }}
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent>{t('倍率是为了方便换算不同价格的模型')}</TooltipContent>
                         </Tooltip>
                       </div>
                       <div className='grid grid-cols-3 gap-2 text-xs text-gray-600'>
@@ -360,21 +354,51 @@ const PricingCardView = ({
 
       {/* 分页 */}
       {filteredModels.length > 0 && (
-        <div className='flex justify-center mt-6 py-4 border-t pricing-pagination-divider'>
-          <Pagination
-            currentPage={currentPage}
-            pageSize={pageSize}
-            total={filteredModels.length}
-            showSizeChanger={true}
-            pageSizeOptions={[10, 20, 50, 100]}
-            size={isMobile ? 'small' : 'default'}
-            showQuickJumper={isMobile}
-            onPageChange={(page) => setCurrentPage(page)}
-            onPageSizeChange={(size) => {
-              setPageSize(size);
+        <div className='pricing-pagination-bar flex justify-center items-center mt-6 py-4 border-t pricing-pagination-divider gap-2'>
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+            disabled={currentPage <= 1}
+          >
+            <ChevronLeft className='h-4 w-4' />
+          </Button>
+          <span className='text-sm text-gray-600'>
+            {currentPage} / {Math.max(1, Math.ceil(filteredModels.length / pageSize))}
+          </span>
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={() =>
+              setCurrentPage(
+                Math.min(
+                  Math.ceil(filteredModels.length / pageSize),
+                  currentPage + 1,
+                ),
+              )
+            }
+            disabled={currentPage >= Math.ceil(filteredModels.length / pageSize)}
+          >
+            <ChevronRight className='h-4 w-4' />
+          </Button>
+          <Select
+            value={String(pageSize)}
+            onValueChange={(val) => {
+              setPageSize(Number(val));
               setCurrentPage(1);
             }}
-          />
+          >
+            <SelectTrigger className='w-[80px] h-8'>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {[10, 20, 50, 100].map((size) => (
+                <SelectItem key={size} value={String(size)}>
+                  {size}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       )}
     </div>

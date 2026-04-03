@@ -18,16 +18,18 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { SideSheet, Typography, Button } from '@douyinfe/semi-ui';
-import { IconClose } from '@douyinfe/semi-icons';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '../../../ui/sheet';
 
 import { useIsMobile } from '../../../../hooks/common/useIsMobile';
 import ModelHeader from './components/ModelHeader';
 import ModelBasicInfo from './components/ModelBasicInfo';
 import ModelEndpoints from './components/ModelEndpoints';
 import ModelPricingTable from './components/ModelPricingTable';
-
-const { Text } = Typography;
 
 const ModelDetailSideSheet = ({
   visible,
@@ -48,63 +50,55 @@ const ModelDetailSideSheet = ({
   const isMobile = useIsMobile();
 
   return (
-    <SideSheet
-      placement='right'
-      title={
-        <ModelHeader modelData={modelData} vendorsMap={vendorsMap} t={t} />
-      }
-      bodyStyle={{
-        padding: '0',
-        display: 'flex',
-        flexDirection: 'column',
-        borderBottom: '1px solid var(--semi-color-border)',
-      }}
-      visible={visible}
-      width={isMobile ? '100%' : 600}
-      closeIcon={
-        <Button
-          className='semi-button-tertiary semi-button-size-small semi-button-borderless'
-          type='button'
-          icon={<IconClose />}
-          onClick={onClose}
-        />
-      }
-      onCancel={onClose}
-    >
-      <div className='p-2'>
-        {!modelData && (
-          <div className='flex justify-center items-center py-10'>
-            <Text type='secondary'>{t('加载中...')}</Text>
-          </div>
-        )}
-        {modelData && (
-          <>
-            <ModelBasicInfo
-              modelData={modelData}
-              vendorsMap={vendorsMap}
-              t={t}
-            />
-            <ModelEndpoints
-              modelData={modelData}
-              endpointMap={endpointMap}
-              t={t}
-            />
-            <ModelPricingTable
-              modelData={modelData}
-              groupRatio={groupRatio}
-              currency={currency}
-              siteDisplayType={siteDisplayType}
-              tokenUnit={tokenUnit}
-              displayPrice={displayPrice}
-              showRatio={showRatio}
-              usableGroup={usableGroup}
-              autoGroups={autoGroups}
-              t={t}
-            />
-          </>
-        )}
-      </div>
-    </SideSheet>
+    <Sheet open={visible} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent
+        side='right'
+        className={isMobile ? 'w-full' : 'w-[600px] sm:max-w-[600px]'}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <SheetHeader className='border-b pb-4'>
+          <SheetTitle asChild>
+            <ModelHeader modelData={modelData} vendorsMap={vendorsMap} t={t} />
+          </SheetTitle>
+        </SheetHeader>
+        <div className='p-2 flex-1 overflow-y-auto'>
+          {!modelData && (
+            <div className='flex justify-center items-center py-10'>
+              <span className='text-muted-foreground'>{t('加载中...')}</span>
+            </div>
+          )}
+          {modelData && (
+            <>
+              <ModelBasicInfo
+                modelData={modelData}
+                vendorsMap={vendorsMap}
+                t={t}
+              />
+              <ModelEndpoints
+                modelData={modelData}
+                endpointMap={endpointMap}
+                t={t}
+              />
+              <ModelPricingTable
+                modelData={modelData}
+                groupRatio={groupRatio}
+                currency={currency}
+                siteDisplayType={siteDisplayType}
+                tokenUnit={tokenUnit}
+                displayPrice={displayPrice}
+                showRatio={showRatio}
+                usableGroup={usableGroup}
+                autoGroups={autoGroups}
+                t={t}
+              />
+            </>
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 };
 

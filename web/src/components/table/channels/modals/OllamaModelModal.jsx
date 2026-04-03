@@ -20,29 +20,18 @@ For commercial licensing, please contact support@quantumnous.com
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Modal,
-  Button,
-  Typography,
-  Card,
-  List,
-  Space,
-  Input,
-  Spin,
-  Popconfirm,
-  Tag,
-  Empty,
-  Row,
-  Col,
-  Progress,
-  Checkbox,
-} from '@douyinfe/semi-ui';
-import {
-  IconDownload,
-  IconDelete,
-  IconRefresh,
-  IconSearch,
-  IconPlus,
-} from '@douyinfe/semi-icons';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../../../ui/dialog';
+import { Button } from '../../../ui/button';
+import { Input } from '../../../ui/input';
+import { Badge } from '../../../ui/badge';
+import { Checkbox } from '../../../ui/checkbox';
+import { Download, Trash2, RefreshCw, Search, Plus } from 'lucide-react';
+import { confirm } from '../../../../lib/confirm';
 import {
   API,
   authHeader,
@@ -50,8 +39,6 @@ import {
   showError,
   showSuccess,
 } from '../../../../helpers';
-
-const { Text, Title } = Typography;
 
 const CHANNEL_TYPE_OLLAMA = 4;
 
@@ -528,250 +515,237 @@ const OllamaModelModal = ({
   };
 
   return (
-    <Modal
-      title={t('Ollama 模型管理')}
-      visible={visible}
-      onCancel={onCancel}
-      width={720}
-      style={{ maxWidth: '95vw' }}
-      footer={
-        <Button theme='solid' type='primary' onClick={onCancel}>
-          {t('关闭')}
-        </Button>
-      }
-    >
-      <Space vertical spacing='medium' style={{ width: '100%' }}>
-        <div>
-          <Text type='tertiary' size='small'>
-            {channelInfo?.name ? `${channelInfo.name} - ` : ''}
-            {t('管理 Ollama 模型的拉取和删除')}
-          </Text>
-        </div>
+    <Dialog open={visible} onOpenChange={(open) => !open && onCancel?.()}>
+      <DialogContent className='max-w-3xl' style={{ maxWidth: '95vw' }}>
+        <DialogHeader>
+          <DialogTitle>{t('Ollama 模型管理')}</DialogTitle>
+        </DialogHeader>
 
-        {/* 拉取新模型 */}
-        <Card>
-          <Title heading={6} className='m-0 mb-3'>
-            {t('拉取新模型')}
-          </Title>
+        <div className='flex flex-col gap-4'>
+          <div>
+            <span className='text-sm text-muted-foreground'>
+              {channelInfo?.name ? `${channelInfo.name} - ` : ''}
+              {t('管理 Ollama 模型的拉取和删除')}
+            </span>
+          </div>
 
-          <Row gutter={12} align='middle'>
-            <Col span={16}>
+          {/* Pull new model */}
+          <div className='rounded-lg border p-4'>
+            <h6 className='text-sm font-semibold mb-3'>
+              {t('拉取新模型')}
+            </h6>
+
+            <div className='grid grid-cols-[1fr_auto] gap-3 items-center'>
               <Input
                 placeholder={t('请输入模型名称，例如: llama3.2, qwen2.5:7b')}
                 value={pullModelName}
-                onChange={(value) => setPullModelName(value)}
-                onEnterPress={pullModel}
+                onChange={(e) => setPullModelName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && pullModel()}
                 disabled={pullLoading}
-                showClear
               />
-            </Col>
-            <Col span={8}>
               <Button
-                theme='solid'
-                type='primary'
                 onClick={pullModel}
-                loading={pullLoading}
-                disabled={!pullModelName.trim()}
-                icon={<IconDownload />}
-                block
+                disabled={!pullModelName.trim() || pullLoading}
               >
+                <Download className='h-4 w-4 mr-1' />
                 {pullLoading ? t('拉取中...') : t('拉取模型')}
               </Button>
-            </Col>
-          </Row>
-
-          {/* 进度条显示 */}
-          {pullProgress &&
-            (() => {
-              const completedBytes = Number(pullProgress.completed) || 0;
-              const totalBytes = Number(pullProgress.total) || 0;
-              const hasTotal = Number.isFinite(totalBytes) && totalBytes > 0;
-              const safePercent = hasTotal
-                ? Math.min(
-                    100,
-                    Math.max(
-                      0,
-                      Math.round((completedBytes / totalBytes) * 100),
-                    ),
-                  )
-                : null;
-              const percentText =
-                hasTotal && safePercent !== null
-                  ? `${safePercent.toFixed(0)}%`
-                  : pullProgress.status || t('处理中');
-
-              return (
-                <div style={{ marginTop: 12 }}>
-                  <div className='flex items-center justify-between mb-2'>
-                    <Text strong>{t('拉取进度')}</Text>
-                    <Text type='tertiary' size='small'>
-                      {percentText}
-                    </Text>
-                  </div>
-
-                  {hasTotal && safePercent !== null ? (
-                    <div>
-                      <Progress
-                        percent={safePercent}
-                        showInfo={false}
-                        stroke='#1890ff'
-                        size='small'
-                      />
-                      <div className='flex justify-between mt-1'>
-                        <Text type='tertiary' size='small'>
-                          {(completedBytes / (1024 * 1024 * 1024)).toFixed(2)}{' '}
-                          GB
-                        </Text>
-                        <Text type='tertiary' size='small'>
-                          {(totalBytes / (1024 * 1024 * 1024)).toFixed(2)} GB
-                        </Text>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className='flex items-center gap-2 text-xs text-[var(--semi-color-text-2)]'>
-                      <Spin size='small' />
-                      <span>{t('准备中...')}</span>
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
-
-          <Text type='tertiary' size='small' className='mt-2 block'>
-            {t(
-              '支持拉取 Ollama 官方模型库中的所有模型，拉取过程可能需要几分钟时间',
-            )}
-          </Text>
-        </Card>
-
-        {/* 已有模型列表 */}
-        <Card>
-          <div className='flex items-center justify-between mb-3'>
-            <div className='flex items-center gap-2'>
-              <Title heading={6} className='m-0'>
-                {t('已有模型')}
-              </Title>
-              {models.length > 0 ? (
-                <Tag color='blue'>{models.length}</Tag>
-              ) : null}
             </div>
-            <Space wrap>
-              <Input
-                prefix={<IconSearch />}
-                placeholder={t('搜索模型...')}
-                value={searchValue}
-                onChange={(value) => setSearchValue(value)}
-                style={{ width: 200 }}
-                showClear
-              />
-              <Button
-                size='small'
-                theme='light'
-                onClick={handleSelectAll}
-                disabled={models.length === 0}
-              >
-                {t('全选')}
-              </Button>
-              <Button
-                size='small'
-                theme='light'
-                onClick={handleClearSelection}
-                disabled={selectedModelIds.length === 0}
-              >
-                {t('清空')}
-              </Button>
-              <Button
-                theme='solid'
-                type='primary'
-                icon={<IconPlus />}
-                onClick={handleApplyAllModels}
-                disabled={selectedModelIds.length === 0}
-                size='small'
-              >
-                {t('加入渠道')}
-              </Button>
-              <Button
-                theme='light'
-                type='primary'
-                onClick={fetchModels}
-                loading={loading}
-                icon={<IconRefresh />}
-                size='small'
-              >
-                {t('刷新')}
-              </Button>
-            </Space>
-          </div>
 
-          <Spin spinning={loading}>
-            {filteredModels.length === 0 ? (
-              <Empty
-                title={searchValue ? t('未找到匹配的模型') : t('暂无模型')}
-                description={
-                  searchValue
-                    ? t('请尝试其他搜索关键词')
-                    : t('您可以在上方拉取需要的模型')
-                }
-                style={{ padding: '40px 0' }}
-              />
-            ) : (
-              <List
-                dataSource={filteredModels}
-                split
-                renderItem={(model) => (
-                  <List.Item key={model.id}>
-                    <div className='flex items-center justify-between w-full'>
-                      <div className='flex items-center flex-1 min-w-0 gap-3'>
-                        <Checkbox
-                          checked={selectedModelIds.includes(model.id)}
-                          onChange={(checked) =>
-                            handleToggleModel(model.id, checked)
-                          }
-                        />
-                        <div className='flex-1 min-w-0'>
-                          <Text strong className='block truncate'>
-                            {model.id}
-                          </Text>
-                          <div className='flex items-center space-x-2 mt-1'>
-                            <Tag color='cyan' size='small'>
-                              {model.owned_by || 'ollama'}
-                            </Tag>
-                            {model.size && (
-                              <Text type='tertiary' size='small'>
-                                {formatModelSize(model.size)}
-                              </Text>
-                            )}
-                          </div>
+            {/* Progress */}
+            {pullProgress &&
+              (() => {
+                const completedBytes = Number(pullProgress.completed) || 0;
+                const totalBytes = Number(pullProgress.total) || 0;
+                const hasTotal = Number.isFinite(totalBytes) && totalBytes > 0;
+                const safePercent = hasTotal
+                  ? Math.min(
+                      100,
+                      Math.max(
+                        0,
+                        Math.round((completedBytes / totalBytes) * 100),
+                      ),
+                    )
+                  : null;
+                const percentText =
+                  hasTotal && safePercent !== null
+                    ? `${safePercent.toFixed(0)}%`
+                    : pullProgress.status || t('处理中');
+
+                return (
+                  <div className='mt-3'>
+                    <div className='flex items-center justify-between mb-2'>
+                      <span className='text-sm font-semibold'>{t('拉取进度')}</span>
+                      <span className='text-xs text-muted-foreground'>
+                        {percentText}
+                      </span>
+                    </div>
+
+                    {hasTotal && safePercent !== null ? (
+                      <div>
+                        <div className='h-2 w-full rounded-full bg-muted overflow-hidden'>
+                          <div
+                            className='h-full rounded-full bg-blue-500 transition-all'
+                            style={{ width: `${safePercent}%` }}
+                          />
+                        </div>
+                        <div className='flex justify-between mt-1'>
+                          <span className='text-xs text-muted-foreground'>
+                            {(completedBytes / (1024 * 1024 * 1024)).toFixed(2)}{' '}
+                            GB
+                          </span>
+                          <span className='text-xs text-muted-foreground'>
+                            {(totalBytes / (1024 * 1024 * 1024)).toFixed(2)} GB
+                          </span>
                         </div>
                       </div>
-                      <div className='flex items-center space-x-2 ml-4'>
-                        <Popconfirm
-                          title={t('确认删除模型')}
-                          content={t(
-                            '删除后无法恢复，确定要删除模型 "{{name}}" 吗？',
-                            { name: model.id },
+                    ) : (
+                      <div className='flex items-center gap-2 text-xs text-muted-foreground'>
+                        <div className='animate-spin h-3 w-3 border-2 border-primary border-t-transparent rounded-full' />
+                        <span>{t('准备中...')}</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
+            <p className='text-xs text-muted-foreground mt-2'>
+              {t(
+                '支持拉取 Ollama 官方模型库中的所有模型，拉取过程可能需要几分钟时间',
+              )}
+            </p>
+          </div>
+
+          {/* Existing models */}
+          <div className='rounded-lg border p-4'>
+            <div className='flex items-center justify-between mb-3 flex-wrap gap-2'>
+              <div className='flex items-center gap-2'>
+                <h6 className='text-sm font-semibold m-0'>
+                  {t('已有模型')}
+                </h6>
+                {models.length > 0 ? (
+                  <Badge className='bg-blue-500 text-white'>{models.length}</Badge>
+                ) : null}
+              </div>
+              <div className='flex items-center gap-2 flex-wrap'>
+                <div className='relative'>
+                  <Search className='absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
+                  <Input
+                    className='pl-8 w-[200px]'
+                    placeholder={t('搜索模型...')}
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
+                  />
+                </div>
+                <Button
+                  variant='outline'
+                  size='sm'
+                  onClick={handleSelectAll}
+                  disabled={models.length === 0}
+                >
+                  {t('全选')}
+                </Button>
+                <Button
+                  variant='outline'
+                  size='sm'
+                  onClick={handleClearSelection}
+                  disabled={selectedModelIds.length === 0}
+                >
+                  {t('清空')}
+                </Button>
+                <Button
+                  size='sm'
+                  onClick={handleApplyAllModels}
+                  disabled={selectedModelIds.length === 0}
+                >
+                  <Plus className='h-4 w-4 mr-1' />
+                  {t('加入渠道')}
+                </Button>
+                <Button
+                  variant='outline'
+                  size='sm'
+                  onClick={fetchModels}
+                  disabled={loading}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} />
+                  {t('刷新')}
+                </Button>
+              </div>
+            </div>
+
+            {loading ? (
+              <div className='flex justify-center py-8'>
+                <div className='animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full' />
+              </div>
+            ) : filteredModels.length === 0 ? (
+              <div className='flex flex-col items-center justify-center py-10 text-muted-foreground'>
+                <p>{searchValue ? t('未找到匹配的模型') : t('暂无模型')}</p>
+                <p className='text-xs'>
+                  {searchValue
+                    ? t('请尝试其他搜索关键词')
+                    : t('您可以在上方拉取需要的模型')}
+                </p>
+              </div>
+            ) : (
+              <div className='divide-y'>
+                {filteredModels.map((model) => (
+                  <div key={model.id} className='flex items-center justify-between py-2'>
+                    <div className='flex items-center flex-1 min-w-0 gap-3'>
+                      <Checkbox
+                        checked={selectedModelIds.includes(model.id)}
+                        onCheckedChange={(checked) =>
+                          handleToggleModel(model.id, !!checked)
+                        }
+                      />
+                      <div className='flex-1 min-w-0'>
+                        <span className='font-semibold block truncate text-sm'>
+                          {model.id}
+                        </span>
+                        <div className='flex items-center space-x-2 mt-1'>
+                          <Badge className='bg-cyan-500 text-white text-xs'>
+                            {model.owned_by || 'ollama'}
+                          </Badge>
+                          {model.size && (
+                            <span className='text-xs text-muted-foreground'>
+                              {formatModelSize(model.size)}
+                            </span>
                           )}
-                          onConfirm={() => deleteModel(model.id)}
-                          okText={t('确认')}
-                          cancelText={t('取消')}
-                        >
-                          <Button
-                            theme='borderless'
-                            type='danger'
-                            size='small'
-                            icon={<IconDelete />}
-                          />
-                        </Popconfirm>
+                        </div>
                       </div>
                     </div>
-                  </List.Item>
-                )}
-              />
+                    <div className='flex items-center space-x-2 ml-4'>
+                      <Button
+                        variant='ghost'
+                        size='sm'
+                        className='text-destructive hover:text-destructive'
+                        onClick={() => {
+                          confirm({
+                            title: t('确认删除模型'),
+                            description: t(
+                              '删除后无法恢复，确定要删除模型 "{{name}}" 吗？',
+                              { name: model.id },
+                            ),
+                            onConfirm: () => deleteModel(model.id),
+                          });
+                        }}
+                      >
+                        <Trash2 className='h-4 w-4' />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
-          </Spin>
-        </Card>
-      </Space>
-    </Modal>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button onClick={onCancel}>
+            {t('关闭')}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

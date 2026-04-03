@@ -33,13 +33,13 @@ import {
   Tag,
   Popconfirm,
   Space,
-} from '@douyinfe/semi-ui';
+} from '../ui/semi-compat';
 import {
   IconPlus,
   IconEdit,
   IconDelete,
   IconRefresh,
-} from '@douyinfe/semi-icons';
+} from '../ui/semi-icons-compat';
 import { API, showError, showSuccess, getOAuthProviderIcon } from '../../helpers';
 import { useTranslation } from 'react-i18next';
 

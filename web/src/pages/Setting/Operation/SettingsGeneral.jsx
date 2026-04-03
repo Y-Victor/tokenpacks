@@ -19,18 +19,6 @@ For commercial licensing, please contact support@quantumnous.com
 
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import {
-  Banner,
-  Button,
-  Col,
-  Form,
-  Row,
-  Spin,
-  Modal,
-  Select,
-  InputGroup,
-  Input,
-} from '@douyinfe/semi-ui';
-import {
   compareObjects,
   API,
   showError,
@@ -38,6 +26,12 @@ import {
   showWarning,
 } from '../../../helpers';
 import { useTranslation } from 'react-i18next';
+import { Form, Row, Col, Spin } from '../../../components/ui/form-compat';
+import { Button } from '../../../components/ui/button';
+import { Input } from '../../../components/ui/input';
+import { Select as ShadcnSelect, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../../components/ui/dialog';
+import { AlertTriangle } from 'lucide-react';
 
 export default function GeneralSettings(props) {
   const { t } = useTranslation();
@@ -166,7 +160,6 @@ export default function GeneralSettings(props) {
         <Form
           values={inputs}
           getFormApi={(formAPI) => (refForm.current = formAPI)}
-          style={{ marginBottom: 15 }}
         >
           <Form.Section text={t('通用设置')}>
             <Row gutter={16}>
@@ -203,31 +196,36 @@ export default function GeneralSettings(props) {
               </Col>
               <Col xs={24} sm={12} md={8} lg={8} xl={8}>
                 <Form.Slot label={t('站点额度展示类型及汇率')}>
-                  <InputGroup style={{ width: '100%' }}>
-                    <Input
-                      prefix={'1 USD = '}
-                      style={{ width: '50%' }}
-                      value={combinedRate}
-                      onChange={onCombinedRateChange}
-                      disabled={
-                        inputs['general_setting.quota_display_type'] === 'USD'
-                      }
-                    />
-                    <Select
-                      style={{ width: '50%' }}
+                  <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 w-1/2">
+                      <span className="text-sm text-muted-foreground shrink-0">1 USD =</span>
+                      <Input
+                        value={combinedRate}
+                        onChange={(e) => onCombinedRateChange(e.target.value)}
+                        disabled={
+                          inputs['general_setting.quota_display_type'] === 'USD'
+                        }
+                      />
+                    </div>
+                    <ShadcnSelect
                       value={inputs['general_setting.quota_display_type']}
-                      onChange={handleFieldChange(
+                      onValueChange={handleFieldChange(
                         'general_setting.quota_display_type',
                       )}
                     >
-                      <Select.Option value='USD'>USD ($)</Select.Option>
-                      <Select.Option value='CNY'>CNY (¥)</Select.Option>
-                      <Select.Option value='TOKENS'>Tokens</Select.Option>
-                      <Select.Option value='CUSTOM'>
-                        {t('自定义货币')}
-                      </Select.Option>
-                    </Select>
-                  </InputGroup>
+                      <SelectTrigger className="w-1/2">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value='USD'>USD ($)</SelectItem>
+                        <SelectItem value='CNY'>CNY (¥)</SelectItem>
+                        <SelectItem value='TOKENS'>Tokens</SelectItem>
+                        <SelectItem value='CUSTOM'>
+                          {t('自定义货币')}
+                        </SelectItem>
+                      </SelectContent>
+                    </ShadcnSelect>
+                  </div>
                 </Form.Slot>
               </Col>
               <Col xs={24} sm={12} md={8} lg={8} xl={8}>
@@ -310,24 +308,24 @@ export default function GeneralSettings(props) {
         </Form>
       </Spin>
 
-      <Modal
-        title={t('警告')}
-        visible={showQuotaWarning}
-        onOk={() => setShowQuotaWarning(false)}
-        onCancel={() => setShowQuotaWarning(false)}
-        closeOnEsc={true}
-        width={500}
-      >
-        <Banner
-          type='warning'
-          description={t(
-            '此设置用于系统内部计算，默认值500000是为了精确到6位小数点设计，不推荐修改。',
-          )}
-          bordered
-          fullMode={false}
-          closeIcon={null}
-        />
-      </Modal>
+      <Dialog open={showQuotaWarning} onOpenChange={setShowQuotaWarning}>
+        <DialogContent className="max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>{t('警告')}</DialogTitle>
+          </DialogHeader>
+          <div className="flex items-start gap-2 rounded-md border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800 dark:border-yellow-700 dark:bg-yellow-950 dark:text-yellow-200">
+            <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
+            <span>
+              {t('此设置用于系统内部计算，默认值500000是为了精确到6位小数点设计，不推荐修改。')}
+            </span>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowQuotaWarning(false)}>
+              {t('确定')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

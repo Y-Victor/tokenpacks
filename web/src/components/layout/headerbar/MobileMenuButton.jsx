@@ -18,8 +18,8 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Button } from '@douyinfe/semi-ui';
-import { IconClose, IconMenu } from '@douyinfe/semi-icons';
+import { X, Menu } from 'lucide-react';
+import { Button } from '../../ui/button';
 
 const MobileMenuButton = ({
   isConsoleRoute,
@@ -35,21 +35,20 @@ const MobileMenuButton = ({
 
   return (
     <Button
-      icon={
-        (isMobile ? drawerOpen : collapsed) ? (
-          <IconClose className='text-lg' />
-        ) : (
-          <IconMenu className='text-lg' />
-        )
-      }
+      variant='ghost'
+      size='icon'
       aria-label={
         (isMobile ? drawerOpen : collapsed) ? t('关闭侧边栏') : t('打开侧边栏')
       }
       onClick={onToggle}
-      theme='borderless'
-      type='tertiary'
-      className='!p-2 !text-current focus:!bg-semi-color-fill-1 dark:focus:!bg-gray-700'
-    />
+      className='header-icon-button p-2'
+    >
+      {(isMobile ? drawerOpen : collapsed) ? (
+        <X className='h-5 w-5' />
+      ) : (
+        <Menu className='h-5 w-5' />
+      )}
+    </Button>
   );
 };
 

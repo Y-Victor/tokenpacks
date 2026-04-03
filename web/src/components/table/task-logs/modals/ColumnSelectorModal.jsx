@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Modal, Button, Checkbox } from '@douyinfe/semi-ui';
+import { Modal, Button, Checkbox } from '../../../ui/semi-compat';
 import { getTaskLogsColumns } from '../TaskLogsColumnDefs';
 
 const ColumnSelectorModal = ({

@@ -17,15 +17,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import React from 'react';
-import { Card, Collapse, Empty } from '@douyinfe/semi-ui';
-import { HelpCircle } from 'lucide-react';
-import { IconPlus, IconMinus } from '@douyinfe/semi-icons';
+import React, { useState } from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '../ui/card';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '../ui/collapsible';
+import { HelpCircle, Plus, Minus } from 'lucide-react';
 import { marked } from 'marked';
-import {
-  IllustrationConstruction,
-  IllustrationConstructionDark,
-} from '@douyinfe/semi-illustrations';
+import { EmptyState } from '../ui/empty-state';
 import ScrollableContainer from '../common/ui/ScrollableContainer';
 
 const FaqPanel = ({
@@ -35,52 +32,54 @@ const FaqPanel = ({
   ILLUSTRATION_SIZE,
   t,
 }) => {
+  const [openIndex, setOpenIndex] = useState(null);
+
   return (
-    <Card
-      {...CARD_PROPS}
-      className='shadow-sm !rounded-2xl lg:col-span-1'
-      title={
-        <div className={FLEX_CENTER_GAP2}>
-          <HelpCircle size={16} />
-          {t('常见问答')}
-        </div>
-      }
-      bodyStyle={{ padding: 0 }}
-    >
-      <ScrollableContainer maxHeight='24rem'>
-        {faqData.length > 0 ? (
-          <Collapse
-            accordion
-            expandIcon={<IconPlus />}
-            collapseIcon={<IconMinus />}
-          >
-            {faqData.map((item, index) => (
-              <Collapse.Panel
-                key={index}
-                header={item.question}
-                itemKey={index.toString()}
-              >
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: marked.parse(item.answer || ''),
-                  }}
-                />
-              </Collapse.Panel>
-            ))}
-          </Collapse>
-        ) : (
-          <div className='flex justify-center items-center py-8'>
-            <Empty
-              image={<IllustrationConstruction style={ILLUSTRATION_SIZE} />}
-              darkModeImage={
-                <IllustrationConstructionDark style={ILLUSTRATION_SIZE} />
-              }
-              title={t('暂无常见问答')}
-              description={t('请联系管理员在系统设置中配置常见问答')}
-            />
+    <Card className='shadow-sm rounded-2xl lg:col-span-1'>
+      <CardHeader className='pb-3'>
+        <CardTitle className='text-base'>
+          <div className={FLEX_CENTER_GAP2}>
+            <HelpCircle size={16} />
+            {t('常见问答')}
           </div>
-        )}
-      </ScrollableContainer>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className='p-0'>
+        <ScrollableContainer maxHeight='24rem'>
+          {faqData.length > 0 ? (
+            <div className='divide-y'>
+              {faqData.map((item, index) => (
+                <Collapsible
+                  key={index}
+                  open={openIndex === index}
+                  onOpenChange={(isOpen) => setOpenIndex(isOpen ? index : null)}
+                >
+                  <CollapsibleTrigger className='flex items-center justify-between w-full px-4 py-3 text-left text-sm font-medium hover:bg-muted/50 transition-colors'>
+                    <span>{item.question}</span>
+                    {openIndex === index ? <Minus size={16} /> : <Plus size={16} />}
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div
+                      className='px-4 pb-3 text-sm text-muted-foreground'
+                      dangerouslySetInnerHTML={{
+                        __html: marked.parse(item.answer || ''),
+                      }}
+                    />
+                  </CollapsibleContent>
+                </Collapsible>
+              ))}
+            </div>
+          ) : (
+            <div className='flex justify-center items-center py-8'>
+              <EmptyState
+                type='construction'
+                title={t('暂无常见问答')}
+                description={t('请联系管理员在系统设置中配置常见问答')}
+              />
+            </div>
+          )}
+        </ScrollableContainer>
+      </CardContent>
     </Card>
   );
 };

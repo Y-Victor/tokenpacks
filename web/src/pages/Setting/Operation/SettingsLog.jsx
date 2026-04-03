@@ -18,16 +18,6 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useEffect, useState, useRef } from 'react';
-import {
-  Button,
-  Col,
-  Form,
-  Row,
-  Spin,
-  DatePicker,
-  Typography,
-  Modal,
-} from '@douyinfe/semi-ui';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
 import {
@@ -37,8 +27,9 @@ import {
   showSuccess,
   showWarning,
 } from '../../../helpers';
-
-const { Text } = Typography;
+import { Form, Row, Col, Spin } from '../../../components/ui/form-compat';
+import { Button, Text } from '../../../components/ui/semi-compat';
+import { confirm } from '../../../lib/confirm';
 
 export default function SettingsLog(props) {
   const { t } = useTranslation();
@@ -100,18 +91,18 @@ export default function SettingsLog(props) {
     const currentTime = now.format('YYYY-MM-DD HH:mm:ss');
     const daysDiff = now.diff(targetDate, 'day');
 
-    Modal.confirm({
+    confirm({
       title: t('确认清除历史日志'),
       content: (
         <div style={{ lineHeight: '1.8' }}>
           <p>
-            <Text>{t('当前时间')}：</Text>
+            <span>{t('当前时间')}：</span>
             <Text strong style={{ color: '#52c41a' }}>
               {currentTime}
             </Text>
           </p>
           <p>
-            <Text>{t('选择时间')}：</Text>
+            <span>{t('选择时间')}：</span>
             <Text strong type='danger'>
               {targetTime}
             </Text>
@@ -135,17 +126,17 @@ export default function SettingsLog(props) {
             <Text strong style={{ color: '#d46b08' }}>
               ⚠️ {t('注意')}：
             </Text>
-            <Text style={{ color: '#333' }}>{t('将删除')} </Text>
+            <span style={{ color: '#333' }}>{t('将删除')} </span>
             <Text strong style={{ color: '#cf1322' }}>
               {targetTime}
             </Text>
             {daysDiff > 0 && (
-              <Text style={{ color: '#8c8c8c' }}>
+              <span style={{ color: '#8c8c8c' }}>
                 {' '}
                 ({t('约')} {daysDiff} {t('天前')})
-              </Text>
+              </span>
             )}
-            <Text style={{ color: '#333' }}> {t('之前的所有日志')}</Text>
+            <span style={{ color: '#333' }}> {t('之前的所有日志')}</span>
           </div>
           <p style={{ marginTop: '12px' }}>
             <Text type='danger'>
@@ -157,7 +148,7 @@ export default function SettingsLog(props) {
       okText: t('确认删除'),
       cancelText: t('取消'),
       okType: 'danger',
-      onOk: async () => {
+      onConfirm: async () => {
         try {
           setLoadingCleanHistoryLog(true);
           const res = await API.delete(
@@ -197,7 +188,6 @@ export default function SettingsLog(props) {
         <Form
           values={inputs}
           getFormApi={(formAPI) => (refForm.current = formAPI)}
-          style={{ marginBottom: 15 }}
         >
           <Form.Section text={t('日志设置')}>
             <Row gutter={16}>
@@ -232,7 +222,6 @@ export default function SettingsLog(props) {
                   />
                   <Text
                     type='tertiary'
-                    size='small'
                     style={{ display: 'block', marginTop: 4, marginBottom: 8 }}
                   >
                     {t('将清除选定时间之前的所有日志')}

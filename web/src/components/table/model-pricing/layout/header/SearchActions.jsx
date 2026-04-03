@@ -18,8 +18,18 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { memo, useCallback } from 'react';
-import { Input, Button, Switch, Select, Divider } from '@douyinfe/semi-ui';
-import { IconSearch, IconCopy, IconFilter } from '@douyinfe/semi-icons';
+import { Input } from '../../../../ui/input';
+import { Button } from '../../../../ui/button';
+import { Switch } from '../../../../ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../../../ui/select';
+import { Separator } from '../../../../ui/separator';
+import { Search, Copy, Filter, X } from 'lucide-react';
 
 const SearchActions = memo(
   ({
@@ -65,68 +75,76 @@ const SearchActions = memo(
     }, [tokenUnit, setTokenUnit]);
 
     return (
-      <div className='flex items-center gap-2 w-full'>
-        <div className='flex-1'>
+      <div className='pricing-search-actions'>
+        <div className='pricing-search-input-wrap'>
+          <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
           <Input
-            prefix={<IconSearch />}
             placeholder={t('模糊搜索模型名称')}
             value={searchValue}
             onCompositionStart={handleCompositionStart}
             onCompositionEnd={handleCompositionEnd}
-            onChange={handleChange}
-            showClear
+            onChange={(e) => handleChange(e.target.value)}
+            className='pl-9 pr-8'
           />
+          {searchValue && (
+            <button
+              type='button'
+              onClick={() => handleChange('')}
+              className='absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground'
+            >
+              <X className='h-4 w-4' />
+            </button>
+          )}
         </div>
 
         <Button
-          theme='outline'
-          type='primary'
-          icon={<IconCopy />}
+          variant='default'
           onClick={handleCopyClick}
           disabled={selectedRowKeys.length === 0}
-          className='!bg-blue-500 hover:!bg-blue-600 !text-white disabled:!bg-gray-300 disabled:!text-gray-500'
+          className='bg-blue-500 hover:bg-blue-600 text-white disabled:bg-gray-300 disabled:text-gray-500'
         >
+          <Copy className='h-4 w-4 mr-1' />
           {t('复制')}
         </Button>
 
         {!isMobile && (
-          <>
-            <Divider layout='vertical' margin='8px' />
+          <div className='pricing-search-toggles'>
+            <Separator orientation='vertical' className='h-6 mx-1' />
 
             {/* 充值价格显示开关 */}
             {supportsCurrencyDisplay && (
-              <div className='flex items-center gap-2'>
+              <div className='pricing-toggle-item'>
                 <span className='text-sm text-gray-600'>{t('充值价格显示')}</span>
                 <Switch
                   checked={showWithRecharge}
-                  onChange={setShowWithRecharge}
+                  onCheckedChange={setShowWithRecharge}
                 />
               </div>
             )}
 
             {/* 货币单位选择 */}
             {supportsCurrencyDisplay && showWithRecharge && (
-              <Select
-                value={currency}
-                onChange={setCurrency}
-                optionList={[
-                  { value: 'USD', label: 'USD' },
-                  { value: 'CNY', label: 'CNY' },
-                  { value: 'CUSTOM', label: t('自定义货币') },
-                ]}
-              />
+              <Select value={currency} onValueChange={setCurrency}>
+                <SelectTrigger className='w-[120px]'>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='USD'>USD</SelectItem>
+                  <SelectItem value='CNY'>CNY</SelectItem>
+                  <SelectItem value='CUSTOM'>{t('自定义货币')}</SelectItem>
+                </SelectContent>
+              </Select>
             )}
 
             {/* 显示倍率开关 */}
-            <div className='flex items-center gap-2'>
+            <div className='pricing-toggle-item'>
               <span className='text-sm text-gray-600'>{t('倍率')}</span>
-              <Switch checked={showRatio} onChange={setShowRatio} />
+              <Switch checked={showRatio} onCheckedChange={setShowRatio} />
             </div>
 
             {/* 视图模式切换按钮 */}
             <Button
-              theme={viewMode === 'table' ? 'solid' : 'outline'}
-              type={viewMode === 'table' ? 'primary' : 'tertiary'}
+              variant={viewMode === 'table' ? 'default' : 'outline'}
               onClick={handleViewModeToggle}
             >
               {t('表格视图')}
@@ -134,22 +152,20 @@ const SearchActions = memo(
 
             {/* Token单位切换按钮 */}
             <Button
-              theme={tokenUnit === 'K' ? 'solid' : 'outline'}
-              type={tokenUnit === 'K' ? 'primary' : 'tertiary'}
+              variant={tokenUnit === 'K' ? 'default' : 'outline'}
               onClick={handleTokenUnitToggle}
             >
               {tokenUnit}
             </Button>
-          </>
+          </div>
         )}
 
         {isMobile && (
           <Button
-            theme='outline'
-            type='tertiary'
-            icon={<IconFilter />}
+            variant='outline'
             onClick={handleFilterClick}
           >
+            <Filter className='h-4 w-4 mr-1' />
             {t('筛选')}
           </Button>
         )}

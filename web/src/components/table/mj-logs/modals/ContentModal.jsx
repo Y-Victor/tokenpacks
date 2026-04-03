@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Modal, ImagePreview } from '@douyinfe/semi-ui';
+import { Modal, ImagePreview } from '../../../ui/semi-compat';
 
 const ContentModal = ({
   isModalOpen,

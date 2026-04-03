@@ -18,8 +18,8 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Button } from '@douyinfe/semi-ui';
-import { RefreshCw, Search } from 'lucide-react';
+import { Button } from '../ui/button';
+import { RefreshCw, Search, Loader2 } from 'lucide-react';
 
 const DashboardHeader = ({
   getGreeting,
@@ -29,8 +29,6 @@ const DashboardHeader = ({
   loading,
   t,
 }) => {
-  const ICON_BUTTON_CLASS = 'text-white hover:bg-opacity-80 !rounded-full';
-
   return (
     <div className='flex items-center justify-between mb-4'>
       <h2
@@ -41,18 +39,22 @@ const DashboardHeader = ({
       </h2>
       <div className='flex gap-3'>
         <Button
-          type='tertiary'
-          icon={<Search size={16} />}
+          variant='ghost'
+          size='icon'
           onClick={showSearchModal}
-          className={`bg-green-500 hover:bg-green-600 ${ICON_BUTTON_CLASS}`}
-        />
+          className='bg-green-500 hover:bg-green-600 text-white hover:text-white hover:bg-opacity-80 rounded-full'
+        >
+          <Search size={16} />
+        </Button>
         <Button
-          type='tertiary'
-          icon={<RefreshCw size={16} />}
+          variant='ghost'
+          size='icon'
           onClick={refresh}
-          loading={loading}
-          className={`bg-blue-500 hover:bg-blue-600 ${ICON_BUTTON_CLASS}`}
-        />
+          disabled={loading}
+          className='bg-blue-500 hover:bg-blue-600 text-white hover:text-white hover:bg-opacity-80 rounded-full'
+        >
+          {loading ? <Loader2 size={16} className='animate-spin' /> : <RefreshCw size={16} />}
+        </Button>
       </div>
     </div>
   );

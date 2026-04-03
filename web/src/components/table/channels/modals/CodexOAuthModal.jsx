@@ -20,16 +20,17 @@ For commercial licensing, please contact support@quantumnous.com
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Modal,
-  Button,
-  Space,
-  Typography,
-  Input,
-  Banner,
-} from '@douyinfe/semi-ui';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../../../ui/dialog';
+import { Button } from '../../../ui/button';
+import { Input } from '../../../ui/input';
+import { Alert, AlertDescription } from '../../../ui/alert';
+import { Info } from 'lucide-react';
 import { API, copy, showError, showSuccess } from '../../../../helpers';
-
-const { Text } = Typography;
 
 const CodexOAuthModal = ({ visible, onCancel, onSuccess }) => {
   const { t } = useTranslation();
@@ -108,64 +109,58 @@ const CodexOAuthModal = ({ visible, onCancel, onSuccess }) => {
   }, [visible]);
 
   return (
-    <Modal
-      title={t('Codex 授权')}
-      visible={visible}
-      onCancel={onCancel}
-      maskClosable={false}
-      closeOnEsc
-      width={720}
-      footer={
-        <Space>
-          <Button theme='borderless' onClick={onCancel} disabled={loading}>
+    <Dialog open={visible} onOpenChange={(open) => !open && onCancel?.()}>
+      <DialogContent className='max-w-3xl'>
+        <DialogHeader>
+          <DialogTitle>{t('Codex 授权')}</DialogTitle>
+        </DialogHeader>
+
+        <div className='flex flex-col gap-3'>
+          <Alert>
+            <Info className='h-4 w-4' />
+            <AlertDescription>
+              {t(
+                '1) 点击「打开授权页面」完成登录；2) 浏览器会跳转到 localhost（页面打不开也没关系）；3) 复制地址栏完整 URL 粘贴到下方；4) 点击「生成并填入」。',
+              )}
+            </AlertDescription>
+          </Alert>
+
+          <div className='flex items-center gap-2 flex-wrap'>
+            <Button onClick={startOAuth} disabled={loading}>
+              {loading ? '...' : t('打开授权页面')}
+            </Button>
+            <Button
+              variant='outline'
+              disabled={!authorizeUrl || loading}
+              onClick={() => copy(authorizeUrl)}
+            >
+              {t('复制授权链接')}
+            </Button>
+          </div>
+
+          <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder={t('请粘贴完整回调 URL（包含 code 与 state）')}
+          />
+
+          <p className='text-xs text-muted-foreground'>
+            {t(
+              '说明：生成结果是可直接粘贴到渠道密钥里的 JSON（包含 access_token / refresh_token / account_id）。',
+            )}
+          </p>
+        </div>
+
+        <DialogFooter>
+          <Button variant='outline' onClick={onCancel} disabled={loading}>
             {t('取消')}
           </Button>
-          <Button
-            theme='solid'
-            type='primary'
-            onClick={completeOAuth}
-            loading={loading}
-          >
-            {t('生成并填入')}
+          <Button onClick={completeOAuth} disabled={loading}>
+            {loading ? '...' : t('生成并填入')}
           </Button>
-        </Space>
-      }
-    >
-      <Space vertical spacing='tight' style={{ width: '100%' }}>
-        <Banner
-          type='info'
-          description={t(
-            '1) 点击「打开授权页面」完成登录；2) 浏览器会跳转到 localhost（页面打不开也没关系）；3) 复制地址栏完整 URL 粘贴到下方；4) 点击「生成并填入」。',
-          )}
-        />
-
-        <Space wrap>
-          <Button type='primary' onClick={startOAuth} loading={loading}>
-            {t('打开授权页面')}
-          </Button>
-          <Button
-            theme='outline'
-            disabled={!authorizeUrl || loading}
-            onClick={() => copy(authorizeUrl)}
-          >
-            {t('复制授权链接')}
-          </Button>
-        </Space>
-
-        <Input
-          value={input}
-          onChange={(value) => setInput(value)}
-          placeholder={t('请粘贴完整回调 URL（包含 code 与 state）')}
-          showClear
-        />
-
-        <Text type='tertiary' size='small'>
-          {t(
-            '说明：生成结果是可直接粘贴到渠道密钥里的 JSON（包含 access_token / refresh_token / account_id）。',
-          )}
-        </Text>
-      </Space>
-    </Modal>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

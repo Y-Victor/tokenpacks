@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Modal, Badge } from '@douyinfe/semi-ui';
+import { Modal, Badge } from '../../../ui/semi-compat';
 import { renderQuota, renderNumber } from '../../../../helpers';
 
 const UserInfoModal = ({
